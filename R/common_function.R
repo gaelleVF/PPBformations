@@ -64,5 +64,86 @@ dupl_table = function(tab){
 
 
 
-
+# clean data 
+mag = function(d){
+  # tkw
+  if( length(grep("^tkw---tkw$", colnames(d$data))) > 0 ) {
+    a = as.numeric(d$data$"tkw---tkw")
+    a[which(a>70)] = NA
+    d$data$"tkw---tkw" = a
+  }
+  
+  # protein
+  if( length(grep("^protein---protein$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"protein---protein"))
+    a[which(a>20)] = NA
+    d$data$"protein---protein" = a
+  }
+  
+  # spike_weight
+  if( length(grep("^spike_weight---spike_weight$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"spike_weight---spike_weight"))
+    a[which(a>10)] = NA
+    d$data$"spike_weight---spike_weight" = a
+  }
+  
+  # plant_height
+  if( length(grep("^plant_height---plant_height$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"plant_height---plant_height"))
+    a[which(a==0)] = NA # mesure en m
+    a[which(a<2)] = a[which(a<2)] * 1000 # mesure en m
+    a[which(a>2 & a<500)] = NA # valeurs bizarres
+    d$data$"plant_height---plant_height" = a
+  }
+  
+  # LLSD
+  if( length(grep("^LLSD---LLSD$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"LLSD---LLSD"))
+    a[which(a < 0)] = 0
+    a[which(a > 500)] = NA
+    d$data$"LLSD---LLSD" = a
+  }
+  
+  
+  # nbr_kernels---nbr.epillets
+  if( length(grep("^nbr_kernels---nbr_kernels$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"nbr_kernels---nbr_kernels"))
+    a[which(a <= 0)] = NA
+    a[which(a > 60)] = NA
+    d$data$"nbr_kernels---nbr_kernels" = a
+  }
+  
+  #  spike_length---spike_length
+  if( length(grep("^spike_length---spike_length$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"spike_length---spike_length"))
+    a[which(a <= 0)] = NA
+    a[which(a > 250)] = NA
+    d$data$"spike_length---spike_length" = a
+  }
+  
+  #  rdt
+  if( length(grep("^rdt$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"rdt"))
+    a[which(a <= 5)] = NA
+    a[which(a > 100)] = NA
+    d$data$"rdt" = a
+  }
+  
+  if( length(grep("^rdt_parcelle---rdt_parcelle$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"rdt_parcelle---rdt_parcelle"))
+    a[which(a <= 5)] = NA
+    a[which(a > 100)] = NA
+    d$data$"rdt_parcelle---rdt_parcelle" = a
+  }
+  
+  # estimated_nbr_grain_spike
+  if( length(grep("^estimated_nbr_grain_spike---estimated_nbr_grain_spike$", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"estimated_nbr_grain_spike---estimated_nbr_grain_spike"))
+    a[which(a <= 0)] = NA
+    a[which(a > 100)] = NA
+    d$data$"estimated_nbr_grain_spike---estimated_nbr_grain_spike" = a
+  }
+  
+  return(d)
+}
 
