@@ -582,7 +582,7 @@ data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
             if(is.null(dim(tab[[i]][[j]]))){germ = tab[[i]][[j]]["germplasm"][grep("Groupe",tab[[i]][[j]]["germplasm"])]}else{germ = tab[[i]][[j]][,"germplasm"][grep("Groupe",tab[[i]][[j]][,"germplasm"])]}
             name=NULL
             for (n in germ){if(!is.null(n)){name = paste(name,noms[[grep(n,noms)]]$Groupe,sep="\\\\")}}
-            out = list("table" = list("caption" = paste("Informations sur les pratiques culturales",noms,sep="\n"), "content" = list(tab[[i]][[j]]),"landscape"=TRUE)); OUT = c(OUT, out)
+            out = list("table" = list("caption" = paste("Informations sur les pratiques culturales",name,sep="\n"), "content" = list(tab[[i]][[j]]),"landscape"=TRUE)); OUT = c(OUT, out)
           }
         }else{
           if(is.null(dim(tab[[i]]))){germ = tab[[i]]["germplasm"][grep("Groupe",tab[[i]]["germplasm"])]}else{germ = tab[[i]][,"germplasm"][grep("Groupe",tab[[i]][,"germplasm"])]}
