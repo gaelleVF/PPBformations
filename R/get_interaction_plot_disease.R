@@ -4,12 +4,14 @@ get_interaction_plot_disease <- function(tab, nb_parameter_per_plot,vec_variable
 add_split_col= function(x, each){ rep(c(1:nrow(x)), each = each)[1:nrow(x)] } 
   
 format_date <- function(char){
+  date = "not_date"
   if(length(strsplit(char,"-")[[1]])>1){
     a = strsplit(char,"-")[[1]]
     if(length(which(nchar(a)==4))>0){
       if(which(nchar(a)==4)==1){return(paste(a[3],a[2],a[1],sep="/"))}
       if(which(nchar(a)==4)==3){return(paste(a[1],a[2],a[3],sep="/"))}
     }
+    date="date"
     if(length(which(nchar(a)==4))==0){return(paste(a[1],a[2],paste("20",a[3],sep=""),sep="/"))}
   }
   
@@ -19,9 +21,11 @@ format_date <- function(char){
       if(which(nchar(a)==4)==1){return(paste(a[3],a[2],a[1],sep="/"))}
       if(which(nchar(a)==4)==3){return(paste(a[1],a[2],a[3],sep="/"))}
     }
-
+    date="date"
     if(length(which(nchar(a)==4))==0){return(paste(a[1],a[2],paste("20",a[3],sep=""),sep="/"))}
   }
+  
+  if(date == "not_date"){return("NA")}
 }
 
 
@@ -81,9 +85,6 @@ if(type=="all_year"){
   Tab = cbind(Tab[,1:2],apply(Tab[,3:ncol(Tab)],2,function(x){
     return(unlist(lapply(x,function(y){
       if(!is.na(y)){
-      #   yr = strsplit(y,"/")[[1]][3]
-      #   yr = ifelse(nchar(yr) == 2, paste("20",yr,sep=""),yr)
-      #   return(paste(strsplit(y,"/")[[1]][1],strsplit(y,"/")[[1]][2],yr,sep="/"))
         return(format_date(as.character(y)))
        }else{return(y)}
     })))
