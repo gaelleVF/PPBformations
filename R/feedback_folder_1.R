@@ -452,26 +452,6 @@ data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
     return(out)
   }
   
-  # Traduire les vec_variables
-  traduction = function(tab,row_or_col)	{
-    
-    if( !is.null(tab$duplicated_infos)) {
-      for (i in 1:length(tab$duplicated_infos)) {
-        if (row_or_col == "row") {rownames(tab$duplicated_infos[[i]]$duplicated_infos_variables) = gsub("^([^---]*)---.*$", "\\1",rownames(tab$duplicated_infos[[i]]$duplicated_infos_variables))
-        }else{colnames(tab$duplicated_infos[[i]]$duplicated_infos_variables) = gsub("^([^---]*)---.*$", "\\1",colnames(tab$duplicated_infos[[i]]$duplicated_infos_variables)) }
-      }
-    }
-    
-    if( !is.null(tab$not_duplicated_infos)) {
-      for (i in 1:length(tab$not_duplicated_infos)) {
-        if (row_or_col == "row") {rownames(tab$not_duplicated_infos[[i]]) = gsub("^([^---]*)---.*$", "\\1",rownames(tab$not_duplicated_infos[[i]]))
-        }else{colnames(tab$not_duplicated_infos[[i]]) = gsub("^([^---]*)---.*$", "\\1",colnames(tab$not_duplicated_infos[[i]])) }
-      }
-    }
-    
-    return(tab)
-  }
-  
 
   out = list("chapter" = "Résultats dans la ferme"); OUT = c(OUT, out)
   
