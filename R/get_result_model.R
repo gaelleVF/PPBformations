@@ -9,7 +9,7 @@
 #
 #' @param variable the variable
 #' 
-#' @param modele the model from which the results were obtained : model_1, model_2, model_variance_intra
+#' @param model the model from which the results were obtained : model_1, model_2, model_variance_intra
 #
 #' @param param The parameter wanted ("mu","beta","sigma" if model_1 is used, "alpha","beta","theta" if model_2 is used, "sigma" if model_variance_intra model is used)
 #' 
@@ -27,7 +27,6 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 
 
 # 1. Check parameters -------------
-	if ( is.null(year)) {stop("A year is needed.")}
 	if ( type_result %in% c("comparison","MCMC") == FALSE ) {stop("Type_result must be comparison or MCMC." )}
 	if ( type_result == "comparison" & is.null(param) ) {stop("If type_result == comparison then param must be mu, beta, sigma if model 1 is used, alpha, beta, theta if model 2 is used, or  sigma if variance_intra model is used." )}
   if (type_result == "comparison" ){
@@ -55,12 +54,16 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	germplasm = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][1]}))
 	env = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][2]}))
 	block = data$block
-	
+	if(is.null(year)){year = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][3]}))}
   
 	if (type_result == "comparison") {	
 	  comp.param = paste("comp",param,sep=".")
-	  comp = res_model[[variable]]$comp.par[[comp.param]]$mean.comparisons 
-	  param = unlist(strsplit(as.character(comp$parameter)[1], "\\["))[1]	
+	  comp = res_model[[variable]]$comp.par[[comp.param]]$data_mean_comparisons 
+	  comp = comp[grep(paste(paste(env,year,sep=":"),collapse="|"),names(comp))]
+	  COMP = NULL
+	  for (i in 1:length(comp)){
+	    COMP=rbind(COMP,comp[[i]]$mean.comparisons)
+	  }
 	}
 	
 	if (model == "model_1"){
@@ -84,7 +87,7 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	
 # 3. Get model results -------------
 	if (type_result == "comparison") {	
-		D=merge(comp,ID, by="parameter")
+		D=merge(COMP,ID, by="parameter")
 		D$entry = unlist(lapply(as.character(D$ID), function(x){strsplit(x,"_")[[1]][1]}))
 		D$environment = paste(unlist(lapply(as.character(D$ID), function(x){strsplit(x,"_")[[1]][2]})),unlist(lapply(as.character(D$ID), function(x){strsplit(x,"_")[[1]][3]})),sep=":")
 		D$location = unlist(lapply(as.character(D$ID), function(x){strsplit(x,"_")[[1]][2]}))
