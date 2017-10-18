@@ -527,7 +527,7 @@ data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
       }
       a = unique(noms[,2])
       b=lapply(a,function(x){
-        d = grep(paste("^",x,"$",sep=""),noms[,2]) 
+        d = grep(TRUE,x == noms[,2])    #grep(paste("^",x,"$",sep=""),noms[,2]) 
         return(list("Groupe"=paste("Groupe ",paste(d,collapse = ",")," : ",unique(noms[d,2]),sep=""),"nom" = paste("Groupe ",d,sep="")))
       })
       noms=b
