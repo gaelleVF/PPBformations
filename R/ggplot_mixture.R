@@ -33,7 +33,7 @@ ggplot_mixture1 = function(res_model,
                            save=NULL,
                            col_plot = "pval") 
 {
-  melanges_PPB_mixture=melanges_PPB_mixture$data
+  if(class(melanges_PPB_mixture)=="list"){melanges_PPB_mixture=melanges_PPB_mixture$data}
   melanges_tot=melanges_tot$data$data
   add_split_col = function(x, each){ rep(c(1:nrow(x)), each = each)[1:nrow(x)] } 
   data_S = data_S$data$data
@@ -48,11 +48,15 @@ ggplot_mixture1 = function(res_model,
     d_env_b = lapply(d_env, function(x){
       # une table par mélange
       mix = plyr:::splitter_d(x, .(mixture_id))
-      MIX = list()
-      for (i in 1:(length(mix)-1)) {
-        Mel = mix[[i]]
-        Comp = mix[[length(mix)]] 
-        MIX = c(MIX,list(rbind(Mel, Comp[Comp$expe %in% Mel$mixture_id,])))
+      if(length(mix)==1){
+        MIX=mix
+      }else{
+        MIX = list()
+        for (i in 1:(length(mix)-1)) {
+          Mel = mix[[i]]
+          Comp = mix[[length(mix)]] 
+          MIX = c(MIX,list(rbind(Mel, Comp[Comp$expe %in% Mel$mixture_id,])))
+        }
       }
       paysan = unique(mix[[1]]$location)
       
@@ -371,41 +375,50 @@ ggplot_mixture1 = function(res_model,
           mcmc = get_result_model(res_model, M, type_result = "MCMC", variable, model="model_1", param = "mu", year = year)
         }else{mcmc=data.frame(0)}
         if(ncol(mcmc) > 1){
-          comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), "mu", get.at.least.X.groups = 1)
-          comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
-          comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+          a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
+          year_to_delete = year[a[a==1]]
+          if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
           
-          comp.mu$mod = unlist(lapply(as.character(comp.mu$germplasm),function(y){
-            if(length(grep("[.]2",y)) == 1){return("Mélange issu 1 année sélection 
+          go_plot = lapply(year, function(yr){
+            x = mcmc[,grep(yr,names(mcmc))]
+            comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), "mu", get.at.least.X.groups = 1)
+            comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
+            comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+            
+            comp.mu$mod = unlist(lapply(as.character(comp.mu$germplasm),function(y){
+              if(length(grep("[.]2",y)) == 1){return("Mélange issu 1 année sélection 
   dans composantes (Mod2)")}
-            if(length(grep("#B",y)) == 1){return("Mélange sélectionné (Mod3)")}
-            if(length(grep("[.]3",y)) == 1){return("Mélange issu 2 années sélection 
+              if(length(grep("#B",y)) == 1){return("Mélange sélectionné (Mod3)")}
+              if(length(grep("[.]3",y)) == 1){return("Mélange issu 2 années sélection 
   dans composantes (Mod1)")}
-            if(length(grep("[.]2",y)) == 0 & length(grep("#B",y)) == 0 &  length(grep(".3",y)) == 0){return("Mélange non sélectionné (Mod4)")}
-          }))
-          
-          Data = arrange(comp.mu, median)
-          Data$max = max(Data$median, na.rm = TRUE)
-          if(length(grep("Mod4",Data$mod))>1){
-            Data$gain = Data$median/Data[grep("Mod4",Data$mod),"median"]-1
-          }else{Data$gain = NA}
-
-          
-          p = ggplot(Data, aes(x = reorder(germplasm, median), y = median, fill=unlist(Data$mod))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
-          p = p + scale_fill_manual("legend",values=c("Mélange issu 1 année sélection 
+              if(length(grep("[.]2",y)) == 0 & length(grep("#B",y)) == 0 &  length(grep(".3",y)) == 0){return("Mélange non sélectionné (Mod4)")}
+            }))
+            
+            Data = arrange(comp.mu, median)
+            Data$max = max(Data$median, na.rm = TRUE)
+            if(length(grep("Mod4",Data$mod))>1){
+              Data$gain = Data$median/Data[grep("Mod4",Data$mod),"median"]-1
+            }else{Data$gain = NA}
+            
+            
+            p = ggplot(Data, aes(x = reorder(germplasm, median), y = median, fill=unlist(Data$mod))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
+            p = p + scale_fill_manual("legend",values=c("Mélange issu 1 année sélection 
   dans composantes (Mod2)"="gold","Mélange sélectionné (Mod3)"="steelblue3","Mélange issu 2 années sélection 
   dans composantes (Mod1)"="chartreuse3","Mélange non sélectionné (Mod4)"="red"))
-          
-          # ajouter les groupes de significativité
-          p = p + geom_text(data = Data, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
-          p = p + ggtitle(paste("Comparaison modalités de sélection",", données ",year,sep="")) + ylab(variable)
-          
-          # pivoter légende axe abscisses
-          p = p + xlab("") + theme(axis.text.x = element_text(angle = 90)) + ylim(0, Data[1,"max"])
-          
-          if(!is.null(save)){write.table(Data,file=paste(save,"/Selection_mod_",variable,".csv",sep=""),sep=";")}
-          
-          return(list("Tab"=Data,"plot"=p))
+            
+            # ajouter les groupes de significativité
+            p = p + geom_text(data = Data, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
+            p = p + ggtitle(paste("Comparaison modalités de sélection",", données ",year,sep="")) + ylab(variable)
+            
+            # pivoter légende axe abscisses
+            p = p + xlab("") + theme(axis.text.x = element_text(angle = 90)) + ylim(0, Data[1,"max"])
+            
+            if(!is.null(save)){write.table(Data,file=paste(save,"/Selection_mod_",variable,".csv",sep=""),sep=";")}
+            
+            return(list("Tab"=Data,"plot"=p))
+          })
+          names(go_plot) = year
+          return(go_plot)
         }else{return(NULL)}
       })
       return(bp)
