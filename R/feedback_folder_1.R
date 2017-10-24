@@ -7,8 +7,6 @@
 #' 
 #' @param out_analyse_feedback_folder_1 The outputs from \code{analyse_feedback_folder_1}
 #' 
-#' @param score Indicated whether to print the score graphics (TRUE) or not (FALSE)
-#
 #' @details 
 #' The function creates two folders :
 #' \itemize{
@@ -194,7 +192,7 @@ data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
           
           \\textbf{ADEAR 32} & \\textbf{Li mestère}	\\\\
           Charleyne BARTHOMEUF & 	Sofia Costa Santos BALTAZAR \\\\	
-          \\href{mailto:adear32@free.fr}{adear32@free.fr} & \\href{mailto:sofia.baltazar@unamur.be}{sofia.baltazar@unamur.be}
+          \\href{mailto:adear32@free.fr}{adear32@free.fr} & \\href{mailto:sofia.baltazar@unamur.be}{sofia.baltazar@unamur.be} \\\\
           1 rue Dupont de l'Eure,	32000	Auch	& 48 Rue Albert Billy	5370	Porcheresse	Belgique	\\\\
           05 62 05 30 86 - 06 87 58 35 95 & \\\\
            & \\\\
@@ -248,15 +246,7 @@ data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
           \\begin{itemize}
           \\item Dans un premier temps, nous montrons les fermes dans lesquelles les populations se comportent le plus comme dans  votre ferme. Cela vous permet de vous mettre en lien avec cette ferme afin de récupérer quelques populations.
           
-          \\item Dans un deuxième temps 
-          
-          \\item Ensuite, nous vous donnons les caractéristiques génétiques des populations, c'est à dire:
-          \\begin{itemize}
-          \\item Leurs effets génétiques (intrinsèque aux populations)
-          \\item Leurs sensibilité à l'interaction. Moins elles sont sensibles à l'interaction, plus elles se comportent moyennement de la même manière dans les fermes par rapport aux autres populations.
-          \\end{itemize}
-          
-          \\item Enfin, nous vous proposons de prédire les valeurs qu'auraient eu certaines populations dans vos fermes cette année : on prédit le passé!
+          \\item Dans un deuxième temps nous vous proposons de prédire les valeurs qu'auraient eu certaines populations dans vos fermes cette année : on prédit le passé!
           Cette information est issue des modèles statistiques que nous avons développés.
           Comme tous modèles, il donne une information avec une certaine confiance qui est donnée en pourcentage.
           \\end{itemize}
