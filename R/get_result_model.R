@@ -54,8 +54,7 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	germplasm = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][1]}))
 	env = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][2]}))
 	block = data$block
-	year_to_keep = year
-	year = unlist(lapply(as.character(noms),function(x){return(as.character(as.numeric(as.character(strsplit(x,"_")[[1]][3]))+1))}))
+	if(is.null(year)){year = unlist(lapply(as.character(noms),function(x){return(strsplit(x,"_")[[1]][3])}))}
   
 	if (type_result == "comparison") {	
 	  comp.param = paste("comp",param,sep=".")
@@ -84,8 +83,7 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	}
 	
 	if (!is.null(ID)) { colnames(ID) = c("ID","parameter")}
-	if(!is.null(year_to_keep)){ID = ID[grep(paste(year_to_keep,collapse="|"), ID$parameter),]}
-	
+
 	
 # 3. Get model results -------------
 	if (type_result == "comparison") {	
