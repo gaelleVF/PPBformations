@@ -55,7 +55,7 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	env = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][2]}))
 	block = data$block
 	year_to_keep = year
-	year = unlist(lapply(as.character(noms),function(x){strsplit(x,"_")[[1]][3]}))
+	year = unlist(lapply(as.character(noms),function(x){return(as.character(as.numeric(as.character(strsplit(x,"_")[[1]][3]))+1))}))
   
 	if (type_result == "comparison") {	
 	  comp.param = paste("comp",param,sep=".")
