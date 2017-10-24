@@ -481,9 +481,6 @@ et la comparaison de ces mélanges au mélange non sélectionné
              et la moyenne de toutes leurs composantes."); OUT = c(OUT, out)
   }
   
-  
-  
-}
 
   
   # /!\ Get pdf ----------
