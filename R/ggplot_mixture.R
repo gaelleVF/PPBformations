@@ -37,6 +37,9 @@ ggplot_mixture1 = function(res_model,
   melanges_tot=melanges_tot$data$data
   add_split_col = function(x, each){ rep(c(1:nrow(x)), each = each)[1:nrow(x)] } 
   data_S = data_S$data$data
+  data_S = unique(data_S[,c("son","expe","sl_statut","expe_name","expe_name_2","son_germplasm","father","father_germplasm","son_person")])
+  data_S = data_S[grep("bouquet",data_S$sl_statut),]
+  
   
   # 1. Compare, for each mixture in each farm, the mixture to its components and the mean of these components ----
   if ( plot.type == "comp.in.farm" | plot.type == "mix.comp.distribution"| plot.type == "mix.gain.distribution") {
@@ -71,8 +74,6 @@ ggplot_mixture1 = function(res_model,
           nom_melange$Type="Mélange"
           noms=data.frame(noms[-1,],stringsAsFactors = FALSE)
           colnames(noms)[1] =  colnames(nom_melange)[1] ="germplasm"
-          data_S = unique(data_S[,c("son","expe","sl_statut","expe_name","expe_name_2","son_germplasm","father","father_germplasm","son_person")])
-          data_S = data_S[grep("bouquet",data_S$sl_statut),]
           mel_year = strsplit(as.character(nom_melange$germplasm),"_")[[1]][3]
           noms$germplasm_2 = lapply(as.character(noms$germplasm),function(x){
             d = data_S[grep(strsplit(x,"#")[[1]][1],data_S$father),]
@@ -372,7 +373,14 @@ ggplot_mixture1 = function(res_model,
         M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
         M = M[is.na(M$selection_id) & M$son_year %in% year,]
         if(nrow(M)>1){
-          mcmc = get_result_model(res_model, M, type_result = "MCMC", variable, model="model_1", param = "mu", year = year)
+          mcmc = lapply(year,function(x){
+            a = get_result_model(res_model, M, type_result = "MCMC", variable, model="model_1", param = "mu", year = x)
+            # Do not keep if year's selection
+            data_S$parameter = paste("mu[",unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][1]})),",",
+                                     data_S$son_person, ":", unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][3]})),"]",sep="")
+            a=a[!(names(a) %in% data_S$parameter)]
+          })
+          mcmc = do.call(cbind,mcmc)
         }else{mcmc=data.frame(0)}
         if(ncol(mcmc) > 1){
           a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
