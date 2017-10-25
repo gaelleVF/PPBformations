@@ -70,8 +70,14 @@ ggplot_mixture1 = function(res_model,
         
         M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
         M = M[is.na(M$selection_id) & M$son_year %in% year,]
-        M = M[M$father_germplasm %in% noms$expe_melange,]
-        M$expe_melange = unique(noms$expe_melange)
+        M$expe_melange = unlist(lapply(as.character(M$father_germplasm),function(x){
+          a = strsplit(x,"-")[[1]]
+          b = grep("[.]",a) ; c = grep("#",a)
+          if(length(b)>0){ a[b] = strsplit(a[b],".",fixed=TRUE)[[1]][1]}
+          if(length(c)>0){ a[c] = strsplit(a[c],".",fixed=TRUE)[[1]][1]}
+          return(paste(a,collapse="-"))
+        }))
+        M = M[M$expe_melange %in% noms$expe_melange,]
         M = plyr:::splitter_d(M, .(son_year))
         M = lapply(M, function(m){
           a = noms[grep(paste(m$father,collapse="|"),noms$son),]
