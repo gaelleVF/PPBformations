@@ -215,7 +215,7 @@ ggplot_mixture1 = function(res_model,
        # ne garder l'overyielding que de la première année
         comp=NULL
         for (yr in 1:length(res_year)){if(!is.null(res_year[[yr]]$Tab) & is.null(comp)){comp=yr}}
-        if(!is.null(comp)){if(comp < length(res_year)){for(i in (comp+1):length(res_year)){res_year[[i]]=list("Tab"=NULL,"plot"=NULL)}}}
+        if(!is.null(comp)){if(comp < length(res_year)){for(i in (comp+1):length(res_year)){res_year[[i]]$Tab=NULL}}}
        return(res_year)
       }) # end lapply(y)
       return(mix_split)
