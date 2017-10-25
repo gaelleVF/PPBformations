@@ -50,7 +50,8 @@ ggplot_mixture1 = function(res_model,
     # Par environnement, on sépare par mélange pour ensuite faire les graphs
     d_env_b = lapply(d_env, function(x){
       # une table par mélange
-      mix = plyr:::splitter_d(x, .(mixture_id))
+ #     mix = plyr:::splitter_d(x, .(mixture_id))
+        mix = plyr:::splitter_d(x, .(expe_melange))
       if(length(mix)==1){
         MIX=mix
       }else{
@@ -65,46 +66,70 @@ ggplot_mixture1 = function(res_model,
       
       # récupérer les données (MCMC) pour chaque mixture et les splitter
       mix_split = lapply(MIX , function(y) {
-        noms = as.data.frame(unique(y$son),stringsAsFactors = FALSE)
-        y_son = y[y$sl_statut %in%"son",]
-        if(length(unique(y_son$germplasm_son == y_son$expe_melange))>1 | unique(y_son$germplasm_son == y_son$expe_melange) == FALSE ){ # Modality 2 of mixture experiment : we have only the name of the mixture and not the components since the selection 
-                              # that were done to create the mixture have not been sown. We want to get the selections that were sown (modality)
-          nom_melange=data.frame(noms[1,],stringsAsFactors = FALSE)
-          nom_melange$germplasm_2 = nom_melange[,1]
-          nom_melange$Type="Mélange"
-          noms=data.frame(noms[-1,],stringsAsFactors = FALSE)
-          colnames(noms)[1] =  colnames(nom_melange)[1] ="germplasm"
-          mel_year = strsplit(as.character(nom_melange$germplasm),"_")[[1]][3]
-          noms$germplasm_2 = lapply(as.character(noms$germplasm),function(x){
-            d = data_S[grep(strsplit(x,"#")[[1]][1],data_S$father),]
-            d = d[d$son_person %in% paysan,]
-            d$year = unlist(lapply(as.character(d$sl_statut),function(y){strsplit(y,":")[[1]][1]}))
-            d=d[d$year %in% mel_year,]
-            germ = d$son
-            return(as.character(germ[grep("VA",germ)]))
-          })
-          noms$Type="Composante"
-          noms = rbind(as.matrix(nom_melange),as.matrix(noms))
-          noms = as.data.frame(noms)
-        }else{
-          noms$Type = c("Mélange",rep("Composante",(nrow(noms)-1)))
-          colnames(noms)[1] = "germplasm"
-          noms$germplasm_2 = noms$germplasm
-        }
-        if(length(unlist(noms$germplasm_2)) < nrow(noms)){noms$germplasm_2 = noms$germplasm}
-        if(length(unlist(noms$germplasm_2)) == nrow(noms)){
-          y$son = unlist(lapply(as.character(y$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
-          
-        }
-        noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
+        noms = as.data.frame(unique(y[,c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y","expe_melange")]),stringsAsFactors = FALSE)
+        
+        M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
+        M = M[is.na(M$selection_id) & M$son_year %in% year,]
+        M$expe_melange = unique(noms$expe_melange)
+        M = plyr:::splitter_d(M, .(son_year))
+        M = lapply(M, function(m){
+          a = noms[grep(paste(m$father,collapse="|"),noms$son),]
+          a$son = a$father
+          return(rbind(m,a))
+        })
+        
+      #  y_son = y[y$sl_statut %in%"son",]
+#        if(length(unique(y_son$germplasm_son == y_son$expe_melange))>1 | unique(y_son$germplasm_son == y_son$expe_melange) == FALSE ){ # Modality 2 of mixture experiment : we have only the name of the mixture and not the components since the selection 
+   #                           # that were done to create the mixture have not been sown. We want to get the selections that were sown (modality)
+    Donnees = lapply(M,function(M_year){
+      M_year$Type = unlist(lapply(1:nrow(M_year),function(i){
+        a = M_year[i,]
+        if(as.character(a$son_germplasm)== as.character(a$father_germplasm)){return("Mélange")}else{return("Composante")}
+      }))
+      
+      if(length(unique(M_year$son_germplasm == M_year$expe_melange))>1 | length(grep(FALSE,(unique(M_year$son_germplasm == M_year$expe_melange))))>0){
+        nom_melange=data.frame(M_year[M_year$Type %in% "Mélange",],stringsAsFactors = FALSE)
+        nom_melange$germplasm_2 = nom_melange[,1]
+
+        noms=data.frame(M_year[M_year$Type %in% "Composante",],stringsAsFactors = FALSE)
+        colnames(noms)[1] =  colnames(nom_melange)[1] ="germplasm"
+ #       mel_year = strsplit(as.character(nom_melange$germplasm),"_")[[1]][3]
+        mel_year = as.character(as.numeric(as.character(unique(nom_melange$son_year)))-1)
+        noms$germplasm_2 = lapply(as.character(noms$germplasm),function(x){
+          d = data_S[grep(strsplit(x,"#")[[1]][1],data_S$father),]
+          d = d[d$son_person %in% paysan,]
+          d$year = unlist(lapply(as.character(d$sl_statut),function(y){strsplit(y,":")[[1]][1]}))
+          d=d[d$year %in% mel_year,]
+          germ = d$son
+          return(as.character(germ[grep("VA",germ)]))
+        })
+        noms = rbind(as.matrix(nom_melange),as.matrix(noms))
+        noms = as.data.frame(noms)
+      }else{
+        noms=M_year
+        colnames(noms)[1] = "germplasm"
+        noms$germplasm_2 = noms$germplasm
+      }
+      
+      if(length(unlist(noms$germplasm_2)) < nrow(noms)){noms$germplasm_2 = noms$germplasm}
+      if(length(unlist(noms$germplasm_2)) == nrow(noms)){
+        M_year$son = unlist(lapply(as.character(M_year$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
+        
+      }
+      noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
+      noms$son_year = max(as.numeric(as.character(noms$son_year)))
+      noms$son = paste(noms$son_germplasm, paysan, noms$son_year,"0001",sep="_")
+      return(noms)
+     })
         
         res_year = lapply(year,function(yr){
-          mcmc = get_result_model(res_model, y, type_result = "MCMC", variable, model,param = "mu", year = yr)
+          noms = Donnees[yr][[1]]
+          mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = "mu", year = yr)
           Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
           
           if (length(Mel) > 0) {
             Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
-            if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms$son_germplasm))-1){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+            if(!is.null(ncol(Comp))){if (ncol(Comp) < length(noms[noms$Type == "Composante","Type"])){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
             if(!missingComp){
               MeanComp = apply(Comp, 1, mean)
               M = cbind(Mel, MeanComp, Comp)
@@ -116,8 +141,11 @@ ggplot_mixture1 = function(res_model,
               comp.mu = mean_comparisons.check_model_1(M, "mu", get.at.least.X.groups = 1)
               
               C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
-              A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",unique(y$location),":",yr,"]",sep="")), which(colnames(C) == paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",unique(y$location),":",yr,"]",sep=""))]
-              if(A == 0){A = C[which(rownames(C) == paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",unique(y$location),":",yr,"]",sep="")), which(colnames(C) == paste("mu[","MoyenneComposantes",",",unique(y$location),":",yr,"]",sep=""))]}
+              A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))]), 
+                  which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+              
+              if(A == 0){ A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                              which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))])]}
               
               comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
               comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
@@ -126,14 +154,22 @@ ggplot_mixture1 = function(res_model,
               type = NULL
               for (i in 1:nrow(comp.mu)) { 
                 a = unique(unlist(noms[noms$son_germplasm %in% comp.mu[i,"germplasm"],"Type"]))
-                if (!is.null(a)) {type = c(type, a)}
+                if (!is.null(a)) {
+                  if(a == "Mélange"){
+                    if(length(grep("[.]",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 2")
+                    }else if(length(grep("#B",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 3")
+                    }else{ type = c(type, a) 
+                    }
+                  }
+                  if(a == "Composante"){type = c(type, a)}
+                }
                 if (comp.mu[i,"germplasm"] == "MoyenneComposantes") { type = c(type, "MoyenneComposantes")}
               }
               
               Data = cbind(comp.mu, type)
               Data = arrange(Data, median)
               Data$max = max(Data$median, na.rm = TRUE)
-              Data$melange = Data[grep("Mélange",Data$type),"germplasm"]
+              Data$melange = Data[grep("^Mélange$",Data$type),"germplasm"]
               
               if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
               if (plot.type == "comp.in.farm") {
@@ -349,7 +385,7 @@ ggplot_mixture1 = function(res_model,
         }else{return("mod4")}
       }))
 
-      p = get_histo(Data,col_plot,breaks=0.05, titre=variable)
+      p = get_histo(Data,col_plot,breaks=0.04, titre=variable)
       
       if(!is.null(save)){write.table(Data,file=paste(save,"/Histo_",variable,".csv",sep=""),sep=";")}
   
