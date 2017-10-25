@@ -323,7 +323,7 @@ et la comparaison de ces mélanges au mélange non sélectionné
         })
       })
       a = do.call(c,unlist(p,recursive = FALSE))
-      a = do.call(c,a)
+      if(length(a)>1){a = do.call(c,a)}
   #   for (i in 1:length(p_melanges[[1]])){
    #     for (yr in 1:length(p_melanges[[1]][[i]])){
    #       if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
@@ -341,17 +341,20 @@ et la comparaison de ces mélanges au mélange non sélectionné
       
       
       # Comparaison modalités de sélection
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1",
-                                   plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL)
-      for (i in 1:length(p_melanges[[1]])){
-        for(yr in 1:length(p_melanges[[1]][[i]])){
-          if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
-            out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges. 
+      if(length(a)<2){
+        p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1",
+                                     plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL)
+        p = lapply(p_melanges, function(x){
+          lapply(x,function(y){
+            lapply(y,function(z){return(z$plot)})
+          })
+        })
+        a = do.call(c,unlist(p,recursive = FALSE))
+        if(length(a)>1){a = do.call(c,a)}
+        out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges.
                                                        Les modalités qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.
-                                                       ",sep=""), "content" = p_melanges[[1]][[i]][[yr]]$plot, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.5)); OUT = c(OUT, out)}
-        }
+                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.5)); OUT = c(OUT, out)}
 
-      }
       return(OUT)
     }
     
