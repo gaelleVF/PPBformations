@@ -311,73 +311,64 @@ et la comparaison de ces mélanges au mélange non sélectionné
     mix = plyr:::splitter_d(Mixtures_all_person, .(expe_melange))
 
     graphs_ferme_melanges = function(OUT,variable,titre,mel){
-      out = list("subsection" = titre); OUT = c(OUT, out)
+   #   out = list("subsection" = titre); OUT = c(OUT, out)
       
       # Comparaison mélange vs composantes
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = NULL, variable, year=c("2016","2017"), model = "model_1", 
-                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20,save=NULL)
-      for (i in 1:length(p_melanges[[1]])){
-        for (yr in 1:length(p_melanges[[1]][[i]])){
-          if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
+      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1", 
+                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL)
+      
+      p = lapply(p_melanges, function(x){
+        lapply(x,function(y){
+          lapply(y,function(z){return(z$plot)})
+        })
+      })
+      a = do.call(c,unlist(p,recursive = FALSE))
+      a = do.call(c,a)
+  #   for (i in 1:length(p_melanges[[1]])){
+   #     for (yr in 1:length(p_melanges[[1]][[i]])){
+   #       if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
             out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} du mélange et de ses composantes. 
                                                        Les populations qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.
-                                                       ",sep=""), "content" = p_melanges[[1]][[i]][[yr]]$plot, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)}
-        }
-        }
+                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2), ncol = 1), "width" = 1, "landscape" = FALSE))
+            OUT = c(OUT, out)#}
+          
+      #  }
+    #  }
      
+      # Différentiel de sélection
+      # Correspondance data_S et mix
+      
+      
       
       # Comparaison modalités de sélection
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1",
-                                   plot.type = "comp.mod", person, nb_parameters_per_plot = 20,save=NULL)
+                                   plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL)
       for (i in 1:length(p_melanges[[1]])){
-        if(!is.null(p_melanges[[1]][[i]]$plot)){
-          out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges. 
+        for(yr in 1:length(p_melanges[[1]][[i]])){
+          if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
+            out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges. 
                                                        Les modalités qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.
-                                                       ",sep=""), "content" = p_melanges[[1]][[i]]$plot, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)}
+                                                       ",sep=""), "content" = p_melanges[[1]][[i]][[yr]]$plot, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.5)); OUT = c(OUT, out)}
+        }
+
       }
       return(OUT)
     }
     
-    lapply(mix,function(x){
+    for(i in 1:length(mix)){
+      print(i)
+      x=mix[[i]]
+      out = list("subsection" = unique(x$expe_melange)); OUT=c(OUT,out)
       for (variable in vec_variables){
+        print(variable)
         OUT = graphs_ferme_melanges(OUT,variable,titre=variable,mel = x)
       }
-    })
-    
- 
-    # 2.1.1. Poids de mille grains -----
-    if ("poids.de.mille.grains" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["poids.de.mille.grains"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"poids.de.mille.grains","poids de mille grains")}
-    
-    # 2.1.2. Taux de protéine -----
-    if ("taux.de.proteine" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["taux.de.proteine"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"taux.de.proteine","Taux de protéine")}
-    
-    # 2.1.3. Poids de l'épi -----
-    if ("poids.de.l.epi" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["poids.de.l.epi"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"poids.de.l.epi","Poids de l'épi")}
-    
-    # 2.1.4. Hauteur -----
-    if ("hauteur" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["hauteur"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"hauteur","Hauteur")}
-    
-    # 2.1.5. Longueur de l'épi -----
-    if ("longueur.de.l.epi" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["longueur.de.l.epi"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"longueur.de.l.epi","Longueur de l'épi")}
-    
-    # 2.1.6. LLSD -----
-    if ("LLSD" %in% names(res_model1) & length(grep(paste(person,year,sep=":"),names(res_model1[["LLSD"]]$model.outputs$MCMC)))>0){OUT=graphs_ferme_melanges(OUT,"LLSD","Distance dernière feuille - base de l'épi")}
+    }
     
     
-    # 2.1.4. La hauteur et la verse ----------
-    # A faire !
-    # out = list("subsubsection" = "La hauteur et la verse"); OUT = c(OUT, out)
-    # 
-    # p = get.ggplot(data = data_PPB_mixture, ggplot.type = "data-interaction", x.axis = "year", in.col = "germplasm", 
-    # 													 vec_variables = "hauteur---hauteur", nb_parameters_per_plot_in.col = 5, merge_g_and_s = TRUE)
-    # out = list("figure" = list("caption" = "Evolution de la hauteur au cours du temps", "content" = p, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)
-    # 
-    # 
-    # p = get.ggplot(data = data_PPB_mixture, ggplot.type = "data-interaction", x.axis = "year", in.col = "germplasm", 
-    # 													 vec_variables ="verse---verse", nb_parameters_per_plot_in.col = 5, merge_g_and_s = TRUE)
-    # out = list("figure" = list("caption" = "Evolution de la verse au cours du temps", "content" = p, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)
+    # Ajouter les différentiels de sélection !
     
-        }
+} #end resultats sur la ferme
   
   # 2.2. Résultats sur le réseau de fermes -----
   out = list("section" = "Résultats sur le réseau de fermes"); OUT = c(OUT, out)
@@ -398,12 +389,12 @@ et la comparaison de ces mélanges au mélange non sélectionné
   melanges_reseau = function(OUT,variable,titre,distrib=TRUE,comp_global=FALSE){
     # Histogramme distribution de l'overyielding
     var = paste(strsplit(variable,"[.]")[[1]],collapse="")
-    if (!file.exists(paste(we_are_here,"/figures/Histo_",var,".png",sep=""))){
+    if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                    year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
                                    save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
-      save(p_melanges,file=paste(we_are_here,"/figures/Histo_",var,".RData",sep=""))
-      png(paste(we_are_here,"/figures/Histo_",var,".png",sep=""))
+      save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
+      png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
       p_melanges
       dev.off()
       #    }else{
@@ -414,7 +405,7 @@ et la comparaison de ces mélanges au mélange non sélectionné
                                                        de leurs composantes respectives pour le ",variable,".
                                                        La ligne rouge verticale indique le gain moyen des mélanges par rapport à la moyenne de leurs composantes respectives 
                                                        tandis que la ligne pointillée noire est fixée sur un gain nul.",sep=""), 
-                                     "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.7))
+                                     "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.6))
     OUT = c(OUT, out)
     
     # Distribution des mélanges et composantes
