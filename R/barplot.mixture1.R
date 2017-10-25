@@ -13,9 +13,11 @@
 #' 
 
 barplot.mixture1 = function(x, title) {
-  Gain = round((x[grep("Mélange",x$type),"median"]/x[grep("MoyenneComposantes",x$type),"median"]-1)*100,2)
+  Gain = round((x[grep("^Mélange$",x$type),"median"]/x[grep("MoyenneComposantes",x$type),"median"]-1)*100,2)
+  x$type = factor(x$type, levels=c("Composante","MoyenneComposantes","Mélange","Mélange Mod1","Mélange Mod 2","Mélange Mod 3"))
   
   p = ggplot(x, aes(x = reorder(germplasm, median), y = median, fill=unlist(x$type))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
+  p = p + scale_fill_manual(drop=FALSE,values =c("olivedrab3","green4","red","springgreen3","gold1","skyblue1"))
   
   # ajouter les groupes de significativité
   p = p + geom_text(data = x, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
