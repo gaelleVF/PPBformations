@@ -153,14 +153,21 @@ ggplot_mixture1 = function(res_model,
                 if(length(a)>0){
                   A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-a]), 
                      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+                  if(A == 0){
+                    A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                        which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-a])]
+                  }
                 }else{
                   A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))), 
                       which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+                  
+                  
+                  if(A == 0){ 
+                    A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                      which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))]
+                  }
                 }
-
-                if(A == 0){ A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                                which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))])]}
-                
+ 
                 comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
                 comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
                 comp.mu$pval=A
