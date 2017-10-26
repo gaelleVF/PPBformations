@@ -123,6 +123,7 @@ ggplot_mixture1 = function(res_model,
         M_year$son = unlist(lapply(as.character(M_year$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
         
       }
+      melange = unlist(unique(noms[noms$Type%in%"Composante","son_germplasm"]))
       noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
       noms$son_year = max(as.numeric(as.character(noms$son_year)))
       noms$son = paste(noms$son_germplasm, paysan, noms$son_year,"0001",sep="_")
@@ -198,7 +199,7 @@ ggplot_mixture1 = function(res_model,
                   Data_split = plyr:::splitter_d(Data, .(split))
                   
                   # faire le graph pour chaque split
-                  bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",variable,", ","données ",yr, sep="")))})
+                  bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",variable,", ","données ",yr, sep=""),melange = melange))})
                   
                   return(list("Tab" = Data,"plot"= bp))
                 }
