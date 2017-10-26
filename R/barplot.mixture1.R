@@ -12,8 +12,8 @@
 #' @seealso \code{\link{PPBformations::ggplot_mixture1}}
 #' 
 
-barplot.mixture1 = function(x, title) {
-  Gain = round((x[grep("^Mélange$",x$type),"median"]/x[grep("MoyenneComposantes",x$type),"median"]-1)*100,2)
+barplot.mixture1 = function(x, title, melange) {
+  Gain = round((x[grep(paste("^",melange,"$",sep=""),x$entry),"median"]/x[grep("MoyenneComposantes",x$entry),"median"]-1)*100,2)
   x$type = factor(x$type, levels=c("Composante","MoyenneComposantes","Mélange","Mélange Mod1","Mélange Mod 2","Mélange Mod 3"))
   
   p = ggplot(x, aes(x = reorder(germplasm, median), y = median, fill=unlist(x$type))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
