@@ -391,58 +391,35 @@ et la comparaison de ces mélanges au mélange non sélectionné
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
              Un histogramme décalé vers la droite par rapport à 0 indique qu'une majorité des mélanges se sont mieux comportés que la moyenne de leurs composantes. 
              A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes."); OUT = c(OUT, out)
+
+  P = list()
+for (variable in vec_variables){
+  var = paste(strsplit(variable,"[.]")[[1]],collapse="")
   
-  melanges_reseau = function(OUT,variable,titre,distrib=TRUE,comp_global=FALSE){
-    # Histogramme distribution de l'overyielding
-    var = paste(strsplit(variable,"[.]")[[1]],collapse="")
-    if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
-                                   year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
-                                   save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
-      save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
-      png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
-      p_melanges
-      dev.off()
-      #    }else{
-      #      load(paste(we_are_here,"/figures/Histo_",var,".RData",sep=""))
-    }
-#    out = list("subsection" = titre); OUT = c(OUT, out)
-    out = list("includeimage" = list("caption" = paste("Distribution des rapports entre les comportement des mélanges et les comportements moyens
+  if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
+    p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
+                                 year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
+                                 save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
+    save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
+    png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
+    p_melanges
+    dev.off()
+  }else{
+    p = get(load(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep="")))
+    P=c(P,list(p$plot$plot))
+  }
+}
+  
+  out = list("includeimage" = list("caption" = paste("Distribution des rapports entre les comportement des mélanges et les comportements moyens
                                                        de leurs composantes respectives pour le \\textbf{",variable,"}.
                                                        La ligne rouge verticale indique le gain moyen des mélanges par rapport à la moyenne de leurs composantes respectives 
                                                        tandis que la ligne pointillée noire est fixée sur un gain nul.",sep=""), 
-                                     "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.6))
-    OUT = c(OUT, out)
-    
-    # Distribution des mélanges et composantes
-    if(distrib){
-      if (!file.exists(paste(we_are_here,"/figures/Distribution_",var,".png",sep=""))){
-        p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), 
-                                     model="model_1", plot.type = "mix.comp.distribution", person, nb_parameters_per_plot = 15,save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
-        save(p_melanges,file=paste(we_are_here,"/figures/Distribution_",var,".RData",sep=""))
-        png(paste(we_are_here,"/figures/Distribution_",var,".png",sep=""))
-        p_melanges
-        dev.off()
-        #    }else{
-        #      load(paste(we_are_here,"/figures/Distribution",var,".RData",sep=""))
-      }
-      
-      out = list("includeimage" = list("caption" = paste("Distribution sur le réseau des mélanges, des moins bonnes et meilleures composantes 
-                                                         ainsi que de la moyenne des composantes pour chaque mélange pour le ",variable,".
-                                                         Le X noir représente la valeur moyenne pour chaque type.",sep=""), 
-                                       "content" = paste("./figures/Distribution_",var,".png",sep=""),  "width" = 0.7))
-      OUT = c(OUT, out)
-    }
-    
-    if(comp_global){
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=year, model="model_1",plot.type = "mixVScomp", person, nb_parameters_per_plot = 15)
-      out = list("figure" = list("caption" = "Comparaison entre la moyenne des mélanges et la moyenne des composantes sur le réseau.
-                                 Les moyennes sont significativement différentes si les lettres diffèrent.
-                                 ", "content" = p_melanges$bp, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)
-    }
-    
-    return(OUT)
-    }
+                                   "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.6))
+  OUT = c(OUT, out)
+  
+
+
+
   
   # 2.2.1.1. poids de mille grains -----
   OUT = melanges_reseau(OUT,variable="poids.de.mille.grains",titre="Poids de mille grains",distrib=FALSE,comp_global=FALSE)
