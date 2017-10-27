@@ -351,10 +351,13 @@ et la comparaison de ces mélanges au mélange non sélectionné
         })
         a = do.call(c,unlist(p,recursive = FALSE))
         if(length(a)>1){a = do.call(c,a)}
-        out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges.
+        if(length(a)>0){
+          out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges.
                                                        Les modalités qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.
-                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.5)); OUT = c(OUT, out)}
-
+                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.7)); OUT = c(OUT, out)}
+        
+        }
+      
       return(OUT)
     }
     
@@ -403,9 +406,9 @@ et la comparaison de ces mélanges au mélange non sélectionné
       #    }else{
       #      load(paste(we_are_here,"/figures/Histo_",var,".RData",sep=""))
     }
-    out = list("subsection" = titre); OUT = c(OUT, out)
+#    out = list("subsection" = titre); OUT = c(OUT, out)
     out = list("includeimage" = list("caption" = paste("Distribution des rapports entre les comportement des mélanges et les comportements moyens
-                                                       de leurs composantes respectives pour le ",variable,".
+                                                       de leurs composantes respectives pour le \\textbf{",variable,"}.
                                                        La ligne rouge verticale indique le gain moyen des mélanges par rapport à la moyenne de leurs composantes respectives 
                                                        tandis que la ligne pointillée noire est fixée sur un gain nul.",sep=""), 
                                      "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.6))
