@@ -50,8 +50,8 @@ ggplot_mixture1 = function(res_model,
     # Par environnement, on sépare par mélange pour ensuite faire les graphs
     d_env_b = lapply(d_env, function(x){
       # une table par mélange
- #     mix = plyr:::splitter_d(x, .(mixture_id))
-        mix = plyr:::splitter_d(x, .(expe_melange))
+      if (plot.type %in% c("mix.gain.distribution","mix.comp.distribution")){mix = plyr:::splitter_d(x, .(mixture_id))}
+      if (plot.type == "comp.in.farm"){mix = plyr:::splitter_d(x, .(expe_melange))}
       if(length(mix)==1){
         MIX=mix
       }else{
@@ -84,7 +84,6 @@ ggplot_mixture1 = function(res_model,
           a$son = a$father
           return(rbind(m,a))
         })
-        
       #  y_son = y[y$sl_statut %in%"son",]
 #        if(length(unique(y_son$germplasm_son == y_son$expe_melange))>1 | unique(y_son$germplasm_son == y_son$expe_melange) == FALSE ){ # Modality 2 of mixture experiment : we have only the name of the mixture and not the components since the selection 
    #                           # that were done to create the mixture have not been sown. We want to get the selections that were sown (modality)
@@ -93,7 +92,6 @@ ggplot_mixture1 = function(res_model,
         a = M_year[i,]
         if(as.character(a$son_germplasm)== as.character(a$father_germplasm)){return("Mélange")}else{return("Composante")}
       }))
-      
       if(length(unique(M_year$son_germplasm == M_year$expe_melange))>1 | length(grep(FALSE,(unique(M_year$son_germplasm == M_year$expe_melange))))>0){
         nom_melange=data.frame(M_year[M_year$Type %in% "Mélange",],stringsAsFactors = FALSE)
         nom_melange$germplasm_2 = nom_melange[,1]
@@ -123,95 +121,117 @@ ggplot_mixture1 = function(res_model,
         M_year$son = unlist(lapply(as.character(M_year$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
         
       }
-      melange = unlist(unique(noms[noms$Type%in%"Composante","son_germplasm"]))
+      melange = unlist(unique(noms[noms$Type%in%"Composante","expe_melange"]))
       noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
       noms$son_year = max(as.numeric(as.character(noms$son_year)))
       noms$son = paste(noms$son_germplasm, paysan, noms$son_year,"0001",sep="_")
+      noms=noms[noms$expe_melange %in% melange,]
       return(noms)
      })
         
         res_year = lapply(year,function(yr){
           noms = Donnees[yr][[1]]
+
           if(!is.null(noms)){
-            mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = "mu", year = yr)
-            Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
-            
-            if (length(Mel) > 0) {
-              Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
-              if(!is.null(ncol(Comp))){if (ncol(Comp) < length(noms[noms$Type == "Composante","Type"])){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
-              if(!missingComp){
-                MeanComp = apply(Comp, 1, mean)
-                M = cbind(Mel, MeanComp, Comp)
-                #     attributes(M)$model = "model1"
-                colnames(M)[colnames(M) %in% "MeanComp"] = paste("mu[","MoyenneComposantes",",",unique(y$location),":",yr,"]",sep="")
-                colnames(M)[colnames(M) %in% "Mel"] = paste("mu[", noms[noms$Type %in% "Mélange","son_germplasm"],",",unique(y$location),":",yr,"]",sep="")
-                M=list("MCMC"=M)
-                #         attributes(M)$PPBstats.object = "check_model_model_1"
-                comp.mu = mean_comparisons.check_model_1(M, "mu", get.at.least.X.groups = 1)
-                
-                C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
-                a = grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))
-                if(length(a)>0){
-                  A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-a]), 
-                     which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+            if(nrow(noms)>0){
+              melange = noms$son_germplasm[1]
+              mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = "mu", year = yr)
+              Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
+              
+              if (length(Mel) > 0) {
+                Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
+                if(!is.null(ncol(Comp))){if (ncol(Comp) < length(noms[noms$Type == "Composante","Type"]) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+                if(!missingComp){
+                  MeanComp = apply(Comp, 1, mean)
+                  M = cbind(Mel, MeanComp, Comp)
+                  #     attributes(M)$model = "model1"
+                  colnames(M)[colnames(M) %in% "MeanComp"] = paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
+                  colnames(M)[colnames(M) %in% "Mel"] = paste("mu[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
+                  M=list("MCMC"=M)
+                  #         attributes(M)$PPBstats.object = "check_model_model_1"
+                  comp.mu = mean_comparisons.check_model_1(M, "mu", get.at.least.X.groups = 1)
+                  
+                  C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
+                  # a = grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))
+                  #  if(length(a) < length(grep("Mélange",noms$Type))){
+                  #    if(length(a)>0){
+                  A=C[which(rownames(C) == paste("mu[",melange,",",paysan,":",yr,"]",sep="")), 
+                      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
                   if(A == 0){
                     A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                        which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))[-a])]
+                        which(colnames(C) == paste("mu[",melange,",",paysan,":",yr,"]",sep=""))]
+                  }
+                  #  }else{
+                  #   A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))), 
+                  #      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+                  
+                  
+                  #    if(A == 0){ 
+                  #     A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                  #        which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))]
+                  #  }
+                  #}
+                  
+                  comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
+                  comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+                  comp.mu$pval=A
+                  # }else{
+                  #   comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
+                  #   comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+                  #   comp.mu$pval = 1
+                  #  }
+                  
+                  
+                  type = NULL
+                  for (i in 1:nrow(comp.mu)) { 
+                    a = unique(unlist(noms[noms$son_germplasm %in% comp.mu[i,"germplasm"],"Type"]))
+                    if (length(a)>0) {
+                      if(a == "Mélange"){
+                        if(length(grep("[.]",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 2")
+                        }else if(length(grep("#B",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 3")
+                        }else{ type = c(type, a) 
+                        }
+                      }
+                      if(a == "Composante"){type = c(type, a)}
+                    }
+                    if (comp.mu[i,"germplasm"] == "MoyenneComposantes") { type = c(type, "MoyenneComposantes")}
+                  }
+                  
+                  Data = cbind(comp.mu, type)
+                  Data = arrange(Data, median)
+                  Data$max = max(Data$median, na.rm = TRUE)
+                  d = Data[grep("^Mélange$",Data$type),"germplasm"]
+                  if(length(d)>0){
+                    Data$melange = d
+                  }else if(length( Data[grep("^Mélange Mod 2$",Data$type),"germplasm"])>0){
+                    Data$melange = strsplit(as.character(Data[grep("^Mélange Mod 2$",Data$type),"germplasm"]),"[.]")[[1]][1]
+                  }else if(length( Data[grep("^Mélange Mod 3$",Data$type),"germplasm"])>0){
+                    Data$melange = strsplit(as.character(Data[grep("^Mélange Mod 3$",Data$type),"germplasm"]),"#")[[1]][1]
+                  }
+                  
+                  if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
+                  if (plot.type == "comp.in.farm") {
+                    Data$split = add_split_col(Data, nb_parameters_per_plot)
+                    Data_split = plyr:::splitter_d(Data, .(split))
+                    
+                    # faire le graph pour chaque split
+                    bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",variable,", ","données ",yr, sep=""),melange = melange))})
+                    
+                    return(list("Tab" = Data,"plot"= bp))
+                  }
+                  if ((plot.type == "mix.comp.distribution" | plot.type == "mix.gain.distribution") & missingComp == FALSE) {
+                    return(list("Tab" = Data,"plot" = NULL))
                   }
                 }else{
-                  A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))), 
-                      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
-                  
-                  
-                  if(A == 0){ 
-                    A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                      which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))]
-                  }
+                  warning("No data for all components")
+                  return(list("Tab" = NULL,"plot"= NULL))
                 }
- 
-                comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
-                comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
-                comp.mu$pval=A
-                
-                type = NULL
-                for (i in 1:nrow(comp.mu)) { 
-                  a = unique(unlist(noms[noms$son_germplasm %in% comp.mu[i,"germplasm"],"Type"]))
-                  if (length(a)>0) {
-                    if(a == "Mélange"){
-                      if(length(grep("[.]",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 2")
-                      }else if(length(grep("#B",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 3")
-                      }else{ type = c(type, a) 
-                      }
-                    }
-                    if(a == "Composante"){type = c(type, a)}
-                  }
-                  if (comp.mu[i,"germplasm"] == "MoyenneComposantes") { type = c(type, "MoyenneComposantes")}
-                }
-                
-                Data = cbind(comp.mu, type)
-                Data = arrange(Data, median)
-                Data$max = max(Data$median, na.rm = TRUE)
-                Data$melange = Data[grep("^Mélange$",Data$type),"germplasm"]
-                
-                if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
-                if (plot.type == "comp.in.farm") {
-                  Data$split = add_split_col(Data, nb_parameters_per_plot)
-                  Data_split = plyr:::splitter_d(Data, .(split))
-                  
-                  # faire le graph pour chaque split
-                  bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",variable,", ","données ",yr, sep=""),melange = melange))})
-                  
-                  return(list("Tab" = Data,"plot"= bp))
-                }
-                if ((plot.type == "mix.comp.distribution" | plot.type == "mix.gain.distribution") & missingComp == FALSE) {
-                  return(list("Tab" = Data,"plot" = NULL))
-                }
-              }else{
-                warning("No data for all components")
+              } else {
+                warning("No data for the mixture")
                 return(list("Tab" = NULL,"plot"= NULL))
               }
-            } else {
-              warning("No data for the mixture")
+            }else{
+              warning(paste("No data for ",yr,sep=""))
               return(list("Tab" = NULL,"plot"= NULL))
             }
           }else{
@@ -407,6 +427,7 @@ ggplot_mixture1 = function(res_model,
       Data=as.data.frame(Data)
       colnames(Data) = c("Paysan","overyielding","pvalue","nbComp","melange","year","location")
       Data$mod = unlist(lapply(as.character(Data$melange),function(x){
+        ## Marche pas !!!!
         if(length(grep(".2",x))>0){return("mod2")
         }else if(length(grep("[.]3",x))>0){return("mod1")
         }else{return("mod4")}
