@@ -1,4 +1,4 @@
-get_histo = function(Data,col_plot="pval",breaks=0.03,titre){
+get_histo = function(Data,col_plot="pval",breaks=0.03,titre, language){
   
   Gain = round(mean(as.numeric(as.character(Data$overyielding)))*100,2)
   Mean=mean(as.numeric(as.character(Data$overyielding)))
@@ -10,21 +10,21 @@ get_histo = function(Data,col_plot="pval",breaks=0.03,titre){
   
   pval= NULL
   for (i in 1:nrow(Data)){
-    if (as.numeric(as.character(Data[i,"pvalue"])) <= 0.01){pval = c(pval,"Significatif à 0.01")}
-    if (as.numeric(as.character(Data[i,"pvalue"])) <= 0.05 & as.numeric(as.character(Data[i,"pvalue"])) > 0.01 ){pval = c(pval,"Significatif à 0.05")}
-    if (as.numeric(as.character(Data[i,"pvalue"])) > 0.05){pval = c(pval,"Non significatif (pvalue >0.05)")}
+    if (as.numeric(as.character(Data[i,"pvalue"])) <= 0.01){pval = c(pval,ifelse(language=="french","Significatif à 0.01","Significant at 0.01"))}
+    if (as.numeric(as.character(Data[i,"pvalue"])) <= 0.05 & as.numeric(as.character(Data[i,"pvalue"])) > 0.01 ){pval = c(pval,ifelse(language=="french","Significatif à 0.05","Significant at 0.05"))}
+    if (as.numeric(as.character(Data[i,"pvalue"])) > 0.05){pval = c(pval,ifelse(language=="french","Non significatif (pvalue >0.05)","Not significant (pvalue >0.05)"))}
   }
   
   if(col_plot == "year"){
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(year))) + scale_fill_discrete(name = "Année")
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(year))) + scale_fill_discrete(name = ifelse(language=="french","Année","Year"))
   }else if(col_plot == "melange"){
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(melange))) + scale_fill_discrete(name = "Mélange")
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(melange))) + scale_fill_discrete(name = ifelse(language=="french","Mélange","Mixture"))
   }else if(col_plot == "location"){
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(location))) + scale_fill_discrete(name = "Paysan")
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(location))) + scale_fill_discrete(name = ifelse(language=="french","Paysan","Farmer"))
   }else if(col_plot == "modalite"){
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(mod))) + scale_fill_discrete(name = "Modalité")
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(mod))) + scale_fill_discrete(name = ifelse(language=="french","Modalité","Modality"))
   }else{
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(pval)))  + scale_fill_discrete(name = "Significativité")
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=as.factor(pval)))  + scale_fill_discrete(name = ifelse(language=="french","Significativité","Significance"))
   }
   
   if(shapiro.test(as.numeric(as.character(Data$overyielding)))$p.value <0.05){
@@ -37,10 +37,11 @@ get_histo = function(Data,col_plot="pval",breaks=0.03,titre){
   Mean = round(mean(as.numeric(as.character(Data$overyielding))),3)
   p = p + geom_histogram(breaks=seq(1.5*min(as.numeric(as.character(Data$overyielding))),1.5*max(as.numeric(as.character(Data$overyielding))),breaks), alpha=0.6, color="black")
   p = p + geom_vline(xintercept = Mean, size = 1.2, color="red") + geom_vline(xintercept = 0,  linetype = "dotted")
-  p = p + labs(x=paste("Différence normalisée entre les mélanges et 
-	                         la moyenne de leurs composantes pour ",titre,sep=""), y="Nombre de mélanges")
-  p = p + labs(title = paste(titre,":","Gain moyen =",Mean*100,"% (",sign,");
-        ","Cas positifs :",Positif,"%",";","Cas négatifs :",Negatif,"%",sep=" "))
+  p = p + labs(x=paste(ifelse(language=="french","Différence normalisée entre les mélanges et 
+	                         la moyenne de leurs composantes pour ","Normalized difference between mixtures and their components' mean for "),titre,sep=""), 
+               y=ifelse(language=="french","Nombre de mélanges","Number of mixtures"))
+  p = p + labs(title = paste(titre,":",ifelse(language=="french","Gain moyen =","Mean gain ="),Mean*100,"% (",sign,");
+        ",ifelse(language=="french","Cas positifs :","Positive cases:"),Positif,"%",";",ifelse(language=="french","Cas négatifs :","Negative cases:"),Negatif,"%",sep=" "))
   
   return(list("plot"=p,"pval"=Signif))
 }
