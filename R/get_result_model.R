@@ -78,7 +78,7 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	  if (param == "theta") {	ID = unique(as.data.frame(cbind(paste(param,"[",paste(env,year,sep=":"),"]",sep=""),paste(param,"[",paste(env,year,sep=":"),"]",sep="")))) }
 	}
 	
-	if (model == "model_var_intra"){
+	if (model == "model_varintra"){
 	  if (param == "sigma") {		ID = as.data.frame(cbind(as.character(noms),paste(param,"[",paste(germplasm,paste(env,year,sep=":"), sep=","),"]",sep=""))) }
 	}
 	
@@ -95,7 +95,8 @@ get_result_model = function(res_model, data, type_result = "comparison", variabl
 	}
 	if (type_result == "MCMC") {	
 		MCMC = res_model[[variable]]$model.outputs$MCMC
-		D=MCMC[,colnames(MCMC) %in% ID$parameter] 
+		D=MCMC[,colnames(MCMC) %in% ID$parameter]
+		if(class(D)=="numeric"){D=as.data.frame(D) ; names(D) = unique(ID[ID$parameter %in% colnames(MCMC),"parameter"])}
 #		colnames(D) = ID[ID$parameter %in% colnames(MCMC),1]
 		if (is.null(ncol(D)) & !is.null(D)) { D = as.data.frame(matrix(D,ncol=1))} #; colnames(D) = ID[ID %in% colnames(MCMC)]}
 	}
