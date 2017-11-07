@@ -19,7 +19,7 @@
 #' 
 #' @seealso \code{\link{}}
 #' 
-analyse.selection = function(donnees, data_version, variable, person, empile=FALSE, nom="", language="english")
+analyse.selection = function(donnees, data_version, variable, titre, empile=FALSE, language="english")
 {
   
   data=unique(data_version[,c("year","location","germplasm","group","type","modalite")])
@@ -49,13 +49,16 @@ analyse.selection = function(donnees, data_version, variable, person, empile=FAL
    vrac=as.numeric(na.omit(Mat[grep("vrac",Mat$sl_statut),variable]))
    bouquet = as.numeric(na.omit(Mat[grep("bouquet",Mat$sl_statut),variable]))
    
-   if (var(na.omit(bouquet)) == 0 & var(na.omit(vrac)) == 0){
-     if(mean(bouquet) == mean(vrac)){pval = 1}else{pval=0}
-   }else{
-     # Test non paramétrique U de Wilcoxon-Mann-Whitney pour données semi_quantitatives
-     pval = wilcox.test(as.numeric(c(vrac,bouquet)) ~ c(rep("vrac",length(vrac)),rep("bouquet",length(bouquet))))$p.value
-     
-   }
+   if(length(vrac) != 1 & length(bouquet) != 1){
+     if (var(na.omit(bouquet)) == 0 & var(na.omit(vrac)) == 0){
+       if(mean(bouquet) == mean(vrac)){pval = 1}else{pval=0}
+     }else{
+       # Test non paramétrique U de Wilcoxon-Mann-Whitney pour données semi_quantitatives
+       pval = wilcox.test(as.numeric(c(vrac,bouquet)) ~ c(rep("vrac",length(vrac)),rep("bouquet",length(bouquet))))$p.value
+       
+     }
+   }else{pval=NA}
+   
    return(c(mean(na.omit(as.numeric(vrac))),mean(na.omit(as.numeric(bouquet))),pval))
  }
  
@@ -89,6 +92,10 @@ if(class(donnees) == "data.frame"){
  Data=Data[Data$modalite != "",]
  pval= NULL
  Data[is.na(Data$pvalue),"pvalue"] = 1
+ if(language == "french"){niveaux = c("Composante, non significatif (pvalue > 0.05)","Composante, significatif à 0.05","Composante, significatif à 0.01",
+                                      "Mélange, non significatif (pvalue > 0.05)","Mélange, significatif à 0.05","Mélange, significatif à 0.01")}
+ if(language == "english"){niveaux=c("Component, not significant (pvalue > 0.05)","Component, significant at 0.05","Component, significant at 0.01",
+                                     "Mixture, not significant (pvalue > 0.05)","Mixture, significant at 0.05","Mixture, significant at 0.01")}
  for (i in 1:nrow(Data)){
    if (Data[i,"type"] == "Composante" & as.numeric(as.character(Data[i,"pvalue"])) <= 0.01){
      if(language == "english"){pval = c(pval,"Component, significant at 0.01")}else{pval = c(pval,"Composante, significatif à 0.01")}}
@@ -103,12 +110,19 @@ if(class(donnees) == "data.frame"){
    if (Data[i,"type"] == "Mélange" & as.numeric(as.character(Data[i,"pvalue"])) > 0.05){
      if(language == "english"){pval = c(pval,"Mixture, not significant (pvalue > 0.05)")}else{pval = c(pval,"Mélange, non significatif (pvalue > 0.05)")}}
  }
-
-  Mean=unlist(lapply(levels(as.factor(Data$modalite)),function(x){mean(Data[Data$modalite %in% x,"overyielding"])}))
-  names(Mean) = levels(as.factor(Data$modalite))
+  
+  if(empile == "modalite"){
+    Mean=unlist(lapply(levels(as.factor(Data$modalite)),function(x){mean(Data[Data$modalite %in% x,"overyielding"])}))
+    names(Mean) = levels(as.factor(Data$modalite))
+  }
+ if(empile == "type"){
+   Mean=unlist(lapply(levels(as.factor(Data$type)),function(x){mean(Data[Data$type %in% x,"overyielding"])}))
+   names(Mean) = levels(as.factor(Data$type))
+ }
+ 
   MeanGlob = mean(Data$overyielding)
 
- Data$pval = pval
+ Data$pval = factor(pval,levels=niveaux)
  
  mel = Data[Data$type %in% "Mélange", "overyielding"]
  names(mel) = Data[Data$type %in% "Mélange", "germplasm"]
@@ -117,7 +131,7 @@ if(class(donnees) == "data.frame"){
  if (empile == FALSE){
    if(shapiro.test(Data$overyielding)$p.value <= 0.05){Signif = t.test(Data$overyielding, mu=0)$p.value }else{ Signif = wilcox.test(Data$overyielding, mu=0)$p.value}
  }
- if (empile ==TRUE){
+ if (empile == "modalite"){
    Signif = unlist(lapply(unique(Data$modalite),function(x){
      if(length(Data[Data$modalite %in% x,"modalite"]) < 3){
        Signif=1
@@ -135,10 +149,31 @@ if(class(donnees) == "data.frame"){
      return(Signif)
    }))
    names(Signif)=unique(Data$modalite)
+   Data$modalite = unlist(lapply(Data$modalite, function(x){paste(x,ifelse(language=="english","- Mean gain: "," - Gain moyen : "),round((Mean[x])*100,2)," % ",get_stars(Signif[x])," (n = ",nrow(Data[Data$modalite %in% x,])," )", sep="")}))
+   
  }
- 
- Data$modalite = unlist(lapply(Data$modalite, function(x){paste(x,ifelse(language=="english","- Mean gain: "," - Gain moyen : "),round((Mean[x])*100,2)," % ",get_stars(Signif[x])," (n = ",nrow(Data[Data$modalite %in% x,])," )", sep="")}))
- 
+ if (empile == "type"){
+   Signif = unlist(lapply(unique(Data$type),function(x){
+     if(length(Data[Data$type %in% x,"type"]) < 3){
+       Signif=1
+     }else{
+       if (length(unique(Data[Data$type %in% x,"overyielding"])) == 1){
+         if(mean(Data[Data$type %in% x,"overyielding"]) == 0){Signif = 1}else{Signif = 0}
+       }else{
+         if(shapiro.test(Data[Data$type %in% x,"overyielding"])$p.value <= 0.05){ 
+           Signif = t.test(Data[Data$type %in% x,"overyielding"], mu=0)$p.value
+         }else{  Signif = wilcox.test(Data[Data$type %in% x,"overyielding"], mu=0)$p.value}
+       }
+       
+     }
+     
+     return(Signif)
+   }))
+   names(Signif)=unique(Data$type)
+   Data$type = unlist(lapply(Data$type, function(x){paste(x,ifelse(language=="english","- Mean gain: "," - Gain moyen : "),round((Mean[x])*100,2)," % ",get_stars(Signif[x])," (n = ",nrow(Data[Data$type %in% x,])," )", sep="")}))
+   
+ }
+
 
 #4. Histogram ---------
   From= min(Data$overyielding)-0.2*abs(min(Data$overyielding))
@@ -151,12 +186,14 @@ if(class(donnees) == "data.frame"){
   if(nrow(Data) ==1){p = ggplot(ylim = c(0,1))
   
   }else{ 
-    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=factor(pval, levels = factoL))) +
+    p =  ggplot(data=Data,aes(as.numeric(as.character(overyielding)),fill=pval)) +
     geom_histogram(breaks = seq(From,To,By), color = "black")
+    p = p +  scale_fill_manual(values = c("lightpink1","tomato1","goldenrod","skyblue1","seagreen2","mediumorchid2"), name=" ")
   }
   
-  if (empile==TRUE){ p = p + facet_wrap( ~ modalite, ncol =1, scales="free_y") + theme(strip.text.x = element_text(size=9))} 
-  p = p + ggtitle(paste(person, variable, nom, sep=" : "))
+  if (empile == "modalite"){ p = p + facet_wrap( ~ modalite, ncol =1, scales="free_y") + theme(strip.text.x = element_text(size=9))}
+  if (empile == "type"){ p = p + facet_wrap( ~ type, ncol =1, scales="free_y") + theme(strip.text.x = element_text(size=9))} 
+  p = p + ggtitle(titre)
   if (empile == FALSE) {
     p = p + geom_vline(xintercept = MeanGlob, size = 1.2, color="red")
   }
@@ -169,7 +206,7 @@ if(class(donnees) == "data.frame"){
   p = p + labs(x=xlabel,
                y=ifelse(language == "english","Number of comparisons selected vs non-selected bulk","Nombre de couples Bouquet - Vrac")) 
   p = p + geom_vline(xintercept = 0,  linetype = "dotted")
-  p = p + scale_fill_discrete(name = "")
+# p = p + scale_fill_discrete(name = "")
   p = p + theme(legend.text = element_text(size = 7), axis.title = element_text(size = 10))
   
   if (empile==F){p = p + annotate("text",label = c(paste("n :",nrow(Data),sep=" "),
