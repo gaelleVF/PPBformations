@@ -40,6 +40,9 @@ ggplot_mixture1 = function(res_model,
   data_S = unique(data_S[,c("son","expe","sl_statut","expe_name","expe_name_2","son_germplasm","father","father_germplasm","son_person")])
   data_S = data_S[grep("bouquet",data_S$sl_statut),]
   
+  if(model=="model_1"){param = "mu"}
+  if(model=="model_varintra"){param = "sigma"}
+  
   
   # 1. Compare, for each mixture in each farm, the mixture to its components and the mean of these components ----
   if ( plot.type == "comp.in.farm" | plot.type == "mix.comp.distribution"| plot.type == "mix.gain.distribution") {
@@ -135,7 +138,7 @@ ggplot_mixture1 = function(res_model,
           if(!is.null(noms)){
             if(nrow(noms)>0){
               melange = noms$son_germplasm[1]
-              mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = "mu", year = yr)
+              mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = param, year = yr)
               Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
               
               if (length(Mel) > 0) {
@@ -145,21 +148,21 @@ ggplot_mixture1 = function(res_model,
                   MeanComp = apply(Comp, 1, mean)
                   M = cbind(Mel, MeanComp, Comp)
                   #     attributes(M)$model = "model1"
-                  colnames(M)[colnames(M) %in% "MeanComp"] = paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
-                  colnames(M)[colnames(M) %in% "Mel"] = paste("mu[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
+                  colnames(M)[colnames(M) %in% "MeanComp"] = paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
+                  colnames(M)[colnames(M) %in% "Mel"] = paste(param,"[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
                   M=list("MCMC"=M)
                   #         attributes(M)$PPBstats.object = "check_model_model_1"
-                  comp.mu = mean_comparisons.check_model_1(M, "mu", get.at.least.X.groups = 1)
+                  comp.mu = mean_comparisons.check_model_1(M, param, get.at.least.X.groups = 1)
                   
                   C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
                   # a = grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))
                   #  if(length(a) < length(grep("Mélange",noms$Type))){
                   #    if(length(a)>0){
-                  A=C[which(rownames(C) == paste("mu[",melange,",",paysan,":",yr,"]",sep="")), 
-                      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+                  A=C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")), 
+                      which(colnames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
                   if(A == 0){
-                    A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                        which(colnames(C) == paste("mu[",melange,",",paysan,":",yr,"]",sep=""))]
+                    A=C[which(rownames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                        which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]
                   }
                   #  }else{
                   #   A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))), 
@@ -286,7 +289,7 @@ ggplot_mixture1 = function(res_model,
     
     # Récupérer les résultats du modèle
     Result = lapply(list(Mélanges,Composantes), function(x){
-      mcmc = get_result_model(res_model, x, type_result = "MCMC", variable, model="model_1", param = "mu", year = year)
+      mcmc = get_result_model(res_model, x, type_result = "MCMC", variable, model="model_1", param = param, year = year)
       
       #concaténuer les chaines
       if (ncol(mcmc)>1) {
@@ -299,10 +302,10 @@ ggplot_mixture1 = function(res_model,
     })
     
     Result = as.data.frame(cbind(Result[[1]],Result[[2]]))
-    colnames(Result) = c("mu[Mélanges]","mu[Composantes]")
+    colnames(Result) = c(paste(param,"[Mélanges]",sep=""),paste(param,"[Composantes]",sep=""))
     
     # Comparer les MCMC des mélanges et des composantes
-    Mpvalue = comp.parameters(Result, parameter = "mu", type = 1)
+    Mpvalue = comp.parameters(Result, parameter = param, type = 1)
     Comparison = get.significant.groups(Mpvalue,Result, alpha = 0.05)
     
     Data = arrange(Comparison, median)
@@ -433,7 +436,7 @@ ggplot_mixture1 = function(res_model,
         }else{return("mod4")}
       }))
 
-      p = get_histo(Data,col_plot,breaks=0.04, titre=variable)
+      p = get_histo(Data,col_plot,breaks=0.06, titre=variable)
       
       if(!is.null(save)){write.table(Data,file=paste(save,"/Histo_",variable,".csv",sep=""),sep=";")}
   
@@ -457,10 +460,10 @@ ggplot_mixture1 = function(res_model,
         M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
         M = M[is.na(M$selection_id) & M$son_year %in% year,]
         if(nrow(M)>1){
-          mcmc = lapply(year,function(x){
-            a = get_result_model(res_model, M, type_result = "MCMC", variable, model="model_1", param = "mu", year = x)
+          mcmc = lapply(year,function(yr){
+            a = get_result_model(res_model, M, type_result = "MCMC", variable, model=model, param = param, year = yr)
             # Do not keep if year's selection
-            data_S$parameter = paste("mu[",unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][1]})),",",
+            data_S$parameter = paste(param,"[",unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][1]})),",",
                                      data_S$son_person, ":", unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][3]})),"]",sep="")
             a=a[!(names(a) %in% data_S$parameter)]
           })
@@ -468,12 +471,13 @@ ggplot_mixture1 = function(res_model,
         }else{mcmc=data.frame(0)}
         if(ncol(mcmc) > 1){
           a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
-          year_to_delete = year[a[a==1]]
+          year_to_delete = c(year[a[a==1]],year[a[a==0]])
           if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
           
           go_plot = lapply(year, function(yr){
             x = mcmc[,grep(yr,names(mcmc))]
-            comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), "mu", get.at.least.X.groups = 1)
+            if(model=="model_1"){comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
+            if(model=="model_varintra"){comp.mu =mean_comparisons.check_model_variance_intra(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
             comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
             comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
             
