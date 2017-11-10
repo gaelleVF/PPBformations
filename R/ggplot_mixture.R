@@ -40,9 +40,66 @@ ggplot_mixture1 = function(res_model,
   data_S = unique(data_S[,c("son","expe","sl_statut","expe_name","expe_name_2","son_germplasm","father","father_germplasm","son_person")])
   data_S = data_S[grep("bouquet",data_S$sl_statut),]
   
-  if(model=="model_1"){param = "mu"}
-  if(model=="model_varintra"){param = "sigma"}
+  if(!is.null(model)){
+    if(model=="model_1"){param = "mu"}
+    if(model=="model_varintra"){param = "sigma"}
+  }
   
+  #0. functions -----------
+  delete.NULLs  <-  function(x.list){   # delele null/empty entries in a list
+    to_delete = grep(0,unlist(lapply(x.list, function(x){length(unlist(x))})))
+    x.list=x.list[-to_delete]
+  }
+  
+  compare_pop = function(x,donnees){
+    data = donnees[donnees$parameter %in% x,c(variable,"parameter")]
+    if(length(unique(data$parameter))>1){
+      mean = by(as.numeric(as.character(data[,variable])),data$parameter,function(x){mean(na.omit(x))})
+      OverY = round(100*(mean[1]-mean[2])/mean[2],1)
+      test1 = by(data[,variable],data$parameter,function(x){length(na.omit(x))})
+      if(length(unique(test1>1)) == 1){
+        test2 = by(as.numeric(as.character(data[,variable])),data$parameter,function(x){var(na.omit(x))})
+        if(test2[1]==0 & test2[2]==0){
+          # la variance est nulle
+          test3 = by(as.numeric(as.character(data[,variable])),data$parameter,function(x){mean(na.omit(x))})
+          if(test3[1] == test3[2]){pval = 1}else{pval=0}
+        }else{
+          # Test non paramétrique U de Wilcoxon-Mann-Whitney pour données semi_quantitatives
+          data[,variable] = as.numeric(as.character(data[,variable]))
+          data = data[!is.na(data[,variable]),]
+          pval = wilcox.test(data[,variable] ~ data[,"parameter"])$p.value
+        }
+        return(c(mean,pval,OverY))
+      }else{pval=NA ;       return(c(mean,pval,OverY))}
+
+    }else{return(NULL)}
+    
+  }
+  
+  plot_comp_mod <- function(Data,save){
+    Data = arrange(Data, median)
+    Data$max = max(Data$median, na.rm = TRUE)
+    if(length(grep("Mod4",Data$mod))>1){
+      Data$gain = Data$median/Data[grep("Mod4",Data$mod),"median"]-1
+    }else{Data$gain = NA}
+    
+    
+    p = ggplot(Data, aes(x = reorder(germplasm, median), y = median, fill=unlist(Data$mod))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
+    p = p + scale_fill_manual("legend",values=c("Mélange issu 1 année sélection 
+  dans composantes (Mod2)"="gold","Mélange sélectionné (Mod3)"="steelblue3","Mélange issu 2 années sélection 
+  dans composantes (Mod1)"="chartreuse3","Mélange non sélectionné (Mod4)"="red"))
+    
+    # ajouter les groupes de significativité
+    p = p + geom_text(data = Data, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
+    p = p + ggtitle(paste("Comparaison modalités de sélection",", données ",year,sep="")) + ylab(variable)
+    
+    # pivoter légende axe abscisses
+    p = p + xlab("") + theme(axis.text.x = element_text(angle = 90)) + ylim(0, Data[1,"max"])
+    
+    if(!is.null(save)){write.table(Data,file=paste(save,"/Selection_mod_",variable,".csv",sep=""),sep=";")}
+    
+    return(list("Tab"=Data,"plot"=p))
+  }
   
   # 1. Compare, for each mixture in each farm, the mixture to its components and the mean of these components ----
   if ( plot.type == "comp.in.farm" | plot.type == "mix.comp.distribution"| plot.type == "mix.gain.distribution") {
@@ -449,7 +506,7 @@ ggplot_mixture1 = function(res_model,
   
   
   # 5. Compare, for each mixture, the different selection practices -----
-  if ( plot.type == "comp.mod" ){
+  if ( plot.type == "comp.mod" | plot.type=="comp.mod.network" ){
     d_env = plyr:::splitter_d(melanges_PPB_mixture, .(location))
     if(!is.null(person)){d_env = list(d_env[[grep(person,names(d_env))]])}
     d_env_b = lapply(d_env,function(D){
@@ -460,66 +517,91 @@ ggplot_mixture1 = function(res_model,
         M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
         M = M[is.na(M$selection_id) & M$son_year %in% year,]
         if(nrow(M)>1){
-          mcmc = lapply(year,function(yr){
-            a = get_result_model(res_model, M, type_result = "MCMC", variable, model=model, param = param, year = yr)
-            # Do not keep if year's selection
-            data_S$parameter = paste(param,"[",unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][1]})),",",
-                                     data_S$son_person, ":", unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][3]})),"]",sep="")
-            a=a[!(names(a) %in% data_S$parameter)]
-          })
-          mcmc = do.call(cbind,mcmc)
-        }else{mcmc=data.frame(0)}
-        if(ncol(mcmc) > 1){
-          a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
-          year_to_delete = c(year[a[a==1]],year[a[a==0]])
-          if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
           
-          go_plot = lapply(year, function(yr){
-            x = mcmc[,grep(yr,names(mcmc))]
-            if(model=="model_1"){comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
-            if(model=="model_varintra"){comp.mu =mean_comparisons.check_model_variance_intra(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
-            comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
-            comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+          if(!is.null(model)){
+            mcmc = lapply(year,function(yr){
+              a = get_result_model(res_model, M, type_result = "MCMC", variable, model=model, param = param, year = yr)
+              # Do not keep if year's selection
+              data_S$parameter = paste(param,"[",unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][1]})),",",
+                                       data_S$son_person, ":", unlist(lapply(as.character(data_S$son),function(x){strsplit(x,"_")[[1]][3]})),"]",sep="")
+              a=a[!(names(a) %in% data_S$parameter)]
+            })
+            mcmc = do.call(cbind,mcmc)
             
-            comp.mu$mod = unlist(lapply(as.character(comp.mu$germplasm),function(y){
-              if(length(grep("[.]2",y)) == 1){return("Mélange issu 1 année sélection 
+            if(ncol(mcmc) > 1){
+              a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
+              year_to_delete = c(year[a[a==1]],year[a[a==0]])
+              if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
+              
+              comp.mu = lapply(year, function(yr){
+                x = mcmc[,grep(yr,names(mcmc))]
+                if(model=="model_1"){comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
+                if(model=="model_varintra"){comp.mu =mean_comparisons.check_model_variance_intra(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
+                comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
+                comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
+                
+                comp.mu$mod = unlist(lapply(as.character(comp.mu$germplasm),function(y){
+                  if(length(grep("[.]2",y)) == 1){return("Mélange issu 1 année sélection 
   dans composantes (Mod2)")}
-              if(length(grep("#B",y)) == 1){return("Mélange sélectionné (Mod3)")}
-              if(length(grep("[.]3",y)) == 1){return("Mélange issu 2 années sélection 
+                  if(length(grep("#B",y)) == 1){return("Mélange sélectionné (Mod3)")}
+                  if(length(grep("[.]3",y)) == 1){return("Mélange issu 2 années sélection 
   dans composantes (Mod1)")}
-              if(length(grep("[.]2",y)) == 0 & length(grep("#B",y)) == 0 &  length(grep(".3",y)) == 0){return("Mélange non sélectionné (Mod4)")}
-            }))
-            
-            Data = arrange(comp.mu, median)
-            Data$max = max(Data$median, na.rm = TRUE)
-            if(length(grep("Mod4",Data$mod))>1){
-              Data$gain = Data$median/Data[grep("Mod4",Data$mod),"median"]-1
-            }else{Data$gain = NA}
-            
-            
-            p = ggplot(Data, aes(x = reorder(germplasm, median), y = median, fill=unlist(Data$mod))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
-            p = p + scale_fill_manual("legend",values=c("Mélange issu 1 année sélection 
-  dans composantes (Mod2)"="gold","Mélange sélectionné (Mod3)"="steelblue3","Mélange issu 2 années sélection 
-  dans composantes (Mod1)"="chartreuse3","Mélange non sélectionné (Mod4)"="red"))
-            
-            # ajouter les groupes de significativité
-            p = p + geom_text(data = Data, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
-            p = p + ggtitle(paste("Comparaison modalités de sélection",", données ",year,sep="")) + ylab(variable)
-            
-            # pivoter légende axe abscisses
-            p = p + xlab("") + theme(axis.text.x = element_text(angle = 90)) + ylim(0, Data[1,"max"])
-            
-            if(!is.null(save)){write.table(Data,file=paste(save,"/Selection_mod_",variable,".csv",sep=""),sep=";")}
-            
-            return(list("Tab"=Data,"plot"=p))
-          })
-          names(go_plot) = year
-          return(go_plot)
+                  if(length(grep("[.]2",y)) == 0 & length(grep("#B",y)) == 0 &  length(grep(".3",y)) == 0){return("Mélange non sélectionné (Mod4)")}
+                }))
+                return(comp.mu)
+              })
+              }else{return(NULL)}
+              
+          }else{
+            donnees = melanges_tot[,c(1:40,grep(paste("^",variable,"$",sep=""),colnames(melanges_tot)))]
+            donnees = donnees[donnees$son %in% M$son,]
+            donnees$parameter = paste("mu[",
+                    unlist(lapply(as.character(donnees$son),function(x){strsplit(x,"_")[[1]][1]})),
+                    ",",donnees$son_person,":",donnees$son_year,"]",sep=""
+            )
+            donnees = donnees[!is.na(donnees[,variable]),]
+            Moy = by(donnees[,variable],donnees$parameter, function(x){mean(as.numeric(as.character(x)))})
+            M$parameter =  paste("mu[",
+                                 unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]})),",",
+                                 unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][2]})),":",
+                                 M$son_year,"]",sep=""
+            )
+            if(length(unique(M$parameter))>1){
+              M$median = Moy[M$parameter]
+              M$mod = unlist(lapply(as.character(M$parameter),function(y){
+                if(length(grep("[.]2",y)) == 1){return("Mélange issu 1 année sélection 
+  dans composantes (Mod2)")}
+                if(length(grep("#B",y)) == 1){return("Mélange sélectionné (Mod3)")}
+                if(length(grep("[.]3",y)) == 1){return("Mélange issu 2 années sélection 
+  dans composantes (Mod1)")}
+                if(length(grep("[.]2",y)) == 0 & length(grep("#B",y)) == 0 &  length(grep(".3",y)) == 0){return("Mélange non sélectionné (Mod4)")}
+              }))
+              M$germplasm = unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]}))
+              if(length(grep("Mod4",M$mod))>0){
+                m1 = unique(M[grep("Mod1|Mod4",M$mod),"parameter"])
+                m2 = unique(M[grep("Mod2|Mod4",M$mod),"parameter"])
+                m3 = unique(M[grep("Mod3|Mod4",M$mod),"parameter"])
+                a = lapply(list(m1,m2,m3),function(x){return(compare_pop(x,donnees))})
+                pval=NULL
+                for (i in 1:length(a)){if(!is.null(a[[i]])){pval = rbind(pval,c(names(a[[i]])[1],a[[i]][3]))}}
+                M$pval = unlist(lapply(1:nrow(M),function(i){
+                  b = pval[which(pval[,1] == M[i,"parameter"]),2] 
+                  if(length(b)>0){return(b)}else{return(NA)}
+                }))
+              }else{M$pval = NA}
+              M$median = as.numeric(as.character(M$median))
+              comp.mu=unique(M[,c("parameter","median","pval","germplasm","mod","son_year")])
+              comp.mu$groups = get_stars(comp.mu$pval)
+              comp.mu = plyr:::splitter_d(comp.mu, .(son_year))
+            }else{comp.mu=NULL}
+          }
+          
+        if(!is.null(comp.mu)){p = lapply(comp.mu,function(yr){plot_comp_mod(yr,save=save)})}else{p=NULL}
         }else{return(NULL)}
       })
       return(bp)
     })
-    return(d_env_b)
+    if(plot.type =="comp.mod"){ return(d_env_b)}
   }
 
   
@@ -535,10 +617,33 @@ ggplot_mixture1 = function(res_model,
     }
     
     if(is.null(person) & Nul == FALSE){
-      Gain_sel = lapply(d_env_b, function(x){return(x[[1]]$Tab)})
+      Gain_sel = lapply(d_env_b, function(pers){
+        return(lapply(pers,function(mel){return(lapply(mel,function(yr){return(yr$Tab)}))}))})
+      Gain_sel = delete.NULLs(Gain_sel)
       Mat=NULL
-      for (i in 1:length(Gain_sel)){Mat = rbind(Mat,Gain_sel[[i]])}
-    }
-  }
+      for (pers in Gain_sel){
+       for(mel in pers){
+         if(length(mel)>0){
+           for (y in mel){
+             m1 = (y[grep("Mod1",y$mod),"median"] - y[grep("Mod4",y$mod),"median"])/ y[grep("Mod4",y$mod),"median"] ; if(length(m1)==0){m1=NA}
+             m2 = (y[grep("Mod2",y$mod),"median"] - y[grep("Mod4",y$mod),"median"])/ y[grep("Mod4",y$mod),"median"] ; if(length(m2)==0){m2=NA}
+             m3 = (y[grep("Mod3",y$mod),"median"] - y[grep("Mod4",y$mod),"median"])/ y[grep("Mod4",y$mod),"median"] ; if(length(m3)==0){m3=NA}
+             m32 = (y[grep("Mod3",y$mod),"median"] - y[grep("Mod2",y$mod),"median"])/ y[grep("Mod2",y$mod),"median"] ; if(length(m32)==0){m32=NA}
+             d=c(m1,m2,m3,m32)
+             Mat=rbind(Mat,d)
+           }
+         }
+       }
+      }
+      to_delete = NULL
+      for (i in 1:nrow(Mat)){m = Mat[i,] ; if(length(m[!is.na(m)])==0){to_delete=c(to_delete,i)}}
+      if(length(to_delete)>0){Mat = Mat[-to_delete,]}
+      colnames(Mat) = c("mod1","Mod2","Mod3","Mod3vsMod2")
+      if(!is.null(save)){write.table(Mat,file=paste(save,"Rep_Sel_",variable,".csv",sep=""),dec=",",sep=";")}
+      return(Mat)
+    }else(return(NA))}
+
   
+
+   
 } # end function
