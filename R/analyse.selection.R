@@ -26,49 +26,6 @@ analyse.selection = function(donnees, data_version, variable, titre, empile=FALS
   data$vrac = paste("mu[",sapply(strsplit(as.character(data$group)," | "),function(x){return(x[[1]])}),",",data$location,":",data$year,"]",sep="")
   data$bouquet = paste("mu[",sapply(strsplit(as.character(data$group)," | "),function(x){return(x[[3]])}),",",data$location,":",data$year,"]",sep="")
 
-  
-#0. functions ---------
- compare_model = function(x){
-   # x : nom du vrac et nom du bouquet. La fonction retourne la moyenne de chacune des chaines ainsi que la comparaison des 2
-   MCMC = donnees[[variable]]$model.outputs$MCMC
-   vrac=MCMC[,colnames(MCMC) %in% x["vrac"]] 
-   bouquet=MCMC[,colnames(MCMC) %in% x["bouquet"]]
-   
-   Result = as.data.frame(cbind(vrac,bouquet))
-   if(length(Result) == 2){ 
-     colnames(Result) = c("mu[vrac]","mu[bouquet]")
-     Mpvalue = comp.parameters(Result, parameter = "mu", type = 1)
-     return(c(mean(vrac),mean(bouquet),Mpvalue[1,2]))
-   }
- }
- 
- WMW = function(x){
-   # x: nom du vrac et du bouquet
-   if (class(x) == "data.frame"){Mat = donnees[as.character(donnees$expe_name) %in% x[,"group"],]}else{Mat = donnees[as.character(donnees$expe_name) %in% x["group"],]}
-   # add one since color, awns and curve can be 0 and then problems when calculating overyielding
-   vrac=as.numeric(na.omit(Mat[grep("vrac",Mat$sl_statut),variable]))
-   bouquet = as.numeric(na.omit(Mat[grep("bouquet",Mat$sl_statut),variable]))
-   
-   if(length(vrac) != 1 & length(bouquet) != 1){
-     if (var(na.omit(bouquet)) == 0 & var(na.omit(vrac)) == 0){
-       if(mean(bouquet) == mean(vrac)){pval = 1}else{pval=0}
-     }else{
-       # Test non paramétrique U de Wilcoxon-Mann-Whitney pour données semi_quantitatives
-       pval = wilcox.test(as.numeric(c(vrac,bouquet)) ~ c(rep("vrac",length(vrac)),rep("bouquet",length(bouquet))))$p.value
-       
-     }
-   }else{pval=NA}
-   
-   return(c(mean(na.omit(as.numeric(vrac))),mean(na.omit(as.numeric(bouquet))),pval))
- }
- 
- get_stars = function(signif) {
-   stars = findInterval(signif, c(0, 0.001, 0.01, 0.05, 0.1))
-   codes = c("***" , "**","*", ".", " ")
-   return(codes[stars])
- }
- 
-
 #1. If the data was analyzed using bayesian model -----------
 if (class(donnees) == "list"){
   if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
@@ -76,7 +33,7 @@ if (class(donnees) == "list"){
   if(class(result) == "list"){Res=NULL; comp = NULL; for (i in 1:length(result)){if(!is.null(result[[i]])){Res=cbind(Res,result[[i]])}else{comp = c(comp,i)}}; result=Res; data=data[-comp,]}
 }
    
-#2. If the data was not analyzed using the bayesian model: semi-quantitative data such as awns, color, curve --> use chi2 test to compare selection vs bulk-----------
+#2. If the data was not analyzed using the bayesian model: semi-quantitative data such as awns, color, curve --> use Wilcoxon-Mann-Whitney test to compare selection vs bulk-----------
 if(class(donnees) == "data.frame"){
   if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
   result = apply(data,1,FUN=WMW)
@@ -89,6 +46,7 @@ if(class(donnees) == "data.frame"){
  if(class(donnees) == "list"){Data$overyielding = Data$MoyenneBouquet/Data$MoyenneVrac-1}
  if(class(donnees) == "data.frame"){Data$overyielding = Data$MoyenneBouquet-Data$MoyenneVrac}
 
+ Data = Data[!is.na(Data$overyielding),]
  Data=Data[Data$modalite != "",]
  pval= NULL
  Data[is.na(Data$pvalue),"pvalue"] = 1
