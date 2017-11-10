@@ -271,7 +271,7 @@ et la comparaison de ces mélanges au mélange non sélectionné
   OUT=c(OUT,out)
   
   res_model1 = get(load(paste(pathway,"out_res_model1.RData",sep="/")))
-  
+  res_model_varintra = get(load(paste(pathway,"res_varintra.RData",sep="/")))
   # 2. Essai Mélanges --------------------------------------------------------------------------------------------------------------------------------------
   out = list("chapter" = "Résultats de l'essai mélanges"); OUT = c(OUT, out)
 
