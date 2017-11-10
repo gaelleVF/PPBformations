@@ -36,7 +36,7 @@ if (class(donnees) == "list"){
 #2. If the data was not analyzed using the bayesian model: semi-quantitative data such as awns, color, curve --> use Wilcoxon-Mann-Whitney test to compare selection vs bulk-----------
 if(class(donnees) == "data.frame"){
   if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
-  result = apply(data,1,FUN=WMW)
+  result = apply(data,1,FUN=WMW, donnees)
 }
  
 #3. Calculations ----------------
