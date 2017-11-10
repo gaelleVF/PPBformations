@@ -63,8 +63,6 @@ dupl_table = function(tab){
   return(tab)
 }
 
-
-
 # clean data 
 mag = function(d){
   # tkw
@@ -168,5 +166,39 @@ traduction = function(tab,row_or_col)	{
   return(tab)
 }
 
+# Selection differential/Response to selection significance test from model results
+compare_model = function(x){
+  # x : nom du vrac et nom du bouquet. La fonction retourne la moyenne de chacune des chaines ainsi que la comparaison des 2
+  MCMC = donnees[[variable]]$model.outputs$MCMC
+  vrac=MCMC[,colnames(MCMC) %in% x["vrac"]] 
+  bouquet=MCMC[,colnames(MCMC) %in% x["bouquet"]]
+  
+  Result = as.data.frame(cbind(vrac,bouquet))
+  if(length(Result) == 2){ 
+    colnames(Result) = c("mu[vrac]","mu[bouquet]")
+    Mpvalue = comp.parameters(Result, parameter = "mu", type = 1)
+    return(c(mean(vrac),mean(bouquet),Mpvalue[1,2]))
+  }
+}
 
+# Selection differential/Response to selection significance test for semi-quantitative variables (non-parametric test)
+WMW = function(x, donnees){
+  # x: nom du vrac et du bouquet
+  if (class(x) == "data.frame"){Mat = donnees[as.character(donnees$expe_name) %in% x[,"group"],]}else{Mat = donnees[as.character(donnees$expe_name) %in% x["group"],]}
+  # add one since color, awns and curve can be 0 and then problems when calculating overyielding
+  vrac=as.numeric(na.omit(Mat[grep("vrac",Mat$sl_statut),variable]))
+  bouquet = as.numeric(na.omit(Mat[grep("bouquet",Mat$sl_statut),variable]))
+  
+  if(length(vrac) > 1 & length(bouquet) > 1){
+    if (var(na.omit(bouquet)) == 0 & var(na.omit(vrac)) == 0){
+      if(mean(bouquet) == mean(vrac)){pval = 1}else{pval=0}
+    }else{
+      # Test non paramétrique U de Wilcoxon-Mann-Whitney pour données semi_quantitatives
+      pval = wilcox.test(as.numeric(c(vrac,bouquet)) ~ c(rep("vrac",length(vrac)),rep("bouquet",length(bouquet))))$p.value
+      
+    }
+  }else{pval=NA}
+  
+  return(c(mean(na.omit(as.numeric(vrac))),mean(na.omit(as.numeric(bouquet))),pval))
+}
 
