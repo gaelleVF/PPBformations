@@ -167,7 +167,7 @@ traduction = function(tab,row_or_col)	{
 }
 
 # Selection differential/Response to selection significance test from model results
-compare_model = function(x){
+compare_model = function(x, donnees, variable){
   # x : nom du vrac et nom du bouquet. La fonction retourne la moyenne de chacune des chaines ainsi que la comparaison des 2
   MCMC = donnees[[variable]]$model.outputs$MCMC
   vrac=MCMC[,colnames(MCMC) %in% x["vrac"]] 
@@ -182,7 +182,7 @@ compare_model = function(x){
 }
 
 # Selection differential/Response to selection significance test for semi-quantitative variables (non-parametric test)
-WMW = function(x, donnees){
+WMW = function(x, donnees, variable){
   # x: nom du vrac et du bouquet
   if (class(x) == "data.frame"){Mat = donnees[as.character(donnees$expe_name) %in% x[,"group"],]}else{Mat = donnees[as.character(donnees$expe_name) %in% x["group"],]}
   # add one since color, awns and curve can be 0 and then problems when calculating overyielding
