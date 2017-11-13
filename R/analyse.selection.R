@@ -21,7 +21,7 @@
 #' 
 analyse.selection = function(donnees, data_version, variable, titre, empile=FALSE, language="english")
 {
-  
+
   data=unique(data_version[,c("year","location","germplasm","group","type","modalite")])
   data$vrac = paste("mu[",sapply(strsplit(as.character(data$group)," | "),function(x){return(x[[1]])}),",",data$location,":",data$year,"]",sep="")
   data$bouquet = paste("mu[",sapply(strsplit(as.character(data$group)," | "),function(x){return(x[[3]])}),",",data$location,":",data$year,"]",sep="")
@@ -29,15 +29,16 @@ analyse.selection = function(donnees, data_version, variable, titre, empile=FALS
 #1. If the data was analyzed using bayesian model -----------
 if (class(donnees) == "list"){
   if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
-  result = apply(data,1,FUN=compare_model)
+  result = apply(data,1,FUN=compare_model,donnees, variable)
   if(class(result) == "list"){Res=NULL; comp = NULL; for (i in 1:length(result)){if(!is.null(result[[i]])){Res=cbind(Res,result[[i]])}else{comp = c(comp,i)}}; result=Res; data=data[-comp,]}
 }
-   
+
 #2. If the data was not analyzed using the bayesian model: semi-quantitative data such as awns, color, curve --> use Wilcoxon-Mann-Whitney test to compare selection vs bulk-----------
 if(class(donnees) == "data.frame"){
   if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
-  result = apply(data,1,FUN=WMW, donnees)
+  result = apply(data,1,FUN=WMW, donnees, variable)
 }
+
  
 #3. Calculations ----------------
  result = t(result)
