@@ -381,12 +381,13 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   
   # 2.2. Résultats sur le réseau de fermes -----
   out = list("section" = "Résultats sur le réseau de fermes"); OUT = c(OUT, out)
-  out = list("text" = "Dans cette partie sont présentés les résultats de l'essai mélange sur le réseau de ferme. 
-             On s'intéresse dans un premier temps à la différence observée entre la valeur des mélanges et celle de la moyenne de leurs composantes respectives, 
-             permettant de constater si les mélanges apportent en moyenne plutôt un gain ou une perte par rapport à la moyenne de leurs composantes. 
-             Puis on s'intéresse à la variabilité observée, pour chacun des mélanges testés, de chacune des \"moins bonnes\" composantes, de la meilleure composante,
-             de la valeur moyenne des composante et de celle des mélanges.
-             Enfin on compare la valeur moyenne de l'ensemble des mélange à celle de l'ensemble des composantes pour voir si on détecte un effet du mélange."); OUT=c(OUT,out)
+  out = list("text" = "Dans cette partie sont présentés les résultats de l'essai mélange sur le réseau de fermes. 
+             Dans un premier temps on s'intéresse aux benefices que peuvent apporter les mélanges en comparant les mélanges à la moyenne de leurs composantes : \\textbf{a-t-on
+             globalement un gain ou une perte à cultiver des mélanges ?} \\\\
+             Dans un second temps on étudie le différentiel de sélection moyen sur le réseau : \\textbf{quels caractères sont sélectionnés globalement par les paysans ?} \\\\
+             Enfin on compare les différentes modalités de sélection des mélanges : \\textbf{y a-t-il une méthode qui permette d'obtenir des résultats plus rapidement ? 
+             Quel est l'impact des pratiques de sélection des mélange sur la diversité phénotypique ?}"
+             ); OUT=c(OUT,out)
   
   
   # 2.2.0. Tableau récapitulatif -----
@@ -395,7 +396,14 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
            la proportion de mélanges pour lesquels la valeur est supérieur à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
             dont la valeur est inférieur à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
             moyen des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\
-Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$
+Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ \\\\
+On remarque en particulier :
+\\begin{itemize}
+\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
+ne présentent pas une perte significativement différente de 0.
+\\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
+semée en pur sans connaître les conditions de culture de l'année.
+\\end{itemize}
            ")
   OUT=c(OUT,out)
   
