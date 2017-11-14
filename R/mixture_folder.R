@@ -382,7 +382,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   # 2.2. Résultats sur le réseau de fermes -----
   out = list("section" = "Résultats sur le réseau de fermes"); OUT = c(OUT, out)
   out = list("text" = "Dans cette partie sont présentés les résultats de l'essai mélange sur le réseau de fermes. 
-             Dans un premier temps on s'intéresse aux benefices que peuvent apporter les mélanges en comparant les mélanges à la moyenne de leurs composantes : \\textbf{a-t-on
+             Dans un premier temps on s'intéresse aux bénéfices que peuvent apporter les mélanges en comparant les mélanges à la moyenne de leurs composantes : \\textbf{a-t-on
              globalement un gain ou une perte à cultiver des mélanges ?} \\\\
              Dans un second temps on étudie le différentiel de sélection moyen sur le réseau : \\textbf{quels caractères sont sélectionnés globalement par les paysans ?} \\\\
              Enfin on compare les différentes modalités de sélection des mélanges : \\textbf{y a-t-il une méthode qui permette d'obtenir des résultats plus rapidement ? 
@@ -392,14 +392,14 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   
   # 2.2.0. Tableau récapitulatif -----
   out=list("subsection" = "Résultats globaux sur le réseau"); OUT = c(OUT, out)
-  out=list("text"="Le tableau suivant présente les résultats sur l'ensemble des mélanges testés. Y sont reportés le nombre de mélange testé pour chaque caractère, 
-           la proportion de mélanges pour lesquels la valeur est supérieur à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
-            dont la valeur est inférieur à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
-            moyen des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\\\
+  out=list("text"="Le tableau suivant présente les résultats sur l'ensemble des mélanges testés. Y sont reportés le nombre de mélanges testés pour chaque caractère, 
+           la proportion de mélanges pour lesquels la valeur est supérieure à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
+            dont la valeur est inférieure à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
+            moyen.ne des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\\\
 Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ \\\\
 On remarque en particulier :
 \\begin{itemize}
-\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
+\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
 ne présentent pas une perte significativement différente de 0.
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année.
@@ -414,7 +414,7 @@ semée en pur sans connaître les conditions de culture de l'année.
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La dernière ligne présente le gain (ou la perte) moyenne des mélanges
 comparé à leurs composantes respectives. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
 indique une différence non significative.
-                            ", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
+                            ", "content" = list(Table),"landscape"=TRUE)) ; OUT=c(OUT,out)
   
   
   # 2.2.1. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
