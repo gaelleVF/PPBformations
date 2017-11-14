@@ -82,6 +82,7 @@ ggplot_mixture1 = function(res_model,
     if(length(grep("Mod4",Data$mod))>1){
       Data$gain = Data$median/Data[grep("Mod4",Data$mod),"median"]-1
     }else{Data$gain = NA}
+    year=paste(unique(Data$year),sep=",")
     
     
     p = ggplot(Data, aes(x = reorder(germplasm, median), y = median, fill=unlist(Data$mod))) + geom_bar(stat = "identity")+ theme(legend.title = element_blank())
@@ -531,8 +532,11 @@ ggplot_mixture1 = function(res_model,
             if(ncol(mcmc) > 1){
               a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
               year_to_delete = c(year[a[a==1]],year[a[a==0]])
-              if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
+              print(paste("deleted",year_to_delete,sep=" "))
+            
               
+              if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
+              print(year)
               comp.mu = lapply(year, function(yr){
                 x = mcmc[,grep(yr,names(mcmc))]
                 if(model=="model_1"){comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
