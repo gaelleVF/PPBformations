@@ -64,6 +64,8 @@ mixture_folder = function(
   data_S_year =  out_farmers_data[[person]]$data_S_year
   data_SR_year =  out_farmers_data[[person]]$data_SR_year
   data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
+  res_model1 = get(load(paste(pathway,"out_res_model1.RData",sep="/")))
+  res_model_varintra = get(load(paste(pathway,"res_varintra.RData",sep="/")))
   
   
   # Créer title page
@@ -270,8 +272,7 @@ et la comparaison de ces mélanges au mélange non sélectionné
   out=list("input" = "../tex_files/intro_melanges.tex")
   OUT=c(OUT,out)
   
-  res_model1 = get(load(paste(pathway,"out_res_model1.RData",sep="/")))
-  res_model_varintra = get(load(paste(pathway,"res_varintra.RData",sep="/")))
+
   # 2. Essai Mélanges --------------------------------------------------------------------------------------------------------------------------------------
   out = list("chapter" = "Résultats de l'essai mélanges"); OUT = c(OUT, out)
 
@@ -391,8 +392,8 @@ et la comparaison de ces mélanges au mélange non sélectionné
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
              Un histogramme décalé vers la droite par rapport à 0 indique qu'une majorité des mélanges se sont mieux comportés que la moyenne de leurs composantes. 
              A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes."); OUT = c(OUT, out)
-
-  P = list()
+vec_variables = names(res_model1)
+P = list()
 for (variable in vec_variables){
   var = paste(strsplit(variable,"[.]")[[1]],collapse="")
   
@@ -401,6 +402,7 @@ for (variable in vec_variables){
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
                                  save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
     save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
+    P=c(P,list(p_melanges$plot$plot))
     png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
     p_melanges
     dev.off()
@@ -411,16 +413,16 @@ for (variable in vec_variables){
 }
   
   out = list("includeimage" = list("caption" = paste("Distribution des rapports entre les comportement des mélanges et les comportements moyens
-                                                       de leurs composantes respectives pour le \\textbf{",variable,"}.
+                                                       de leurs composantes respectives pour les différents caractères mesurés.
                                                        La ligne rouge verticale indique le gain moyen des mélanges par rapport à la moyenne de leurs composantes respectives 
                                                        tandis que la ligne pointillée noire est fixée sur un gain nul.",sep=""), 
-                                   "content" = paste("./figures/Histo_",var,".png",sep=""), "width" = 0.6))
+                                   "content" = P, "width" = 0.6))
   OUT = c(OUT, out)
   
 
 
 
-  
+if(FALSE){
   # 2.2.1.1. poids de mille grains -----
   OUT = melanges_reseau(OUT,variable="poids.de.mille.grains",titre="Poids de mille grains",distrib=FALSE,comp_global=FALSE)
   
@@ -439,22 +441,63 @@ for (variable in vec_variables){
   # 2.2.1.6. Nombre moyen de grains par épi  -----
   OUT = melanges_reseau(OUT,variable="nbr.estime.grain.par.epi",titre="Nombre moyen de grains par épi",distrib=FALSE,comp_global=FALSE)
   
-  if(FALSE){
-    # 3.2.2. Distribution des mélanges, de la moins bonne composante & la meilleure composante -----
-    out = list("subsection" = "Distributions des mélanges, de la moins bonne et la meilleure composante pour chaque mélange"); OUT = c(OUT, out)
-    out = list("text" = "Ces graphiques présentent, pour chacun des mélanges testés cette année, le comportement du mélange, de sa moins bonne composantes,
+  # 3.2.2. Distribution des mélanges, de la moins bonne composante & la meilleure composante -----
+  out = list("subsection" = "Distributions des mélanges, de la moins bonne et la meilleure composante pour chaque mélange"); OUT = c(OUT, out)
+  out = list("text" = "Ces graphiques présentent, pour chacun des mélanges testés cette année, le comportement du mélange, de sa moins bonne composantes,
              de sa meilleure composante et le comportement moyen de ses composantes. 
              On peut observer sur ces graphiques la variabilité de comportement des mélanges ainsi que celle de leurs moins bonne
              et meilleure composantes.
              "); OUT = c(OUT, out)
-    
-    #  3.2.3. Comparaison de l'effet mélange par rapport à variété "pure" -----
-    #  A virer...? 
-    out = list("subsection" = "Comparaison de la performance moyenne des mélanges par rapport àa la performance moyenne des composantes"); OUT = c(OUT, out)
-    out = list("text" = "On se pose la question de savoir s'il y a une différence significative entre la moyenne de tous les mélanges de l'essai 
-             et la moyenne de toutes leurs composantes."); OUT = c(OUT, out)
-  }
   
+  #  3.2.3. Comparaison de l'effet mélange par rapport à variété "pure" -----
+  #  A virer...? 
+  out = list("subsection" = "Comparaison de la performance moyenne des mélanges par rapport àa la performance moyenne des composantes"); OUT = c(OUT, out)
+  out = list("text" = "On se pose la question de savoir s'il y a une différence significative entre la moyenne de tous les mélanges de l'essai 
+             et la moyenne de toutes leurs composantes."); OUT = c(OUT, out)
+}
+
+  
+  # 2.2.2. Différentiel de sélection ------
+  out = list("subsection" = "Différentiels de sélection sur le réseau"); OUT = c(OUT, out)
+  out = list("text" = "Ces graphiques présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
+             séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
+             Pour le \\textbf{PMG, poids de l'épi et taux de protéine}, un histogramme décalé vers la droite par rapport à 0 (ligne pointillée) indique que globalement le différentiel de sélection est positif (sélection > vrac),
+             tandis qu'un histogramme décalé vers la droite indique un différentiel de sélection négatif. \\\\
+             Pour la \\textbf{couleur, présence de barbe et courbure}, un histogramme décalé vers la droite indique que les bouquets de sélection sont globalement plus foncés, plus barbus ou plus courbés respectivement.
+             A l'inverse si l'histogramme est décalé vers la gauche alors les bouquets sont globalement plus clairs, moins barbus et moins courbés respectivement."); OUT = c(OUT, out)
+  
+#  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
+   out =  list("includepdf" = "/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
+#  }
+
+  
+  # 2.2.3. Réponse à la sélection ------
+  out = list("subsection" = "Effet des pratiques de sélection sur le comportement des mélanges"); OUT = c(OUT, out)
+  out = list("text" = "En 2017 nous pouvons comparer l'effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
+             une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3). \\\
+Le tableau suivant présente les différentiels de sélection moyen (moyenne des comparaisons bouquet de sélection vs. vrac) pour les différents caractères mesurés ainsi que l'effet de la sélection sur le comportement du mélange (réponse à la sélection : moyenne des comparaison
+de la modalité de sélection avec le mélange non sélectionné). 
+\\begin{itemize}
+\\item On constate pour certains caractères que malgré le différentiel de sélection important en 2016, ça n'a pas forcément un effet important sur le 
+mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l'épi, on a un effet plus important de la sélection sur le comportement du mélange.
+\\item On remarque aussi que sélectionner dans le mélange (modalité 3) semble donner une réponse à la sélection plus importante que mélanger les sélections dans les composantes (notamment pour le poids de l'épi et le nombre moyen de grains par épis).
+\\item Il semble que l'on conserve une diversité phénotypique plus importante en mélangeant les sélections faites dans les composantes qu'en sélectionnant dans le mélange (dernière colonne).
+\\end{itemize}
+
+"); OUT = c(OUT, out)
+  
+  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv")){
+    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv",sep=";",header=T)
+  }
+  attributes(Table)$invert =FALSE
+  out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
+et \\textbf{réponse à la sélection} (RS, données 2017). 
+La valeur indiquée est le gain (ou la perte) en pourcentage du bouquet de sélection par rapport au vrac pour DS, et de la modalité de sélection du mélange
+par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqué si la différence observée est significative ou non : . représente une faible significativité, 
+*** représente une forte significativité, aucun symbole indique que la différence n'est pas significative. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
+tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
+une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
+", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
 
   
   # /!\ Get pdf ----------
