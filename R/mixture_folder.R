@@ -256,13 +256,15 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
           Si vous avez mis en place un essai mélange chez vous la première partie reprend l'ensemble des résultats sur votre ferme : 
           \\begin{itemize}
           \\item la comparaison du comportement du mélange par rapport aux comportement des composantes
-          \\item la comparaison, pour chaque sélection faite, entre le bouquet de sélection et les épis pris au hasard.
-          \\item la comparaison des réponses à la sélection des deux types de mélange (issu de sélection dans le mélange et issu du mélange des sélections dans les composantes) 
-et la comparaison de ces mélanges au mélange non sélectionné
+          \\item la comparaison des différentes modalités de sélections des mélanges à partir de la 2ème année d'essai
           \\end{itemize}
           \\item \\textbf{Une deuxième partie traite des résultats dans le réseau de fermes.}
-         La seconde partie présente les résultats sur l'ensemble du réseau de fermes participant à l'essai. 
-        Nous pouvons constater si globalement il y a un gain à faire un mélange par rapport à cultiver des populations \"en pur\" et voir si une pratique de sélection est plus favorable qu'une autre.
+         La seconde partie présente les résultats sur l'ensemble du réseau de fermes participant à l'essai :
+         \\begin{itemize}
+              \\item  Y a-t-il globalement un gain à faire un mélange par rapport à cultiver des populations \"en pur\" ?
+              \\item Dans notre réseau quels caractères sont sélectionnés par les paysans ?
+              \\item Quel sont les impacts des patiques de sélection des mélanges sur les caractères mesurés ?
+          \\end{itemize}
           \\end{enumerate}
   \\newpage",sep="/")
   
@@ -387,6 +389,25 @@ et la comparaison de ces mélanges au mélange non sélectionné
              Enfin on compare la valeur moyenne de l'ensemble des mélange à celle de l'ensemble des composantes pour voir si on détecte un effet du mélange."); OUT=c(OUT,out)
   
   
+  # 2.2.0. Tableau récapitulatif -----
+  out=list("subsection" = "Résultats globaux sur le réseau"); OUT = c(OUT, out)
+  out=list("text"="Le tableau suivant présente les résultats sur l'ensemble des mélanges testés. Y sont reportés le nombre de mélange testé pour chaque caractère, 
+           la proportion de mélanges pour lesquels la valeur est supérieur à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
+            dont la valeur est inférieur à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
+            moyen des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\
+Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$
+           ")
+  OUT=c(OUT,out)
+  
+  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/TableauOveryieldingsProp.csv")){
+    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/TableauOveryieldingsProp.csv",sep=";",header=T)
+  }
+  attributes(Table)$invert =FALSE
+  out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La dernière ligne présente le gain (ou la perte) moyenne des mélanges
+comparé à leurs composantes respectives.
+                            ", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
+  
+  
   # 2.2.1. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
   out = list("subsection" = "Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau"); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
@@ -497,7 +518,7 @@ par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqu
 *** représente une forte significativité, aucun symbole indique que la différence n'est pas significative. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
-", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
+", "content" = list(Table),"landscape"=TRUE)) ; OUT=c(OUT,out)
 
   
   # /!\ Get pdf ----------
