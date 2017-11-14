@@ -395,7 +395,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   out=list("text"="Le tableau suivant présente les résultats sur l'ensemble des mélanges testés. Y sont reportés le nombre de mélange testé pour chaque caractère, 
            la proportion de mélanges pour lesquels la valeur est supérieur à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
             dont la valeur est inférieur à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
-            moyen des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\
+            moyen des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\\\
 Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ \\\\
 On remarque en particulier :
 \\begin{itemize}
@@ -412,7 +412,8 @@ semée en pur sans connaître les conditions de culture de l'année.
   }
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La dernière ligne présente le gain (ou la perte) moyenne des mélanges
-comparé à leurs composantes respectives.
+comparé à leurs composantes respectives. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
+indique une différence non significative.
                             ", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
   
   
@@ -420,7 +421,9 @@ comparé à leurs composantes respectives.
   out = list("subsection" = "Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau"); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
              Un histogramme décalé vers la droite par rapport à 0 indique qu'une majorité des mélanges se sont mieux comportés que la moyenne de leurs composantes. 
-             A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes."); OUT = c(OUT, out)
+             A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes.
+             Entre parenthèses est indiqué la significativité du test : *** indique que la valeur est significativement différente de zéro tandis qu'aucun symbole
+             indique que la valeur n'est pas significativement différente de 0."); OUT = c(OUT, out)
 vec_variables = names(res_model1)
 P = list()
 for (variable in vec_variables){
@@ -491,9 +494,12 @@ if(FALSE){
   out = list("text" = "Ces graphiques présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
              séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
              Pour le \\textbf{PMG, poids de l'épi et taux de protéine}, un histogramme décalé vers la droite par rapport à 0 (ligne pointillée) indique que globalement le différentiel de sélection est positif (sélection > vrac),
-             tandis qu'un histogramme décalé vers la droite indique un différentiel de sélection négatif. \\\\
+             tandis qu'un histogramme décalé vers la gauche indique un différentiel de sélection négatif. \\\\
              Pour la \\textbf{couleur, présence de barbe et courbure}, un histogramme décalé vers la droite indique que les bouquets de sélection sont globalement plus foncés, plus barbus ou plus courbés respectivement.
-             A l'inverse si l'histogramme est décalé vers la gauche alors les bouquets sont globalement plus clairs, moins barbus et moins courbés respectivement."); OUT = c(OUT, out)
+             A l'inverse si l'histogramme est décalé vers la gauche alors les bouquets sont globalement plus clairs, moins barbus et moins courbés respectivement.
+            \\\\
+             La ligne pointillée indique le zéro (différentiel de sélection nul).\\\\
+             On constate que les caractères sélectionnés sont surtout le poids de l'épi, le nombre moyen de grains par épi et dans une moindre mesure le poids de mille grains. "); OUT = c(OUT, out)
   
 #  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
    out =  list("includepdf" = "figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
