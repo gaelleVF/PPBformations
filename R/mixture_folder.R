@@ -355,7 +355,7 @@ et la comparaison de ces mélanges au mélange non sélectionné
         if(length(a)>0){
           out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",variable,"} des différentes modalités de sélection des mélanges.
                                                        Les modalités qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.
-                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 0.7)); OUT = c(OUT, out)}
+                                                       ",sep=""), "content" = a, "layout" = matrix(c(1,2,3), ncol = 1), "width" = 1)); OUT = c(OUT, out)}
         
         }
       
