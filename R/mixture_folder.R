@@ -411,12 +411,12 @@ for (variable in vec_variables){
     P=c(P,list(p$plot$plot))
   }
 }
-  
-  out = list("includeimage" = list("caption" = paste("Distribution des rapports entre les comportement des mélanges et les comportements moyens
+
+  out = list("figure" = list("caption" ="Distribution des rapports entre les comportement des mélanges et les comportements moyens
                                                        de leurs composantes respectives pour les différents caractères mesurés.
                                                        La ligne rouge verticale indique le gain moyen des mélanges par rapport à la moyenne de leurs composantes respectives 
-                                                       tandis que la ligne pointillée noire est fixée sur un gain nul.",sep=""), 
-                                   "content" = P, "width" = 0.6))
+                                                       tandis que la ligne pointillée noire est fixée sur un gain nul.", 
+                                   "content" = P, "layout" = matrix(c(1,2), ncol = 1), "width" = 0.6))
   OUT = c(OUT, out)
   
 
@@ -467,7 +467,7 @@ if(FALSE){
              A l'inverse si l'histogramme est décalé vers la gauche alors les bouquets sont globalement plus clairs, moins barbus et moins courbés respectivement."); OUT = c(OUT, out)
   
 #  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
-   out =  list("includepdf" = "/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
+   out =  list("includepdf" = "figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
 #  }
 
   
