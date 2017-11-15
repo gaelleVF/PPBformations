@@ -361,7 +361,12 @@ analyse_feedback_folder_1 = function(
   }
   variables = setdiff(vec_variables,c("poids.de.mille.grains---poids.de.mille.grains","taux.de.proteine---taux.de.proteine","nbr.estime.grain.par.epi---nbr.estime.grain.par.epi"))
   variables_trad = setdiff(vec_variables_trad,c("poids.de.mille.grains","taux.de.proteine","nbr.estime.grain.par.epi"))
-  res_model_varintra = mclapply(variables, fun_model3, data_stats, mc.cores = length(variables))
+  
+  # Keep only mixtures data otherwise it is too long !
+  data_stats$real_germplasm = unlist(lapply(as.character(data_stats$germplasm),function(x){strsplit(x,"#")[[1]][1]}))
+  d=data_stats[data_stats$real_germplasm %in% M,]
+  
+  res_model_varintra = mclapply(variables, fun_model3, d, mc.cores = length(variables))
   names(res_model_varintra) = variables_trad
   
   # 2. Network data ----------
@@ -378,6 +383,25 @@ analyse_feedback_folder_1 = function(
   
   vec_person = sort(as.character(unique(data_network_year$data$network.info$person)))
   
+  data_S_all =  get.data(db_user = db_user, db_host = db_host, db_name = db_name, db_password = db_password, 
+                         query.type = "data-S", filter.on = "father-son", data.type ="relation")
+  
+  data_S_all$data = mag(data_S_all$data)
+  if (!is.null(data_S_all$data$data) & !is.null(attributes(data_S_all$data)$shinemas2R.object)) {
+    data_S_all = translate.data(data_S_all, list_translation)
+    attributes(data_S_all)$shinemas2R.object = "data-S"
+  }
+  
+  data_SR_all =  get.data(db_user = db_user, db_host = db_host, db_name = db_name, db_password = db_password, 
+                          query.type = "data-SR", filter.on = "father-son", data.type ="relation")
+  
+  data_SR_all$data = mag(data_SR_all$data)
+  if (!is.null(data_SR_all$data$data) & !is.null(attributes(data_SR_all$data)$shinemas2R.object)) {
+    data_SR_all = translate.data(data_SR_all, list_translation)
+    attributes(data_SR_all)$shinemas2R.object = "data-SR"
+  }
+  
+
   # 3. farmers'data ---------
   message("
           -------------------------------------
@@ -460,7 +484,8 @@ analyse_feedback_folder_1 = function(
   names(out_farmers_data) = vec_person
   
   out_from_speed = list("year" = year, "vec_person" = vec_person, "res_model1" = res_model1, "res_model2" = res_model2, "res_model_varintra" = res_model_varintra, 
-                        "data_network_year" = data_network_year, "out_farmers_data" = out_farmers_data, "list_translation" = list_translation, "data_mixtures" = list("Mixtures_selection" = data_S_Mixtures, "Mixtures_all" = Mixtures_all,"Mix_tot"=Mix))
+                        "data_all" = list("data_network_year" = data_network_year, "data_S_all"= data_S_all, "data_SR_all"= data_SR_all),
+                        "out_farmers_data" = out_farmers_data, "list_translation" = list_translation, "data_mixtures" = list("Mixtures_selection" = data_S_Mixtures, "Mixtures_all" = Mixtures_all,"Mix_tot"=Mix))
   
   return(out_from_speed)
 }
