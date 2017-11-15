@@ -279,6 +279,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   out = list("chapter" = "Résultats de l'essai mélanges"); OUT = c(OUT, out)
 
   # 2.1. Résultats sur la ferme -----
+  out = list("section" = "Résultats sur la ferme"); OUT = c(OUT, out)
   if (is.null(data_PPB_mixture$data)) { 
     out = list("text" = "Vous n'avez pas mis en place l'essai de sélection pour les mélanges sur votre ferme."); OUT=c(OUT,out)
   }else{
@@ -291,7 +292,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
     Mixtures_all$data[Mixtures_all$data$son %in% "C70#S-crossés_ANB_2015_0001","son"] = as.factor("C70_ANB_2011_0001")
     Mixtures_all$data[Mixtures_all$data$germplasm_son %in% "C70#S-crossés","germplasm_son"] = "C70"
     
-    out = list("section" = "Résultats sur la ferme"); OUT = c(OUT, out)
+
     out = list("text" = "Rappel des appellations pour les différentes sélections faites : \\\\ 
                #VA : Sélections faites dans les composantes pour la modalité 1 la première année.\\\\ 
                #VB : Sélections faites dans les composantes pour la modalité 1 la deuxième année. \\\\
@@ -392,29 +393,62 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   
   # 2.2.0. Tableau récapitulatif -----
   out=list("subsection" = "Résultats globaux sur le réseau"); OUT = c(OUT, out)
-  out=list("text"="Le tableau suivant présente les résultats sur l'ensemble des mélanges testés. Y sont reportés le nombre de mélanges testés pour chaque caractère, 
-           la proportion de mélanges pour lesquels la valeur est supérieure à la moyenne des composantes ainsi qu'à la composante la plus haute et la proportion de mélanges
-            dont la valeur est inférieure à la composante la plus basse. Sont indiquées les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) 
-            moyen.ne des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\\\
-Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ \\\\
+  out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
+\\begin{itemize}
+\\item le nombre de mélanges testés pour chaque caractère, 
+\\item la proportion de mélanges pour lesquels la valeur est supérieure à la moyenne de leurs composantes respectives ainsi qu'à leur composante la plus haute et la proportion de mélanges
+            dont la valeur est inférieure à leur composante la plus basse
+\\item  les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) moyen.ne des mélanges par rapport à leurs composantes respectives, calculé ainsi : \\\\
+Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ 
+\\end{itemize}
+Enfin, on cherche à savoir s'il y a des corrélations entre les gains observés et le nombre de composantes dans le mélange et la variabilité du caractère au sein des différentes composantes. \\\\
 On remarque en particulier :
 \\begin{itemize}
-\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
-ne présentent pas une perte significativement différente de 0.
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
-semée en pur sans connaître les conditions de culture de l'année.
+semée en pur sans connaître les conditions de culture de l'année (Table \\ref{Compmel}).
+\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
+ne présentent pas une perte significativement différente de 0 (Table \\ref{OverY}).
+\\item Il n'y a qu'une corrélation significative et importante : le gain en hauteur du mélange par rapport à la variabilité de hauteur des composantes. On peut émettre l'hypothèse que 
+lorsqu'on a une grande variabilité de hauteur les composantes les plus hautes prennent le dessus sur les composantes les plus basses, donnant alors une hauteur moyenne du mélange plus importante
+que la hauteur moyenne des composantes (Table \\ref{OverY}).
+\\item On ne constate pas de corrélation négative entre les gains en poids de mille grains et taux de protéine (Table \\ref{CorrelOverY}), 
+ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg ou de nombre de grains par épi du mélange n'est pas nécessairement associé à une perte en taux de protéine.
 \\end{itemize}
            ")
   OUT=c(OUT,out)
   
-  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/TableauOveryieldingsProp.csv")){
-    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/TableauOveryieldingsProp.csv",sep=";",header=T)
+# Résultats globaux : comparaisons mélanges / composantes 
+  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv")){
+    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv",sep=";",header=T)
   }
   attributes(Table)$invert =FALSE
-  out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La dernière ligne présente le gain (ou la perte) moyenne des mélanges
-comparé à leurs composantes respectives. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
-indique une différence non significative.
-                            ", "content" = list(Table),"landscape"=TRUE)) ; OUT=c(OUT,out)
+  out = list("table" = list("caption" = "Comparaison des mélanges et de leurs composantes par caractère sur le réseau. On compare à chaque fois les mélanges à leurs propres composantes.
+                            ", "content" = list(Table),"landscape"=TRUE,"tab.lab"="Compmel")) ; OUT=c(OUT,out)
+  
+# Résultats globaux : Overyieldings et corrélations
+  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_OverY_Corr.csv")){
+    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_OverY_Corr.csv",sep=";",header=T)
+  }
+  attributes(Table)$invert =FALSE
+  out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La ligne du milieu présente le gain (ou la perte) moyenne des mélanges
+comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain (ou la perte) et le nombre de composantes dans le mélange ou la variabilité
+du caractère au sein des composantes : une valeur proche de 0 indique qu'il n'existe pas de corrélation, tandis qu'une valeur proche de 1 indique une forte corrélation. 
+Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
+indique une différence non significative. 
+                            ", "content" = list(Table),"landscape"=TRUE,"tab.lab"="OverY")) ; OUT=c(OUT,out)
+  
+# Corrélations entre overyieldings
+  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_corr_OverY.csv")){
+    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_corr_OverY.csv",sep=";",header=T)
+  }
+  attributes(Table)$invert =FALSE
+  out = list("table" = list("caption" = "Corrélations entre gains (ou perte) des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
+tandis qu'une valeur proche de 1 indique une forte corrélation. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
+indique une différence non significative. 
+                            ", "content" = list(Table),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
+  
+  
+  
   
   
   # 2.2.1. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
@@ -501,9 +535,9 @@ if(FALSE){
              La ligne pointillée indique le zéro (différentiel de sélection nul).\\\\
              On constate que les caractères sélectionnés sont surtout le poids de l'épi, le nombre moyen de grains par épi et dans une moindre mesure le poids de mille grains. "); OUT = c(OUT, out)
   
-#  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
+  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
    out =  list("includepdf" = "figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
-#  }
+  }
 
   
   # 2.2.3. Réponse à la sélection ------
@@ -532,7 +566,7 @@ par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqu
 *** représente une forte significativité, aucun symbole indique que la différence n'est pas significative. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
-", "content" = list(Table),"landscape"=TRUE)) ; OUT=c(OUT,out)
+", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
 
   
   # /!\ Get pdf ----------
