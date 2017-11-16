@@ -336,7 +336,7 @@ analyse.selection <- function(Mixtures,
  
 if(FALSE){  # à faire ...
   #1.1. Par mélange ----------------
-  if(type="mixtures"){
+  if(type=="mixtures"){
     
     bp = lapply(vec_variables,function(variable){
       lapply(paysans,function(x){Histo(x,variable,language)})
@@ -394,7 +394,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
   person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
   RS=lapply(vec_variables,function(y){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
-                                 year="2017", model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20,save=NULL,language=language)
+                                 year="2017", model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)
     return(p_melanges)
   })
   names(RS)=vec_variables
