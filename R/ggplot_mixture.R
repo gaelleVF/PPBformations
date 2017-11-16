@@ -27,6 +27,7 @@ ggplot_mixture1 = function(res_model,
                            variable, 
                            year, 
                            model, 
+                           language,
                            plot.type = "comp.in.farm", 
                            person=NULL,
                            nb_parameters_per_plot = 8,
@@ -202,55 +203,44 @@ ggplot_mixture1 = function(res_model,
               if (length(Mel) > 0) {
                 Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
                 if(!is.null(ncol(Comp))){if (ncol(Comp) < length(noms[noms$Type == "Composante","Type"]) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
-                if(!missingComp){
-                  MeanComp = apply(Comp, 1, mean)
-                  M = cbind(Mel, MeanComp, Comp)
-                  #     attributes(M)$model = "model1"
-                  colnames(M)[colnames(M) %in% "MeanComp"] = paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
+
+                  if(!missingComp){
+                    MeanComp = apply(Comp, 1, mean)
+                    M = cbind(Mel, MeanComp, Comp)
+                    colnames(M)[colnames(M) %in% "MeanComp"] = paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
+                  }else{M = cbind(Mel, Comp)}
+                  
                   colnames(M)[colnames(M) %in% "Mel"] = paste(param,"[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
                   M=list("MCMC"=M)
                   #         attributes(M)$PPBstats.object = "check_model_model_1"
                   comp.mu = mean_comparisons.check_model_1(M, param, get.at.least.X.groups = 1)
                   
                   C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
-                  # a = grep(paste("[.]2","#BA",sep="|"),unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))
-                  #  if(length(a) < length(grep("Mélange",noms$Type))){
-                  #    if(length(a)>0){
-                  A=C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")), 
-                      which(colnames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
-                  if(A == 0){
-                    A=C[which(rownames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                        which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]
-                  }
-                  #  }else{
-                  #   A=C[which(rownames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep=""))), 
-                  #      which(colnames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
-                  
-                  
-                  #    if(A == 0){ 
-                  #     A=C[which(rownames(C) == paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                  #        which(colnames(C) == unique(paste("mu[",noms[which(noms$Type == "Mélange"),"son_germplasm"],",",paysan,":",yr,"]",sep="")))]
-                  #  }
-                  #}
-                  
+
+                  if(!missingComp){
+                    A=C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")), 
+                        which(colnames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
+                    if(A == 0){
+                      A=C[which(rownames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
+                          which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]
+                    }
+                  }else{A=NA}
+                 
                   comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
                   comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
                   comp.mu$pval=A
-                  # }else{
-                  #   comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
-                  #   comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
-                  #   comp.mu$pval = 1
-                  #  }
-                  
-                  
+
                   type = NULL
                   for (i in 1:nrow(comp.mu)) { 
                     a = unique(unlist(noms[noms$son_germplasm %in% comp.mu[i,"germplasm"],"Type"]))
                     if (length(a)>0) {
                       if(a == "Mélange"){
-                        if(length(grep("[.]",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 2")
-                        }else if(length(grep("#B",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange Mod 3")
-                        }else{ type = c(type, a) 
+                        if(length(grep("[.]2",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange issu 1 année sélection 
+dans composantes (Mod2)")
+                        }else if(length(grep("#B",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange sélectionné (Mod3)")
+                        }else if(length(grep("[.]3",comp.mu[i,"entry"]))>0){ type = c(type, "Mélange issu 2 années sélection 
+dans composantes (Mod1)")
+                        }else{ type = c(type, "Mélange non sélectionné") 
                         }
                       }
                       if(a == "Composante"){type = c(type, a)}
@@ -261,13 +251,15 @@ ggplot_mixture1 = function(res_model,
                   Data = cbind(comp.mu, type)
                   Data = arrange(Data, median)
                   Data$max = max(Data$median, na.rm = TRUE)
-                  d = Data[grep("^Mélange$",Data$type),"germplasm"]
+                  d = Data[grep("^Mélange non sélectionné$",Data$type),"germplasm"]
                   if(length(d)>0){
                     Data$melange = d
-                  }else if(length( Data[grep("^Mélange Mod 2$",Data$type),"germplasm"])>0){
-                    Data$melange = strsplit(as.character(Data[grep("^Mélange Mod 2$",Data$type),"germplasm"]),"[.]")[[1]][1]
-                  }else if(length( Data[grep("^Mélange Mod 3$",Data$type),"germplasm"])>0){
-                    Data$melange = strsplit(as.character(Data[grep("^Mélange Mod 3$",Data$type),"germplasm"]),"#")[[1]][1]
+                  }else if(length( Data[grep("Mod2",Data$type),"germplasm"])>0){
+                    Data$melange = strsplit(as.character(Data[grep("Mod2",Data$type),"germplasm"]),"[.]")[[1]][1]
+                  }else if(length( Data[grep("Mod3",Data$type),"germplasm"])>0){
+                    Data$melange = strsplit(as.character(Data[grep("Mod3",Data$type),"germplasm"]),"#")[[1]][1]
+                  }else if(length( Data[grep("Mod1",Data$type),"germplasm"])>0){
+                    Data$melange = strsplit(as.character(Data[grep("Mod1",Data$type),"germplasm"]),"[.]")[[1]][1]
                   }
                   
                   if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
@@ -283,11 +275,7 @@ ggplot_mixture1 = function(res_model,
                   if ((plot.type == "mix.comp.distribution" | plot.type == "mix.gain.distribution") & missingComp == FALSE) {
                     return(list("Tab" = Data,"plot" = NULL))
                   }
-                }else{
-                  warning("No data for all components")
-                  return(list("Tab" = NULL,"plot"= NULL))
-                }
-              } else {
+              }else{
                 warning("No data for the mixture")
                 return(list("Tab" = NULL,"plot"= NULL))
               }
@@ -532,11 +520,9 @@ ggplot_mixture1 = function(res_model,
             if(ncol(mcmc) > 1){
               a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
               year_to_delete = c(year[a[a==1]],year[a[a==0]])
-              print(paste("deleted",year_to_delete,sep=" "))
-            
-              
+
               if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
-              print(year)
+
               comp.mu = lapply(year, function(yr){
                 x = mcmc[,grep(yr,names(mcmc))]
                 if(model=="model_1"){comp.mu = mean_comparisons.check_model_1(list("MCMC"=mcmc), param, get.at.least.X.groups = 1)}
