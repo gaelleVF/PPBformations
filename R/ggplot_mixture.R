@@ -7,9 +7,17 @@
 #' 
 #' @param variable the variable to study
 #' 
-#' @param plot.type the type of plot wanted. Can be "comp.in.farm" to compare the mixtures to each of its components in a farm ; "mixVScomp" to compare all mixtures to all components ; "mix.comp.distribution" ; "mix.gain.distribution" to plot the distribution of the difference between mixtures and the mean of its components
+#' @param plot.type the type of plot wanted. 
+#' \itemize{
+#'  \item "comp.in.farm" to compare mixtures to each of their components and the mean of their components in a farm
+#'  \item "mix.comp.distribution" to get the histogram of the overyieldings, 
+#'  the overyielding for each mixture being computed as the value of the mixture minus the mean value of its components, divided by the mean value of the mixture's component 
+#'  \item "mix.gain.distribution" to get, for each mixture, the value of the lower component, the highest component and the mean of the components
+#'  \item "comp.mod" to compare the selection modalities of a mixture
+#'  \item "comp.mod.network" to get, for all mixtures, the comparison of the different selection modalities with the non selected mixture and the comparison of the different selection modalities
+#' }
 #'
-#' @param person if plot.type = "comp.in.farm", the farmers you want the analysis done to
+#' @param person if plot.type = "comp.in.farm" or "comp.mod", the farmers you want the analysis done to
 #' 
 #' @param nb_parameters_per_plot the number of parameters per plot
 #
@@ -611,6 +619,7 @@ dans composantes (Mod1)")
         return(lapply(pers,function(mel){return(lapply(mel,function(yr){return(yr$Tab)}))}))})
       Gain_sel = delete.NULLs(Gain_sel)
       Mat=NULL
+      noms = NULL
       for (pers in Gain_sel){
        for(mel in pers){
          if(length(mel)>0){
@@ -619,8 +628,13 @@ dans composantes (Mod1)")
              m2 = (y[grep("Mod2",y$mod),"median"] - y[grep("Mod4",y$mod),"median"])/ y[grep("Mod4",y$mod),"median"] ; if(length(m2)==0){m2=NA}
              m3 = (y[grep("Mod3",y$mod),"median"] - y[grep("Mod4",y$mod),"median"])/ y[grep("Mod4",y$mod),"median"] ; if(length(m3)==0){m3=NA}
              m32 = (y[grep("Mod3",y$mod),"median"] - y[grep("Mod2",y$mod),"median"])/ y[grep("Mod2",y$mod),"median"] ; if(length(m32)==0){m32=NA}
+             if(!is.na(m3)){
+               melange = y[grep("Mod4",y$mod),"germplasm"]
+             }else{
+                melange = strsplit(y[grep("Mod3",y$mod),"germplasm"][1],"#")[[1]][1]}
              d=c(m1,m2,m3,m32)
              Mat=rbind(Mat,d)
+             noms=c(noms,melange)
            }
          }
        }
@@ -629,11 +643,10 @@ dans composantes (Mod1)")
       for (i in 1:nrow(Mat)){m = Mat[i,] ; if(length(m[!is.na(m)])==0){to_delete=c(to_delete,i)}}
       if(length(to_delete)>0){Mat = Mat[-to_delete,]}
       colnames(Mat) = c("mod1","Mod2","Mod3","Mod3vsMod2")
+      rownames(Mat)=noms
       if(!is.null(save)){write.table(Mat,file=paste(save,"Rep_Sel_",variable,".csv",sep=""),dec=",",sep=";")}
-      return(Mat)
+      return(list("Tab" = Mat))
     }else(return(NA))}
 
   
-
-   
 } # end function
