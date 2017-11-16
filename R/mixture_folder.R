@@ -22,9 +22,9 @@
 mixture_folder = function(
   dir = ".",
   person,
-  pathway = NULL)
+  pathway = ".")
 {
-  # Set the right folder and create folders tex_files and feedback_folder ----------
+# Set the right folder and create folders tex_files and feedback_folder ----------
   a = dir(dir)
   if( !file.exists(dir) ){ stop("directory ", dir, " does not exist.") }
 
@@ -33,12 +33,14 @@ mixture_folder = function(
   if( !is.element("tex_files", dir()) ) { system("mkdir tex_files") ; message("The folder tex_files has been created") }
   if( !is.element("feedback_folder", dir()) ) { system("mkdir mixture_folder") ; message("The folder mixture_folder has been created") }
   
-  # Add info useful for feedback_folder_1
+# Add info useful for feedback_folder_1
   p = system.file("extdata", "feedback_folder_1", package = "PPBformations")
   system(paste("cp ",p , "/* ", " ",we_are_here,"/tex_files", sep = ""))
   p = system.file("extdata", "mixture_folder", package = "PPBformations")
   system(paste("cp ",p , "/* ", " ",we_are_here,"/tex_files", sep = ""))
   message("Several files used in the tex document have been copied to tex_files folder")
+  
+  language="french"
   
   if(FALSE){
     # get info from out_analyse_feedback_folder_1
@@ -66,9 +68,32 @@ mixture_folder = function(
   data_PPB_mixture = out_farmers_data[[person]]$data_PPB_mixture
   res_model1 = get(load(paste(pathway,"out_res_model1.RData",sep="/")))
   res_model_varintra = get(load(paste(pathway,"res_varintra.RData",sep="/")))
+  data_mixtures = get(load(paste(pathway,"out_data_mixtures.RData",sep="/")))
+  Mixtures_all = data_mixtures$Mixtures_all
+  Mixtures_S = data_mixtures$Mixtures_selection
+  Mix_tot = data_mixtures$Mix_tot
+  data_S_all =  get(load(paste(pathway,"data_S_all.RData",sep="/")))
+  data_SR_all =   get(load(paste(pathway,"data_SR_all.RData",sep="/")))
+  
+
   
   
-  # Créer title page
+  list_trad = list(
+    c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
+    c("poids.de.l.epi","Poids de l'épi","Spike weight"),
+    c("nbr.estime.grain.par.epi","Nombre moyen de grains par épi","Mean number of grain per spike"),
+    c("taux.de.proteine","Taux de proteine","Protein content"),
+    c("couleur---couleur_M","Couleur","Color"),
+    c("barbe---barbe_M","Barbe","Awns"),
+    c("courbure---courbure_M","Courbure","Curve"),
+    c("Réseau","Sur le réseau","On the network")
+  )
+  
+  
+  
+  
+  
+# Créer title page --------
   a = paste(
     "	\\begin{titlepage}
     \\pagecolor{color1}
@@ -240,7 +265,7 @@ mixture_folder = function(
           \\begin{center} 
           \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
           \\caption{Schéma du dispositif sur 3 ans : les rectancles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
-Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
+Sur les flèches sont indiquées les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
           \\end{center} 
           \\end{figure}
 
@@ -283,23 +308,9 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
   if (is.null(data_PPB_mixture$data)) { 
     out = list("text" = "Vous n'avez pas mis en place l'essai de sélection pour les mélanges sur votre ferme."); OUT=c(OUT,out)
   }else{
-    data_mixtures = get(load(paste(pathway,"out_data_mixtures.RData",sep="/")))
-    Mixtures_all = data_mixtures$Mixtures_all
-    Mixtures_S = data_mixtures$Mixtures_selection
-    Mix_tot = data_mixtures$Mix_tot
-    
-    levels(Mixtures_all$data$son) = c(levels(Mixtures_all$data$son) , "C70_ANB_2011_0001")
-    Mixtures_all$data[Mixtures_all$data$son %in% "C70#S-crossés_ANB_2015_0001","son"] = as.factor("C70_ANB_2011_0001")
-    Mixtures_all$data[Mixtures_all$data$germplasm_son %in% "C70#S-crossés","germplasm_son"] = "C70"
-    
 
-    out = list("text" = "Rappel des appellations pour les différentes sélections faites : \\\\ 
-               #VA : Sélections faites dans les composantes pour la modalité 1 la première année.\\\\ 
-               #VB : Sélections faites dans les composantes pour la modalité 1 la deuxième année. \\\\
-               #JA : Sélections faites dans les composantes pour la modalité 2 la première année.\\\\
-               #JB : Sélections faites dans le mélange 2 recomposé pour la modalité 2 la deuxième année.\\\\
-               #BA : Sélections faites dans le mélange pour la modalité 3 la première année.\\\\
-               #BB : Sélections faites dans le mélange pour la modalité 3 la deuxième année.\\\\"); OUT=c(OUT,out)
+    out=list("text"="Les graphiques suivants présentent, pour chaque caractère mesuré, les valeurs des différentes modalités de sélection des mélanges 
+    ainsi que des composantes et la valeur moyenne des composantes si celles-ci ont été semées.") ; OUT=c(OUT,out)
     
     ## par mélange, donner d'abord la comparaison mélange/composantes, puis différentiel de sélection, puis réponse à la sélection pour chaque mélange et chaque caractère
     Mixtures_all_person = Mixtures_all$data[Mixtures_all$data$location %in% person,]
@@ -319,7 +330,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
       
       # Comparaison mélange vs composantes
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1", 
-                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL)
+                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL, language=language)
       
       p = lapply(p_melanges, function(x){
         lapply(x,function(y){
@@ -347,7 +358,7 @@ Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les 
       # Comparaison modalités de sélection
       if(length(a)<2){
         p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1",
-                                     plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL)
+                                     plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL,language=language)
         p = lapply(p_melanges, function(x){
           lapply(x,function(y){
             lapply(y,function(z){return(z$plot)})
@@ -466,7 +477,7 @@ for (variable in vec_variables){
   if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
-                                 save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""))
+                                 save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""), language=language)
     save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
     P=c(P,list(p_melanges$plot$plot))
     png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
@@ -535,7 +546,14 @@ if(FALSE){
              La ligne pointillée indique le zéro (différentiel de sélection nul).\\\\
              On constate que les caractères sélectionnés sont surtout le poids de l'épi, le nombre moyen de grains par épi et dans une moindre mesure le poids de mille grains. "); OUT = c(OUT, out)
   
-  if (file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
+  if(file.exists("./mixture_folder/tex_files/Explication_DiffSel.png")){
+  out = list("includeimage" = list("content"= "./tex_files/Explication_DiffSel.png", 
+"caption"= "Explication des graphiques qui suivent : pour chaque événement de sélection est calculé le différentiel de sélection.
+Sur les graphiques sont présentés les histogrammes de ces différentiels de sélection, séparément pour les sélections faites dans les composantes (histogramme du dessus)
+et les sélections faites dans les mélanges(histogramme du dessous)")) ; OUT=c(OUT,out)
+  }
+
+  if (file.exists("./mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
    out =  list("includepdf" = "figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf") ; OUT=c(OUT,out)
   }
 
