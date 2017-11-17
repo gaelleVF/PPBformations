@@ -22,7 +22,8 @@
 mixture_folder = function(
   dir = ".",
   person,
-  pathway = ".")
+  pathway = ".",
+  path_to_tables=".")
 {
 # Set the right folder and create folders tex_files and feedback_folder ----------
   a = dir(dir)
@@ -74,10 +75,9 @@ mixture_folder = function(
   Mix_tot = data_mixtures$Mix_tot
   data_S_all =  get(load(paste(pathway,"data_S_all.RData",sep="/")))
   data_SR_all =   get(load(paste(pathway,"data_SR_all.RData",sep="/")))
+  if(file.exists(paste(pathway,"mix_to_delete.RData",sep="/"))){mix_to_delete = get(load(paste(pathway,"mix_to_delete.RData",sep="/")))}else{mix_to_delete=FALSE}
   
 
-  
-  
   list_trad = list(
     c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
     c("poids.de.l.epi","Poids de l'épi","Spike weight"),
@@ -431,6 +431,17 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
 # Résultats globaux : comparaisons mélanges / composantes 
   if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv")){
     Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv",sep=";",header=T)
+  }else{
+    t = get_mixture_tables(res_model1, year=NULL, year_DS=NULL,year_RS=NULL,
+                           mix_to_delete=NULL,
+                           language,
+                           Mixtures=Mixtures_all$data,
+                           vec_variables = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M"), 
+                           data_S_all, 
+                           data_SR_all, 
+                           path_to_tables = "/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes",
+                           list_trad,
+                           table.type="selection.modalities")
   }
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "Comparaison des mélanges et de leurs composantes par caractère sur le réseau. On compare à chaque fois les mélanges à leurs propres composantes.
@@ -575,6 +586,50 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   
   if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv")){
     Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv",sep=";",header=T)
+  }else{
+    t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)),year_RS=as.character(seq(2016,as.numeric(year),1)),
+                                   mix_to_delete=NULL,
+                                   language,
+                                   Mixtures=Mixtures_all$data,
+                                   vec_variables = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M"), 
+                                   data_S_all, 
+                                   data_SR_all, 
+                                   path_to_tables = path_to_tables,
+                                   list_trad,
+                                   table.type="selection.modalities")
+    
+    t = lapply(t,function(x){
+      ds=x$DS ; rs=x$RS
+      ds[is.na(ds)] = " " ; rs[is.na(rs)] = " "
+      return(c(paste(ds["Total","mean"]," (",ds["Total","stars"],")",sep=""),
+               paste(ds[grep("M1",rownames(ds)),"mean"]," (",ds[grep("M1",rownames(ds)),"stars"],")",sep=""), 
+                        paste(rs["mean_gain","M1"]," (",rs["stars","M1"],")",sep=""),
+               paste(ds[grep("M2",rownames(ds)),"mean"]," (",ds[grep("M2",rownames(ds)),"stars"],")",sep=""), 
+                       paste(rs["mean_gain","M2"]," (",rs["stars","M2"],")",sep=""),
+               paste(ds[grep("M3",rownames(ds)),"mean"]," (",ds[grep("M3",rownames(ds)),"stars"],")",sep=""), 
+                       paste(rs["mean_gain","M3"]," (",rs["stars","M3"],")",sep=""),
+               paste(rs["mean_gain","M3vsM2"]," (",rs["stars","M3vsM2"],")",sep="")
+      ))
+    })
+    M = NULL
+    for (i in t){M=rbind(M,i)}
+    rownames(M) = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M")
+    if(language == "french"){
+      colnames(M) = c("Toutes modalités - DS", 
+                      "Modalité 1 - DS" , "Modalité 1 - RS",
+                      "Modalité 2 - DS" , "Modalité 2 - RS",
+                      "Modalité 3 - DS" , "Modalité 3 - RS",
+                      "Modalité 3 vs Modalité 2")
+    }else{
+      colnames(M) = c("All modalities - DS", 
+                      "Modality 1 - DS" , "Modality 1 - RS",
+                      "Modality 2 - DS" , "Modality 2 - RS",
+                      "Modality 3 - DS" , "Modality 3 - RS",
+                      "Modality 3 vs Modality 2")
+    }
+    
+    
+    
   }
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
