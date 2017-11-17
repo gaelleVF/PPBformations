@@ -394,7 +394,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
     RS=lapply(variables,function(y){
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
                                    year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)
-      if(!is.null(table.save)){write.table(p_melanges$Tab,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
+      if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges$Tab,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
       return(p_melanges)
     })
     names(RS)=variables
