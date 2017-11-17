@@ -220,7 +220,7 @@ if(table.type == "selection.modalities"){
       Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year_RS,collapse="-"),".csv",sep=""),sep=";",header=T)
     }else{
       Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
-                            year=year_DS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
+                            year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
     }
     
     if(!is.null(Tab)){
