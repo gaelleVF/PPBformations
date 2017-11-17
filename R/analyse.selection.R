@@ -20,6 +20,7 @@
 #' @seealso \code{\link{}}
 #' 
 analyse.selection <- function(Mixtures, 
+                              selection.type,
                               res_model1, 
                               vec_variables, 
                               plot.save=NULL, 
@@ -282,7 +283,7 @@ analyse.selection <- function(Mixtures,
     return(list("histo" = p, "tab" = Data))
   }
   
-  get_selection_differential = function(donnees,data_S,vec_variables,language="english",year){
+  get_selection_differential = function(donnees,data_S,vec_variables,language="english",year, table.save){
     
     data_version = get.data.version(data_S,language)
     data_version = data_version[unlist(lapply(as.character(data_version$version), function(x){strsplit(x,":")[[1]][2]})) %in% "vracS",]
@@ -292,19 +293,13 @@ analyse.selection <- function(Mixtures,
     if(language == "english"){i=3}
     SelectionTot_type = lapply(vec_variables,function(variable){go.analyse.selection(donnees,data_version,variable,titre=paste(list_trad[[grep("Réseau",list_trad)]][i]," (",paste(year,collapse=", "),") : ",list_trad[[grep(variable,list_trad)]][i],sep=""), 
                                                                                      empile="type",language)})
-    if(!is.null(table.save)){lapply(1:length(vec_variables),function(x){write.table(SelectionTot_type[[x]]$tab, 
-                                                                                    file = paste(table.save,"/DifferentielSelectionTotal_type_",vec_variables[x],"_",paste(year,collapse="-"),".csv",sep=""),
-                                                                                    sep=";", dec=",")})}
     
     SelectionTot_moda = lapply(vec_variables,function(variable){go.analyse.selection(donnees,data_version,variable,titre=paste(list_trad[[grep("Réseau",list_trad)]][i]," (",paste(year,collapse=", "),") : ",list_trad[[grep(variable,list_trad)]][i],sep=""), 
                                                                                      empile="modalite",language)})
-    if(!is.null(table.save)){lapply(1:length(vec_variables),function(x){write.table(SelectionTot_moda[[x]]$tab, file = paste(table.save,"/DifferentielSelectionTotal_modalite_",vec_variables[x],"_",paste(year,collapse="-"),".csv",sep=""),
-                                                                                    sep=";", dec=",")})}
-    
-    
-    
+   
     SelectionTot = lapply(vec_variables,function(variable){go.analyse.selection(donnees,data_version,variable,titre=paste("Total : ",list_trad[[grep(variable,list_trad)]][i],sep=""), empile=FALSE,language="french")})
-    if(!is.null(table.save)){lapply(1:length(vec_variables),function(x){write.table(SelectionTot[[x]]$tab, file = paste(table.save,"/DifferentielSelectionTotal_",vec_variables[x],"_",paste(year,collapse="-"),".csv",sep=""))})}
+    if(!is.null(table.save)){lapply(1:length(vec_variables),function(x){write.table(SelectionTot[[x]]$tab, file = paste(table.save,"/DifferentielSelection_",vec_variables[x],"_",paste(year,collapse="-"),".csv",sep=""),
+                                                                                    sep=";",dec=".")})}
     
     if(FALSE){
       # Pour les mélanges
@@ -328,7 +323,7 @@ analyse.selection <- function(Mixtures,
   }
   
 #0.2. 
-#  if(is.null(year)){}
+  if(is.null(year)){year = seq("2016",strsplit(as.character(Sys.Date()),"-")[[1]][1],1)}
   
 #1. analysis
   paysans = unique(Mixtures$location)
@@ -363,11 +358,12 @@ if(FALSE){  # à faire ...
   
 #1.2 Selection differential on the network
 if(selection.type == "sel.diff.network" | selection.type == "diff.and.rep"){
+  if(!is.null(table.save) & !dir.exists(file.path(table.save, "Diff_Sel"))){system(paste("mkdir ",table.save,"/Diff_Sel",sep="")) ; message("dir Diff_Sel have been created, tables dealing with selection differential will be saved there")}
   DS = lapply(vec_variables, function(variable){
     if(variable %in% names(res_model1)){
-      get_selection_differential(donnees = res_model1, data_S = data_S_all, vec_variables = variable , language, year)
+      get_selection_differential(donnees = res_model1, data_S = data_S_all, vec_variables = variable , language, year, table.save = paste(table.save,"Diff_Sel",sep="/"))
     }else{
-      get_selection_differential(donnees = data_S_all$data$data, data_S = data_S_all, vec_variables = variable , language, year)
+      get_selection_differential(donnees = data_S_all$data$data, data_S = data_S_all, vec_variables = variable , language, year, table.save = paste(table.save,"Diff_Sel",sep="/"))
     }
   })
   names(DS)=vec_variables
@@ -391,16 +387,22 @@ if(selection.type == "sel.diff.network" | selection.type == "diff.and.rep"){
 
  
 if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
-  person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
-  RS=lapply(vec_variables,function(y){
-    p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
-                                 year="2017", model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)
-    return(p_melanges)
-  })
-  names(RS)=vec_variables
-  if(!is.null(table.save)){save(RS,file=paste(table.save,"sel_response_",paste(year,collapse="-"),".RData",sep=""))}
-  if(selection.type == "sel.diff.network"){return(RS)}
+  variables = vec_variables[which(vec_variables %in% names(res_model1))]
+  if(length(variables)>0){
+    if(!is.null(table.save) & !dir.exists(file.path(table.save, "Rep_Sel"))){system(paste("mkdir ",table.save,"/Rep_Sel",sep="")) ; message("dir Rep_Sel have been created, tables dealing with response to selection will be saved there")}
+    person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
+    RS=lapply(variables,function(y){
+      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
+                                   year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)
+      if(!is.null(table.save)){write.table(p_melanges$Tab,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
+      return(p_melanges)
+    })
+    names(RS)=variables
+
+  }else{RS=NULL}
+  if(selection.type == "response.sel.mixture"){return(RS)}
 }
+ 
   
 if(selection.type == "diff.and.rep"){return(list(DS,RS))}
   
