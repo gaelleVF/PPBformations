@@ -11,22 +11,20 @@
 #' 
 #' 
 #' 
-mix_to_delete = c("M1.2-CHD","Mélange-2016-RAB")
-
-
 get_mixture_tables <- function(res_model,
+                               res_model_varintra = NULL,
                                table.type,
-                               year,
+                               year=NULL,
                                year_DS=NULL,
                                year_RS=NULL,
-                               mix_to_delete,
-                               language,
+                               mix_to_delete=NULL,
+                               language="english",
                                Mixtures,
                                vec_variables, 
-                               data_S_all, 
-                               data_SR_all, 
+                               data_S_all=NULL, 
+                               data_SR_all=NULL, 
                                path_to_tables = ".",
-                               list_trad)
+                               list_trad=NULL)
 {
   
 #0.1 If no year, take all years
@@ -116,6 +114,7 @@ get_mixture_tables <- function(res_model,
   } # end function Histo
   
   get.gain <- function(tab,to_split=NULL,col=NULL){
+    tab = as.data.frame(tab)
     if(length(na.omit(tab[,col]))==0){
       return(rep(NA,6))
     }else{
@@ -196,6 +195,33 @@ if(table.type == "correlations"){
   
 }
   
+if(table.type %in% c("varIntra","selection.modalities")){
+  Mixtures$expe_melange = unlist(lapply(1:nrow(Mixtures),function(i){
+    m = Mixtures[i,]
+    if(m$sl_statut == "son"){return(m$expe_melange)}
+    if(m$sl_statut == "father"){
+      if(length(unique(Mixtures[grep(m$expe,Mixtures$expe),"sl_statut"])) == 1){return(NA)}else{return(unique(Mixtures[grep(m$expe,Mixtures$mixture_id),"expe_melange"]))}
+    }
+  }))
+  
+  vec_variables_VI = intersect(names(res_model_varintra),vec_variables)
+  
+  VI = lapply(vec_variables_VI,function(variable){
+    Tab = ggplot_mixture1(res_model = res_model_varintra, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_varintra", 
+                                 plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL)$Tab
+    colnames(Tab) = c("Mod1","Mod2","Mod3","Mod3vsMod2")
+    
+    a = lapply(c("Mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
+    Res=NULL
+    for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
+    rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
+    colnames(Res) = c("M1","M2","M3","M3vsM2")
+    return(Res)
+  })
+  names(VI) = vec_variables_VI
+  if(table.type == "varIntra"){return(VI)}
+}
+  
 if(table.type == "selection.modalities"){
   Melanges=unique(Mixtures[Mixtures$sl_statut %in% "son" & unlist(lapply(as.character(Mixtures$son), function(x){return(strsplit(x,"_")[[1]][1])})) != unlist(lapply(as.character(Mixtures$father), function(x){return(strsplit(x,"_")[[1]][1])})), "son_germplasm"])
   
@@ -227,23 +253,25 @@ if(table.type == "selection.modalities"){
       a=lapply(c("mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
       Res=NULL
       for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
-      rownames(Res) = c("mean gain","sd_gain","statistic","pvalue","stars","test")
+      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
       colnames(Res) = c("M1","M2","M3","M3vsM2")
       return(Res)
     }else{
       Res = matrix(NA,ncol=4,nrow=6)
-      rownames(Res) = c("mean gain","sd_gain","statistic","pvalue","stars","test")
+      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
       colnames(Res) = c("M1","M2","M3","M3vsM2")
       return(Res)
     }
 
   })
   names(RS)=vec_variables
+
   
   M = lapply(vec_variables,function(variable){
     ds = DS[[variable]]
     rs = RS[[variable]]
-    return(list("DS"=ds,"RS"=rs))
+    vi = VI[[variable]]
+    return(list("DS"=ds,"RS"=rs,"varIntra"=vi))
    })
   names(M) = vec_variables
   return(M)
