@@ -259,11 +259,12 @@ dans composantes (Mod1)")
                   if(length(d)>0){
                     Data$melange = d
                   }else if(length( Data[grep("Mod2",Data$type),"germplasm"])>0){
-                    Data$melange = strsplit(as.character(Data[grep("Mod2",Data$type),"germplasm"]),"[.]")[[1]][1]
+                    Data$melange = gsub("[.]2", "",Data[grep("Mod2",Data$type),"germplasm"])
                   }else if(length( Data[grep("Mod3",Data$type),"germplasm"])>0){
-                    Data$melange = strsplit(as.character(Data[grep("Mod3",Data$type),"germplasm"]),"#")[[1]][1]
+                    to_delete = strsplit(Data[grep("Mod3",Data$type),"germplasm"],"#")[[1]][2]
+                    Data$melange = gsub(paste("#",to_delete,sep=""), "",Data[grep("Mod3",Data$type),"germplasm"])
                   }else if(length( Data[grep("Mod1",Data$type),"germplasm"])>0){
-                    Data$melange = strsplit(as.character(Data[grep("Mod1",Data$type),"germplasm"]),"[.]")[[1]][1]
+                    Data$melange = gsub("[.]3", "",Data[grep("Mod2",Data$type),"germplasm"])
                   }
                   
                   if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
@@ -373,31 +374,23 @@ dans composantes (Mod1)")
   if (plot.type == "mix.comp.distribution" | plot.type == "mix.gain.distribution") {
     if(Nul == FALSE){
       Distrib = lapply(d_env_b, function(x){
-        Worst = Best = Mel = MeanComp = NULL
         Mat = lapply(x, function(y) {
           mat = lapply(y,function(yr){
             Tab=yr$Tab
             Data = Tab[Tab$type %in% "Composante",]
-            nb_comp = nrow(Data)
-            if (!is.null(Data)){
-              Worst = Data[which(Data$median == min(Data$median, na.rm = TRUE)),"median"]
-              Best = Data[which(Data$median == max(Data$median, na.rm = TRUE)),"median"]
-              Mel = Tab[Tab$type %in% "Mélange non sélectionné","median"]
-              MeanComp = Tab[Tab$type %in% "MoyenneComposantes","median"]
-              pval = Data$pval
-              
-              # get significance
-              grepMel = grep("Mélange",Tab$type)
-              grepMeanComp = grep("MoyenneComposantes",Tab$type)
-              
-              M = cbind(c(Worst,MeanComp,Mel,Best),c("1.moins bonne","2.moyenne composantes","3.mélange","4.meilleure"),pval[1:4])
-              M=as.data.frame(M)
-              M$melange = unique(Data$melange)
-              M$year = unique(Data$year)
-              M$location= unique(Data$location)
-              
-              colnames(M) = c("median","Type","pval","melange","year","location")
-              rownames(M) = c("Worst","MoyenneComposantes","Mélange","Best")
+            nb_comp=nrow(Data)
+            if(!is.null(Data)){
+              Data = Data[order(Data$median),]
+              Data=Data[c(1,nrow(Data)),] ; Data$parameter = c("Worst","Best") 
+              Data$Type = c("1.mois bonne","4.meilleure")
+              Mel = Tab[grep("Mélange|Moyenne",Tab$type),] ; Mel$parameter = unlist(lapply(as.character(Mel$type),function(x){strsplit(x," ")[[1]][1]}))
+              if(length(grep("Mod1",Mel$type))>0){
+                Mel = Mel[grep("Mod1|MoyenneComposantes",Mel$type),]
+              }else if(length(grep("Mod2",Mel$type))>0){
+                Mel = Mel[grep("Mod2|MoyenneComposantes",Mel$type),]
+              }
+              Mel$Type = unlist(lapply(as.character(Mel$type),function(x){ifelse(length(grep("Mélange",x))>0,"3.mélange","2.moyenne composantes")}))
+              M = rbind(Data,Mel)
             }else{
               M = NULL
             }
@@ -428,10 +421,10 @@ dans composantes (Mod1)")
         #         
         #         plot(D)
         
-        colnames(toPlot) = c("Moyenne","Type","pvalue","melange","year","location","Paysan","Group")
+        colnames(toPlot)[(ncol(toPlot)-1):ncol(toPlot)] = c("Paysan","Group")
         rownames(toPlot)=NULL
         toPlot=as.data.frame(toPlot)
-        toPlot$Moyenne = as.numeric(as.character(toPlot$Moyenne))
+        toPlot$Moyenne = as.numeric(as.character(toPlot$median))
     
         if(plot.type =="mix.comp.distribution"){
           p = ggplot(toPlot, aes(x=Type,y=Moyenne,color = Group, shape=Group), xlab=variable)
@@ -459,8 +452,8 @@ dans composantes (Mod1)")
           return(lapply(y,function(yr){
             z=yr$tab
             if(!is.null(z)){
-              diff = as.numeric(as.character(z["Mélange","median"]))/as.numeric(as.character(z["MoyenneComposantes","median"]))-1
-              return(c(unlist(diff),as.numeric(as.character(z[1,"pval"])),yr$nbComp,unique(z$melange),unique(z$year),unique(z$location)))
+              diff = as.numeric(as.character(z[grep("Mélange",z$parameter),"median"]))/as.numeric(as.character(z[grep("MoyenneComposantes",z$parameter),"median"]))-1
+              return(c(unlist(diff),as.numeric(as.character(z[grep("MoyenneComposantes",z$parameter),"pval"])),yr$nbComp,unique(z$melange),unique(z$year),unique(z$location)))
           }}))
           }))
       })
@@ -480,13 +473,12 @@ dans composantes (Mod1)")
       Data=as.data.frame(Data)
       colnames(Data) = c("Paysan","overyielding","pvalue","nbComp","melange","year","location")
       Data$mod = unlist(lapply(as.character(Data$melange),function(x){
-        ## Marche pas !!!!
         if(length(grep(".2",x))>0){return("mod2")
         }else if(length(grep("[.]3",x))>0){return("mod1")
         }else{return("mod4")}
       }))
 
-      p = get_histo(Data,col_plot,breaks=0.06, titre=variable,language=language)
+      p = get_histo(Data,col_plot,breaks=0.03, titre=variable,language=language)
       
       if(!is.null(save)){write.table(Data,file=paste(save,"/Histo_",variable,".csv",sep=""),sep=";")}
   
