@@ -266,6 +266,7 @@ dans composantes (Mod1)")
                   }else if(length( Data[grep("Mod1",Data$type),"germplasm"])>0){
                     Data$melange = gsub("[.]3", "",Data[grep("Mod2",Data$type),"germplasm"])
                   }
+                  Data$true_melange = melange
                   
                   if(!is.null(save)){write.table(Data,file=paste(save,"/Par_paysan/Mel_et_comp_",unique(Data$melange),"_",unique(Data$environment),"_",variable,".csv",sep=""),sep=";",dec=",")}
                   if (plot.type == "comp.in.farm") {
@@ -453,7 +454,7 @@ dans composantes (Mod1)")
             z=yr$tab
             if(!is.null(z)){
               diff = as.numeric(as.character(z[grep("Mélange",z$parameter),"median"]))/as.numeric(as.character(z[grep("MoyenneComposantes",z$parameter),"median"]))-1
-              return(c(unlist(diff),as.numeric(as.character(z[grep("MoyenneComposantes",z$parameter),"pval"])),yr$nbComp,unique(z$melange),unique(z$year),unique(z$location)))
+              return(c(unlist(diff),as.numeric(as.character(z[grep("MoyenneComposantes",z$parameter),"pval"])),yr$nbComp,unique(z$melange),unique(z$true_melange),unique(z$year),unique(z$location)))
           }}))
           }))
       })
@@ -463,9 +464,10 @@ dans composantes (Mod1)")
         unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[1]])}))}))})),
         unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[2]])}))}))})),
         unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[3]])}))}))})),
-        unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[4]])}))}))})),
+    #    unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[4]])}))}))})),
         unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[5]])}))}))})),
-        unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[6]])}))}))}))
+        unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[6]])}))}))})),
+        unlist(lapply(Histo,function(paysan){return(lapply(paysan, function(melange){return(lapply(melange,function(yr){return(yr[[7]])}))}))}))
       )
       
       Data=cbind(rownames(Data),Data)
@@ -473,7 +475,7 @@ dans composantes (Mod1)")
       Data=as.data.frame(Data)
       colnames(Data) = c("Paysan","overyielding","pvalue","nbComp","melange","year","location")
       Data$mod = unlist(lapply(as.character(Data$melange),function(x){
-        if(length(grep(".2",x))>0){return("mod2")
+        if(length(grep("[.]2",x))>0){return("mod2")
         }else if(length(grep("[.]3",x))>0){return("mod1")
         }else{return("mod4")}
       }))
