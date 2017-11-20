@@ -26,7 +26,7 @@ get_mixture_tables <- function(res_model,
                                path_to_tables = ".",
                                list_trad=NULL)
 {
-  
+  print(language)
   Mixtures = data_mixtures$Mixtures_all$data
 #0.1 If no year, take all years
   if(is.null(year)){year = seq("2016",strsplit(as.character(Sys.Date()),"-")[[1]][1],1)}
