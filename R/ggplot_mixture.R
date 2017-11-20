@@ -226,17 +226,13 @@ ggplot_mixture1 = function(res_model,
                   C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
 
                   if(!missingComp){
-                    A=C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")), 
-                        which(colnames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep=""))]
-                    if(A == 0){
-                      A=C[which(rownames(C) == paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")),
-                          which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]
-                    }
+                    A = cbind(C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")),], C[,which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]) 
+                    A = apply(A,1,sum)
                   }else{A=NA}
                  
                   comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
                   comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
-                  comp.mu$pval=A
+                  comp.mu$pval=A[as.character(comp.mu$parameter)]
 
                   type = NULL
                   for (i in 1:nrow(comp.mu)) { 
