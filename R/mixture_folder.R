@@ -402,10 +402,11 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
              ); OUT=c(OUT,out)
   
   # 2.2.0. Explication des symboles de significativité --------
-  out = list("subsection" = "Explication des notations utilisées"); OUT = c(OUT, out)
-  out = list("text" = "Dans les tableaux et gaphiques suivants seront comparées différentes populations/mélanges : si ces populations/mélanges sont significativement différentes, c'est à dire que l'on a un faible risque de
-se tromper en déclarant qu'elle sont différentes, cela sera indiqué par un symbole qui sera différent selon le niveau de risque que l'on prend. Par exemple, * signifie que l'on a entre 1% et 5% de chances de se tromper, tandis que 
-*** signifie que l'on a moins de 0.1% de chances de se tromper. Le tableau suivant récapitule la signification des différents symboles. 
+  out = list("subsection" = "Explication des notations utilisées pour rendre compte de la significativité des tests de comparaison"); OUT = c(OUT, out)
+  out=list("text" = "\\label{symboles_signif}"); OUT=c(OUT,out)
+  out = list("text" = "Dans les tableaux et gaphiques suivants seront comparées différentes populations/mélanges : si ces populations/mélanges sont significativement différents, c'est à dire que l'on a un faible risque de
+se tromper en déclarant qu'elle sont différentes, cela sera indiqué par des symboles ou des couleurs qui seront différents selon le niveau de risque que l'on prend. Par exemple, * signifie que l'on a entre 1% et 5% de chances
+de se tromper, tandis que *** signifie que l'on a moins de 0.1% de chances de se tromper. Le tableau suivant récapitule la signification des différents symboles. 
 Concernant les graphiques, ce niveau de risque sera indiqué par des couleurs différentes dont la signification sera précisée dans la légende. par exemple, s'il est indiqué \"significatif à 0.01\" cela signifie qu'on a 
 un risque de se tromper entre 0.1% et 1%.
   "); OUT=c(OUT,out)
@@ -423,6 +424,8 @@ un risque de se tromper entre 0.1% et 1%.
    ** & Différence significative à 0.01 : risque de se tromper entre 0.1 et 1\\% \\\\ 
    *** & Différence significative à 0.001 : risque de se tromper inférieur à 0.1\\% \\\\ 
    \\hline
+\\caption{Explication des symboles utilisés pour caractériser la significativité des tests de comparaison.}
+\\label{Signif}
 \\end{tabular}
 \\end{table}
              "); OUT=c(OUT,out)
@@ -505,11 +508,11 @@ indique une différence non significative.
   # 2.2.2. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
   out = list("subsection" = "Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau"); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
-Chaque élément de ces histogramme représente une comparaison entre un mélange et la moyenne de ses composantes
+              Chaque élément de ces histogrammes représente une comparaison entre un mélange et la moyenne de ses composantes, la couleur de chaque élément indique
+              si la différence entre mélange et ses composantes est significative ou non (voir légende de chaque graphique et voir partie \\ref{symboles_signif} pour l'explication de la significativité des tests de comparaison).
              Un histogramme décalé vers la droite par rapport à 0 indique qu'une majorité des mélanges se sont mieux comportés que la moyenne de leurs composantes. 
              A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes.
-             Entre parenthèses est indiqué la significativité du test : *** indique que la valeur est significativement différente de zéro tandis qu'aucun symbole
-             indique que la valeur n'est pas significativement différente de 0."); OUT = c(OUT, out)
+             Entre parenthèses est indiqué la significativité du test : voir tableau \\ref{Signif} pour l'explication des symboles utilisés"); OUT = c(OUT, out)
 
 P = list()
 for (variable in intersect(vec_variables,vec_variables_mod1)){
@@ -538,47 +541,13 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   OUT = c(OUT, out)
   
 
-
-
-if(FALSE){
-  # 2.2.1.1. poids de mille grains -----
-  OUT = melanges_reseau(OUT,variable="poids.de.mille.grains",titre="Poids de mille grains",distrib=FALSE,comp_global=FALSE)
-  
-  # 2.2.1.2. Poids de l'épi -----
-  OUT = melanges_reseau(OUT,variable="poids.de.l.epi",titre="Poids de l'épi",distrib=FALSE,comp_global=FALSE)
-  
-  # 2.2.1.3. Hauteur -----
-  OUT = melanges_reseau(OUT,variable="hauteur",titre="Hauteur moyenne",distrib=FALSE,comp_global=FALSE)
-  
-  # 2.2.1.4. Longueur de l'épi -----
-  OUT = melanges_reseau(OUT,variable="longueur.de.l.epi",titre="Longueur de l'épi",distrib=FALSE,comp_global=FALSE)
-  
-  # 2.2.1.5. LLSD -----
-  OUT = melanges_reseau(OUT,variable="LLSD",titre="Distance dernière feuille - base de l'épi",distrib=FALSE,comp_global=FALSE)
-  
-  # 2.2.1.6. Nombre moyen de grains par épi  -----
-  OUT = melanges_reseau(OUT,variable="nbr.estime.grain.par.epi",titre="Nombre moyen de grains par épi",distrib=FALSE,comp_global=FALSE)
-  
-  # 3.2.2. Distribution des mélanges, de la moins bonne composante & la meilleure composante -----
-  out = list("subsection" = "Distributions des mélanges, de la moins bonne et la meilleure composante pour chaque mélange"); OUT = c(OUT, out)
-  out = list("text" = "Ces graphiques présentent, pour chacun des mélanges testés cette année, le comportement du mélange, de sa moins bonne composantes,
-             de sa meilleure composante et le comportement moyen de ses composantes. 
-             On peut observer sur ces graphiques la variabilité de comportement des mélanges ainsi que celle de leurs moins bonne
-             et meilleure composantes.
-             "); OUT = c(OUT, out)
-  
-  #  3.2.3. Comparaison de l'effet mélange par rapport à variété "pure" -----
-  #  A virer...? 
-  out = list("subsection" = "Comparaison de la performance moyenne des mélanges par rapport àa la performance moyenne des composantes"); OUT = c(OUT, out)
-  out = list("text" = "On se pose la question de savoir s'il y a une différence significative entre la moyenne de tous les mélanges de l'essai 
-             et la moyenne de toutes leurs composantes."); OUT = c(OUT, out)
-}
-
   
   # 2.2.3. Différentiel de sélection ------
   out = list("subsection" = "Différentiels de sélection sur le réseau"); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
              séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
+            Chaque élément de l'histogramme représente une comparaison entre un bouquet de sélection et son vrac correspondant, et la couleur représente la significativité
+            de la comparaison (voir légende pour chaque graphique et voir partie \\ref{symboles_signif} pour l'explication de la significativité des tests de comparaison).
              Pour le \\textbf{PMG, poids de l'épi et taux de protéine}, un histogramme décalé vers la droite par rapport à 0 (ligne pointillée) indique que globalement le différentiel de sélection est positif (sélection > vrac),
              tandis qu'un histogramme décalé vers la gauche indique un différentiel de sélection négatif. \\\\
              Pour la \\textbf{couleur, présence de barbe et courbure}, un histogramme décalé vers la droite indique que les bouquets de sélection sont globalement plus foncés, plus barbus ou plus courbés respectivement.
@@ -591,7 +560,8 @@ if(FALSE){
   out = list("includeimage" = list("content"= "./tex_files/Explication_DiffSel.png", 
 "caption"= "Explication des graphiques qui suivent : pour chaque événement de sélection est calculé le différentiel de sélection.
 Sur les graphiques sont présentés les histogrammes de ces différentiels de sélection, séparément pour les sélections faites dans les composantes (histogramme du dessus)
-et les sélections faites dans les mélanges(histogramme du dessous)")) ; OUT=c(OUT,out)
+et les sélections faites dans les mélanges(histogramme du dessous). Les différentes couleurs représentent la significativité de chaque différentiel de sélection :
+voir partie \\ref{symboles_signif} pour les explication de la significativité des tests de comparaison.")) ; OUT=c(OUT,out)
   }
 
   if (file.exists("./mixture_folder/figures/Diff_Sel/DifferentielSelectionReseau-French_2016.pdf")){
@@ -667,8 +637,8 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
 et \\textbf{réponse à la sélection} (RS, données 2017). 
 La valeur indiquée est le gain (ou la perte) en pourcentage du bouquet de sélection par rapport au vrac pour DS, et de la modalité de sélection du mélange
-par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqué si la différence observée est significative ou non : . représente une faible significativité, 
-*** représente une forte significativité, aucun symbole indique que la différence n'est pas significative. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
+par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqué si la différence observée est significative ou non : voir tableau \\ref{Signif}
+pour l'explication des symboles utilisés. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
 ", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,6,8,10,11))) ; OUT=c(OUT,out)
