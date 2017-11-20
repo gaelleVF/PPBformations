@@ -386,7 +386,7 @@ dans composantes (Mod1)")
             if (!is.null(Data)){
               Worst = Data[which(Data$median == min(Data$median, na.rm = TRUE)),"median"]
               Best = Data[which(Data$median == max(Data$median, na.rm = TRUE)),"median"]
-              Mel = Tab[Tab$type %in% "Mélange","median"]
+              Mel = Tab[Tab$type %in% "Mélange non sélectionné","median"]
               MeanComp = Tab[Tab$type %in% "MoyenneComposantes","median"]
               pval = Data$pval
               
@@ -490,7 +490,7 @@ dans composantes (Mod1)")
         }else{return("mod4")}
       }))
 
-      p = get_histo(Data,col_plot,breaks=0.06, titre=variable)
+      p = get_histo(Data,col_plot,breaks=0.06, titre=variable,language=language)
       
       if(!is.null(save)){write.table(Data,file=paste(save,"/Histo_",variable,".csv",sep=""),sep=";")}
   
