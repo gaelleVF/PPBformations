@@ -155,10 +155,10 @@ if(table.type == "distribution"){
     }
     d = read.table(paste(path_to_tables,"/Distrib_",i,".csv",sep=""),header=T,sep=";",comment.char="")
     if(!is.null(mix_to_delete)){d = d[-grep(paste(mix_to_delete,collapse="|"),d$melange),]}
-    tmp=cbind(as.numeric(as.character(d[seq(1,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(2,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(3,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(4,nrow(d),4),"Moyenne"])))
+    tmp=cbind(as.numeric(as.character(d[seq(1,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(2,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(3,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(4,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(1,nrow(d),4),"pvalue"])))
     tmp = cbind(tmp,unlist(as.character(d$melange[seq(1,nrow(d),4)])),unlist(as.character(d$year[seq(1,nrow(d),4)])),unlist(as.character(d$location[seq(1,nrow(d),4)])))
     tmp=data.frame(tmp,stringsAsFactors = F)
-    colnames(tmp)=c(as.character(d[1:4,"Type"]),"melange","year","location")
+    colnames(tmp)=c(as.character(d[1:4,"Type"]),"pvalue_overY","melange","year","location")
     D=c(D,list(tmp))
   }
   names(D)=vec_variables
@@ -172,7 +172,8 @@ if(table.type == "distribution"){
     }else{
       Signif = t.test(as.numeric(as.character(x$overyielding)),mu=0)$p.value
     }
-    a = c(nrow(x),round(sum(as.numeric(as.character(x$'3.mélange'))>as.numeric(as.character(x$'2.moyenne composantes')))*100/nrow(x),3),round(sum(as.numeric(as.character(x$'3.mélange'))<as.numeric(as.character(x$'1.moins bonne')))*100/nrow(x),3),
+    a = c(nrow(x),round(sum(as.numeric(as.character(x$'3.mélange'))>as.numeric(as.character(x$'2.moyenne composantes')))*100/nrow(x),3), sum(as.numeric(as.character(x$pvalue_overY))<=0.05 & as.numeric(as.character(x$overyielding))>0),
+          round(sum(as.numeric(as.character(x$'3.mélange'))<as.numeric(as.character(x$'1.moins bonne')))*100/nrow(x),3),
           round(sum(as.numeric(as.character(x$'3.mélange'))>as.numeric(as.character(x$'4.meilleure')))*100/nrow(x),3),
           mean(as.numeric(as.character(x$'2.moyenne composantes'))),mean(as.numeric(as.character(x$'3.mélange'))), mean(as.numeric(x$overyielding))*100,Signif,get_stars(Signif))
     Tab=cbind(Tab,a)
@@ -180,9 +181,9 @@ if(table.type == "distribution"){
   
   colnames(Tab) = names(D)
   if(language=="english"){
-    rownames(Tab) = c("number blends","Blend > Components' mean","Blend < Lowest component","Blend > Highest component","Mean components","Mean blends","Overyielding","pvalue overyielding","stars pval")
+    rownames(Tab) = c("number blends","Blend > Components' mean","number significant overyieldings","Blend < Lowest component","Blend > Highest component","Mean components","Mean blends","Overyielding","pvalue overyielding","stars pval")
   }else{
-    rownames(Tab) = c("Nombre de mélanges","Proportion mélanges > moyenne des composantes","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute",
+    rownames(Tab) = c("Nombre de mélanges","Proportion mélanges > moyenne des composantes","nombre de gains significiatifs","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute",
                       "Moyenne des composantes","Moyenne des mélanges","Gain moyen","pvalue overyielding","stars")
     
   }
