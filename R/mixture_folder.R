@@ -77,7 +77,7 @@ mixture_folder = function(
   data_S_all =  get(load(paste(pathway,"data_S_all.RData",sep="/")))
   data_SR_all =   get(load(paste(pathway,"data_SR_all.RData",sep="/")))
   if(file.exists(paste(pathway,"mix_to_delete.RData",sep="/"))){mix_to_delete = get(load(paste(pathway,"mix_to_delete.RData",sep="/")))}else{mix_to_delete=FALSE}
-  
+  vec_variables_mod1 = intersect(vec_variables,names(res_model1))
 
   list_trad = list(
     c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
@@ -322,8 +322,6 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
         return(unique(Mixtures_all_person[grep(m$expe,Mixtures_all_person$mixture_id),"expe_melange"]))
       }
     }))
-    
-    vec_variables_mod1 = intersect(vec_variables,names(res_model1))
 
     mix = plyr:::splitter_d(Mixtures_all_person, .(expe_melange))
 
@@ -591,13 +589,13 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   }else{
     t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)), year_RS=as.character(seq(2016,as.numeric(year),1)),
                                    mix_to_delete=NULL,
-                                   language,
+                                   language=language,
                                    data_mixtures=data_mixtures,
                                    vec_variables =vec_variables, 
-                                   data_S_all, 
-                                   data_SR_all, 
+                                   data_S_all=data_S_all, 
+                                   data_SR_all=data_SR_all, 
                                    path_to_tables = path_to_tables,
-                                   list_trad,
+                                   list_trad=list_trad,
                                    table.type="selection.modalities",
                                    res_model_varintra = res_model_varintra)
     
