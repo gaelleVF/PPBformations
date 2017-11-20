@@ -26,7 +26,7 @@ get_mixture_tables <- function(res_model,
                                path_to_tables = ".",
                                list_trad=NULL)
 {
-  print(language)
+
   Mixtures = data_mixtures$Mixtures_all$data
 #0.1 If no year, take all years
   if(is.null(year)){year = seq("2016",strsplit(as.character(Sys.Date()),"-")[[1]][1],1)}
@@ -189,12 +189,15 @@ if(table.type == "distribution"){
   return(Tab)
 
 }
-  
+
+#2. corrélations ----------
 if(table.type == "correlations"){
   
   
 }
   
+  
+#3. modalités de sélection ---------- 
 if(table.type %in% c("varIntra","selection.modalities")){
   Mixtures$expe_melange = unlist(lapply(1:nrow(Mixtures),function(i){
     m = Mixtures[i,]
@@ -268,7 +271,7 @@ if(table.type == "selection.modalities"){
   names(RS)=vec_variables
 
   
-  M = lapply(vec_variables,function(variable){ return(list("DS"=DS[[variable]],"RS"=RS[[variable]],"varIntra"=VI[[variable]]))   })
+  M = lapply(vec_variables,function(variable){ return(list("DS"=DS[[variable]],"RS"=RS[[variable]],"varIntra"=VI[[variable]]))  })
   names(M) = vec_variables
   return(M)
 }
