@@ -392,6 +392,7 @@ dans composantes (Mod1)")
               }
               Mel$Type = unlist(lapply(as.character(Mel$type),function(x){ifelse(length(grep("Mélange",x))>0,"3.mélange","2.moyenne composantes")}))
               M = rbind(Data,Mel)
+              M = M[order(M$Type),]
             }else{
               M = NULL
             }
