@@ -36,13 +36,15 @@ get_histo = function(Data,col_plot="pval",breaks=0.03,titre, language){
   
   Mean = round(mean(as.numeric(as.character(Data$overyielding))),3)
   p = p + geom_histogram(breaks=seq(1.5*min(as.numeric(as.character(Data$overyielding))),1.5*max(as.numeric(as.character(Data$overyielding))),breaks), alpha=0.6, color="black")
+
   p = p + geom_vline(xintercept = Mean, size = 1.2, color="red") + geom_vline(xintercept = 0,  linetype = "dotted")
   p = p + labs(x=paste(ifelse(language=="french","Différence normalisée entre les mélanges et 
 	                         la moyenne de leurs composantes pour ","Normalized difference between mixtures and their components' mean for "),titre,sep=""), 
                y=ifelse(language=="french","Nombre de mélanges","Number of mixtures"))
   p = p + labs(title = paste(titre,":",ifelse(language=="french","Gain moyen =","Mean gain ="),Mean*100,"% (",sign,");
         ",ifelse(language=="french","Cas positifs :","Positive cases:"),Positif,"%",";",ifelse(language=="french","Cas négatifs :","Negative cases:"),Negatif,"%",sep=" "))
-  
+ 
+  p = p + scale_y_continuous(breaks = seq(0,max(ggplot_build(p)$data[[1]]$count)*1.1,by=1))
   return(list("plot"=p,"pval"=Signif))
 }
 
