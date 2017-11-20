@@ -434,13 +434,13 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
   if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv")){
     Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv",sep=";",header=T)
   }else{
-    t = get_mixture_tables(res_model1, year=NULL, year_DS=NULL,year_RS=NULL,
+    t = get_mixture_tables(res_model1, year=NULL, year_DS=NULL, year_RS=NULL,
                            mix_to_delete=mix_to_delete,
-                           language,
+                           language=language,
                            data_mixtures=data_mixtures,
                            vec_variables = intersect(vec_variables,vec_variables_mod1), 
-                           data_S_all, 
-                           data_SR_all, 
+                           data_S_all = NULL, 
+                           data_SR_all = NULL, 
                            path_to_tables = path_to_tables,
                            list_trad,
                            table.type="distribution")
@@ -482,9 +482,9 @@ indique une différence non significative.
              A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes.
              Entre parenthèses est indiqué la significativité du test : *** indique que la valeur est significativement différente de zéro tandis qu'aucun symbole
              indique que la valeur n'est pas significativement différente de 0."); OUT = c(OUT, out)
-vec_variables = names(res_model1)
+
 P = list()
-for (variable in vec_variables){
+for (variable in intersect(vec_variables,vec_variables_mod1)){
   var = paste(strsplit(variable,"[.]")[[1]],collapse="")
   
   if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
