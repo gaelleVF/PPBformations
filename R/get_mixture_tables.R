@@ -19,7 +19,7 @@ get_mixture_tables <- function(res_model,
                                year_RS=NULL,
                                mix_to_delete=NULL,
                                language="english",
-                               Mixtures,
+                               data_mixtures,
                                vec_variables, 
                                data_S_all=NULL, 
                                data_SR_all=NULL, 
@@ -27,6 +27,7 @@ get_mixture_tables <- function(res_model,
                                list_trad=NULL)
 {
   
+  Mixtures = data_mixtures$Mixtures_all$data
 #0.1 If no year, take all years
   if(is.null(year)){year = seq("2016",strsplit(as.character(Sys.Date()),"-")[[1]][1],1)}
   if(is.null(year_DS)){year_DS = seq("2016",strsplit(as.character(Sys.Date()),"-")[[1]][1],1)}
@@ -145,15 +146,14 @@ get_mixture_tables <- function(res_model,
 
 # 1. Distribution-------
 if(table.type == "distribution"){
-  vec_variables = names(res_model)
   D=list()
   for (i in vec_variables){
-    if(!file.exists(paste(pathway,"/Distrib_",i,".csv",sep=""))){
-      p = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
-                                   year=as.character(seq(2015,as.numeric(year),1)), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
-                                   save=pathway)
+    if(!file.exists(paste(path_to_tables,"/Distrib_",i,".csv",sep=""))){
+      p = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, i, 
+                                   year=year, model="model_1", plot.type = "mix.gain.distribution", person=NULL, nb_parameters_per_plot = 15,
+                                   save=path_to_tables)
     }
-    d = read.table(paste(pathway,"/Distrib_",i,".csv",sep=""),header=T,sep=";",comment.char="")
+    d = read.table(paste(path_to_tables,"/Distrib_",i,".csv",sep=""),header=T,sep=";",comment.char="")
     d = d[-grep(paste(mix_to_delete,collapse="|"),d$melange),]
     tmp=cbind(as.numeric(as.character(d[seq(1,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(2,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(3,nrow(d),4),"Moyenne"])),as.numeric(as.character(d[seq(4,nrow(d),4),"Moyenne"])))
     tmp = cbind(tmp,unlist(as.character(d$melange[seq(1,nrow(d),4)])),unlist(as.character(d$year[seq(1,nrow(d),4)])),unlist(as.character(d$location[seq(1,nrow(d),4)])))
@@ -204,21 +204,22 @@ if(table.type %in% c("varIntra","selection.modalities")){
     }
   }))
   
-  vec_variables_VI = intersect(names(res_model_varintra),vec_variables)
-  
-  VI = lapply(vec_variables_VI,function(variable){
-    Tab = ggplot_mixture1(res_model = res_model_varintra, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_varintra", 
-                                 plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL)$Tab
-    colnames(Tab) = c("Mod1","Mod2","Mod3","Mod3vsMod2")
-    
-    a = lapply(c("Mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
-    Res=NULL
-    for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
+  VI = lapply(vec_variables,function(variable){
+    if(variable %in% names(res_model_varintra)){
+      Tab = ggplot_mixture1(res_model = res_model_varintra, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, 
+                            melanges_tot = data_mixtures$Mix_tot, variable, year=c("2016","2017"), model = "model_varintra", 
+                            plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL)$Tab
+      colnames(Tab) = c("Mod1","Mod2","Mod3","Mod3vsMod2")
+      
+      a = lapply(c("Mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
+      Res=NULL
+      for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
+    }else{Res=matrix(NA,nrow=6,ncol=4)}
     rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
     colnames(Res) = c("M1","M2","M3","M3vsM2")
     return(Res)
   })
-  names(VI) = vec_variables_VI
+  names(VI) = vec_variables
   if(table.type == "varIntra"){return(VI)}
 }
   
@@ -267,15 +268,9 @@ if(table.type == "selection.modalities"){
   names(RS)=vec_variables
 
   
-  M = lapply(vec_variables,function(variable){
-    ds = DS[[variable]]
-    rs = RS[[variable]]
-    vi = VI[[variable]]
-    return(list("DS"=ds,"RS"=rs,"varIntra"=vi))
-   })
+  M = lapply(vec_variables,function(variable){ return(list("DS"=DS[[variable]],"RS"=RS[[variable]],"varIntra"=VI[[variable]]))   })
   names(M) = vec_variables
   return(M)
 }
-  
-  
-  }
+
+}#end function
