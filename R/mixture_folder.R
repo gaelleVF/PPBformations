@@ -23,7 +23,8 @@ mixture_folder = function(
   dir = ".",
   person,
   pathway = ".",
-  path_to_tables=".")
+  path_to_tables=".",
+  vec_variables)
 {
 # Set the right folder and create folders tex_files and feedback_folder ----------
   a = dir(dir)
@@ -321,7 +322,8 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
         return(unique(Mixtures_all_person[grep(m$expe,Mixtures_all_person$mixture_id),"expe_melange"]))
       }
     }))
-    vec_variables = names(res_model1)
+    
+    vec_variables_mod1 = intersect(vec_variables,names(res_model1))
 
     mix = plyr:::splitter_d(Mixtures_all_person, .(expe_melange))
 
@@ -380,7 +382,7 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
       print(i)
       x=mix[[i]]
       out = list("subsection" = unique(x$expe_melange)); OUT=c(OUT,out)
-      for (variable in vec_variables){
+      for (variable in vec_variables_mod1){
         print(variable)
         OUT = graphs_ferme_melanges(OUT,variable,titre=variable,mel = x)
       }
@@ -433,15 +435,15 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
     Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv",sep=";",header=T)
   }else{
     t = get_mixture_tables(res_model1, year=NULL, year_DS=NULL,year_RS=NULL,
-                           mix_to_delete=NULL,
+                           mix_to_delete=mix_to_delete,
                            language,
-                           Mixtures=Mixtures_all$data,
-                           vec_variables = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M"), 
+                           data_mixtures=data_mixtures,
+                           vec_variables = intersect(vec_variables,vec_variables_mod1), 
                            data_S_all, 
                            data_SR_all, 
-                           path_to_tables = "/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes",
+                           path_to_tables = path_to_tables,
                            list_trad,
-                           table.type="selection.modalities")
+                           table.type="distribution")
   }
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "Comparaison des mélanges et de leurs composantes par caractère sur le réseau. On compare à chaque fois les mélanges à leurs propres composantes.
@@ -584,52 +586,54 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
 
 "); OUT = c(OUT, out)
   
-  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv")){
-    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/resultats/tableaux/DS_RS_2016-2017.csv",sep=";",header=T)
+  if(file.exists(paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""))){
+    Table = read.table(paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
   }else{
-    t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)),year_RS=as.character(seq(2016,as.numeric(year),1)),
+    t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)), year_RS=as.character(seq(2016,as.numeric(year),1)),
                                    mix_to_delete=NULL,
                                    language,
-                                   Mixtures=Mixtures_all$data,
-                                   vec_variables = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M"), 
+                                   data_mixtures=data_mixtures,
+                                   vec_variables =vec_variables, 
                                    data_S_all, 
                                    data_SR_all, 
                                    path_to_tables = path_to_tables,
                                    list_trad,
-                                   table.type="selection.modalities")
+                                   table.type="selection.modalities",
+                                   res_model_varintra = res_model_varintra)
     
-    t = lapply(t,function(x){
-      ds=x$DS ; rs=x$RS
-      ds[is.na(ds)] = " " ; rs[is.na(rs)] = " "
+    table = lapply(t,function(x){
+      ds=x$DS ; rs=x$RS ; vi=x$varIntra
+      ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
       return(c(paste(ds["Total","mean"]," (",ds["Total","stars"],")",sep=""),
-               paste(ds[grep("M1",rownames(ds)),"mean"]," (",ds[grep("M1",rownames(ds)),"stars"],")",sep=""), 
-                        paste(rs["mean_gain","M1"]," (",rs["stars","M1"],")",sep=""),
-               paste(ds[grep("M2",rownames(ds)),"mean"]," (",ds[grep("M2",rownames(ds)),"stars"],")",sep=""), 
-                       paste(rs["mean_gain","M2"]," (",rs["stars","M2"],")",sep=""),
-               paste(ds[grep("M3",rownames(ds)),"mean"]," (",ds[grep("M3",rownames(ds)),"stars"],")",sep=""), 
-                       paste(rs["mean_gain","M3"]," (",rs["stars","M3"],")",sep=""),
-               paste(rs["mean_gain","M3vsM2"]," (",rs["stars","M3vsM2"],")",sep="")
+               paste(ds[grep("M1",rownames(ds)),"mean"],ds[grep("M1",rownames(ds)),"stars"],sep=" "), 
+                        paste(rs["mean_gain","M1"],rs["stars","M1"],sep=" "),
+               paste(ds[grep("M2",rownames(ds)),"mean"],ds[grep("M2",rownames(ds)),"stars"],sep=" "), 
+                       paste(rs["mean_gain","M2"],rs["stars","M2"],sep=" "),
+               paste(ds[grep("M3",rownames(ds)),"mean"],ds[grep("M3",rownames(ds)),"stars"],sep=" "), 
+                       paste(rs["mean_gain","M3"],rs["stars","M3"],sep=" "),
+               paste(rs["mean_gain","M3vsM2"],rs["stars","M3vsM2"],sep=" "),
+               paste(vi["mean_gain","M3vsM2"],vi["stars","M3vsM2"],sep=" ")
       ))
     })
-    M = NULL
-    for (i in t){M=rbind(M,i)}
-    rownames(M) = c("poids.de.mille.grains","poids.de.l.epi","couleur---couleur_M")
+    Table = NULL
+    for (i in table){Table=rbind(Table,i)}
+    rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
+    Table=cbind(rownames(Table),Table)
+
     if(language == "french"){
-      colnames(M) = c("Toutes modalités - DS", 
+      colnames(Table) = c("Caractère", "Toutes modalités - DS", 
                       "Modalité 1 - DS" , "Modalité 1 - RS",
                       "Modalité 2 - DS" , "Modalité 2 - RS",
                       "Modalité 3 - DS" , "Modalité 3 - RS",
-                      "Modalité 3 vs Modalité 2")
+                      "Modalité 3 vs Modalité 2","Variabilité au sein des mélanges M3 vs M2")
     }else{
-      colnames(M) = c("All modalities - DS", 
+      colnames(Table) = c("CVariable","All modalities - DS", 
                       "Modality 1 - DS" , "Modality 1 - RS",
                       "Modality 2 - DS" , "Modality 2 - RS",
                       "Modality 3 - DS" , "Modality 3 - RS",
-                      "Modality 3 vs Modality 2")
+                      "Modality 3 vs Modality 2","Intra mixture variability M3 vs M2")
     }
-    
-    
-    
+    write.table(Table,file=paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";")
   }
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
@@ -639,7 +643,7 @@ par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqu
 *** représente une forte significativité, aucun symbole indique que la différence n'est pas significative. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
-", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,5,7,9))) ; OUT=c(OUT,out)
+", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,6,8,10,11))) ; OUT=c(OUT,out)
 
   
   # /!\ Get pdf ----------
