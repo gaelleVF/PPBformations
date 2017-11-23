@@ -154,12 +154,12 @@ if(table.type == "distribution"){
                                    save=path_to_tables)
     }
     d = read.table(paste(path_to_tables,"/Distrib_",i,".csv",sep=""),header=T,sep=";",comment.char="")
-    if(!is.null(mix_to_delete)){d = d[-grep(paste(mix_to_delete,collapse="|"),d$melange),]}
+    if(!is.null(mix_to_delete)){d = d[-grep(paste(mix_to_delete,collapse="|"),d$true_melange),]}
     tmp=cbind(as.numeric(as.character(d[grep("Worst",d$parameter),"Moyenne"])),
               as.numeric(as.character(d[grep("MoyenneComposantes",d$parameter),"Moyenne"])),
               as.numeric(as.character(d[grep("Mélange",d$parameter),"Moyenne"])),
               as.numeric(as.character(d[grep("Best",d$parameter),"Moyenne"])),
-              as.numeric(as.character(d[seq(1,nrow(d),4),"pval"])))
+              as.numeric(as.character(d[grep("MoyenneComposantes",d$parameter),"pval"])))
     
     
     tmp = cbind(tmp,unlist(as.character(d$melange[seq(1,nrow(d),4)])),unlist(as.character(d$year[seq(1,nrow(d),4)])),unlist(as.character(d$location[seq(1,nrow(d),4)])))
