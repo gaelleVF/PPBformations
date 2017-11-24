@@ -13,7 +13,6 @@
 #' 
 get_mixture_tables <- function(res_model,
                                res_model_varintra = NULL,
-                               table.type,
                                year=NULL,
                                year_DS=NULL,
                                year_RS=NULL,
