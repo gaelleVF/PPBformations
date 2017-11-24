@@ -55,11 +55,6 @@ ggplot_mixture1 = function(res_model,
   }
   
   #0. functions -----------
-  delete.NULLs  <-  function(x.list){   # delele null/empty entries in a list
-    to_delete = grep(0,unlist(lapply(x.list, function(x){length(unlist(x))})))
-    x.list=x.list[-to_delete]
-  }
-  
   compare_pop = function(x,donnees){
     data = donnees[donnees$parameter %in% x,c(variable,"parameter")]
     if(length(unique(data$parameter))>1){
@@ -150,13 +145,11 @@ ggplot_mixture1 = function(res_model,
         M = M[M$expe_melange %in% noms$expe_melange,]
         M = plyr:::splitter_d(M, .(son_year))
         M = lapply(M, function(m){
-          a = noms[grep(paste(m$father,collapse="|"),noms$son),]
+          a = noms[which(noms$son %in% m$father),]
           a$son = a$father
           return(rbind(m,a))
         })
-      #  y_son = y[y$sl_statut %in%"son",]
-#        if(length(unique(y_son$germplasm_son == y_son$expe_melange))>1 | unique(y_son$germplasm_son == y_son$expe_melange) == FALSE ){ # Modality 2 of mixture experiment : we have only the name of the mixture and not the components since the selection 
-   #                           # that were done to create the mixture have not been sown. We want to get the selections that were sown (modality)
+
     Donnees = lapply(M,function(M_year){
       M_year$Type = unlist(lapply(1:nrow(M_year),function(i){
         a = M_year[i,]
@@ -176,7 +169,7 @@ ggplot_mixture1 = function(res_model,
           d$year = unlist(lapply(as.character(d$sl_statut),function(y){strsplit(y,":")[[1]][1]}))
           d=d[d$year %in% mel_year,]
           germ = d$son
-          return(as.character(germ[grep("VA",germ)]))
+          if(length(germ)>0){return(as.character(germ[grep("VA",germ)]))}else{return(x)}
         })
         noms = rbind(as.matrix(nom_melange),as.matrix(noms))
         noms = as.data.frame(noms)
@@ -210,7 +203,7 @@ ggplot_mixture1 = function(res_model,
               
               if (length(Mel) > 0) {
                 Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
-                if(!is.null(ncol(Comp))){if (ncol(Comp) < length(noms[noms$Type == "Composante","Type"]) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+                if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
 
                   if(!missingComp){
                     MeanComp = apply(Comp, 1, mean)
