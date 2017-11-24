@@ -208,181 +208,195 @@ if(table.type == "distribution"){
 
 #2. corrélations ----------
 if(table.type == "correlations"){
-  d_env = plyr:::splitter_d(Mixtures, .(location))
-  d_env_b = lapply(d_env, function(x){
-    # une table par mélange
-    mix = plyr:::splitter_d(x, .(mixture_id))
-    if(length(mix)==1){
-      MIX=mix
-    }else{
-      MIX = list()
-      for (i in 1:(length(mix)-1)) {
-        Mel = mix[[i]]
-        Comp = mix[[length(mix)]] 
-        MIX = c(MIX,list(rbind(Mel, Comp[Comp$expe %in% Mel$mixture_id,])))
+  Tab = NULL
+  a = lapply(vec_variables,function(variable){
+    d_env = plyr:::splitter_d(Mixtures, .(location))
+    d_env_b = lapply(d_env, function(x){
+      # une table par mélange
+      mix = plyr:::splitter_d(x, .(mixture_id))
+      if(length(mix)==1){
+        MIX=mix
+      }else{
+        MIX = list()
+        for (i in 1:(length(mix)-1)) {
+          Mel = mix[[i]]
+          Comp = mix[[length(mix)]] 
+          MIX = c(MIX,list(rbind(Mel, Comp[Comp$expe %in% Mel$mixture_id,])))
+        }
       }
-    }
-    paysan = unique(mix[[1]]$location)
-    
-    # récupérer les données (MCMC) pour chaque mixture et les splitter
-    mix_split = lapply(MIX , function(y) {
-      noms = as.data.frame(unique(y[,c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y","expe_melange")]),stringsAsFactors = FALSE)
+      paysan = unique(mix[[1]]$location)
       
-      M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
-      M = M[is.na(M$selection_id) & M$son_year %in% year,]
-      M$expe_melange = unlist(lapply(as.character(M$father_germplasm),function(x){
-        a = strsplit(x,"-")[[1]]
-        b = grep("[.]",a) ; c = grep("#",a)
-        if(length(b)>0){ a[b] = strsplit(a[b],".",fixed=TRUE)[[1]][1]}
-        if(length(c)>0){ a[c] = strsplit(a[c],".",fixed=TRUE)[[1]][1]}
-        return(paste(a,collapse="-"))
-      }))
-      M = M[M$expe_melange %in% noms$expe_melange,]
-      M = plyr:::splitter_d(M, .(son_year))
-      M = lapply(M, function(m){
-        a = noms[which(noms$son %in% m$father),]
-        a$son = a$father
-        return(rbind(m,a))
-      })
-      
-      Donnees = lapply(M,function(M_year){
-        M_year$Type = unlist(lapply(1:nrow(M_year),function(i){
-          a = M_year[i,]
-          if(as.character(a$son_germplasm)== as.character(a$father_germplasm)){return("Mélange")}else{return("Composante")}
-        }))
-        if(length(unique(M_year$son_germplasm == M_year$expe_melange))>1 | length(grep(FALSE,(unique(M_year$son_germplasm == M_year$expe_melange))))>0){
-          nom_melange=data.frame(M_year[M_year$Type %in% "Mélange",],stringsAsFactors = FALSE)
-          nom_melange$germplasm_2 = nom_melange[,1]
-          
-          noms=data.frame(M_year[M_year$Type %in% "Composante",],stringsAsFactors = FALSE)
-          colnames(noms)[1] =  colnames(nom_melange)[1] ="germplasm"
-          #       mel_year = strsplit(as.character(nom_melange$germplasm),"_")[[1]][3]
-          mel_year = as.character(as.numeric(as.character(unique(nom_melange$son_year)))-1)
-          noms$germplasm_2 = lapply(as.character(noms$germplasm),function(x){
-            d = data_S[grep(strsplit(x,"#")[[1]][1],data_S$father),]
-            d = d[d$son_person %in% paysan,]
-            d$year = unlist(lapply(as.character(d$sl_statut),function(y){strsplit(y,":")[[1]][1]}))
-            d=d[d$year %in% mel_year,]
-            germ = d$son
-            if(length(germ)>0){return(as.character(germ[grep("VA",germ)]))}else{return(x)}
-          })
-          noms = rbind(as.matrix(nom_melange),as.matrix(noms))
-          noms = as.data.frame(noms)
-        }else{
-          noms=M_year
-          colnames(noms)[1] = "germplasm"
-          noms$germplasm_2 = noms$germplasm
-        }
+      # récupérer les données (MCMC) pour chaque mixture et les splitter
+      mix_split = lapply(MIX , function(y) {
+        noms = as.data.frame(unique(y[,c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y","expe_melange")]),stringsAsFactors = FALSE)
         
-        if(length(unlist(noms$germplasm_2)) < nrow(noms)){noms$germplasm_2 = noms$germplasm}
-        if(length(unlist(noms$germplasm_2)) == nrow(noms)){
-          M_year$son = unlist(lapply(as.character(M_year$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
-          
-        }
-        melange = unlist(unique(noms[noms$Type%in%"Composante","expe_melange"]))
-        noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
-        noms$son_year = max(as.numeric(as.character(noms$son_year)))
-        noms$son = paste(noms$son_germplasm, paysan, noms$son_year,"0001",sep="_")
-        noms=noms[noms$expe_melange %in% melange,]
-        return(noms)
-      })
-      
-      res_year = lapply(year,function(yr){
-        noms = Donnees[yr][[1]]
-        if(!is.null(noms)){
-          if(nrow(noms)>0){
-            melange = noms$son_germplasm[1]
-            mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model="model_1",param = "mu", year = yr)
-            Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
+        M = unique(melanges_tot[melanges_tot$son_germplasm %in% unique(x$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
+        M = M[is.na(M$selection_id) & M$son_year %in% year,]
+        M$expe_melange = unlist(lapply(as.character(M$father_germplasm),function(x){
+          a = strsplit(x,"-")[[1]]
+          b = grep("[.]",a) ; c = grep("#",a)
+          if(length(b)>0){ a[b] = strsplit(a[b],".",fixed=TRUE)[[1]][1]}
+          if(length(c)>0){ a[c] = strsplit(a[c],".",fixed=TRUE)[[1]][1]}
+          return(paste(a,collapse="-"))
+        }))
+        M = M[M$expe_melange %in% noms$expe_melange,]
+        M = plyr:::splitter_d(M, .(son_year))
+        M = lapply(M, function(m){
+          a = noms[which(noms$son %in% m$father),]
+          a$son = a$father
+          return(rbind(m,a))
+        })
+        
+        Donnees = lapply(M,function(M_year){
+          M_year$Type = unlist(lapply(1:nrow(M_year),function(i){
+            a = M_year[i,]
+            if(as.character(a$son_germplasm)== as.character(a$father_germplasm)){return("Mélange")}else{return("Composante")}
+          }))
+          if(length(unique(M_year$son_germplasm == M_year$expe_melange))>1 | length(grep(FALSE,(unique(M_year$son_germplasm == M_year$expe_melange))))>0){
+            nom_melange=data.frame(M_year[M_year$Type %in% "Mélange",],stringsAsFactors = FALSE)
+            nom_melange$germplasm_2 = nom_melange[,1]
             
-            if (length(Mel) > 0) {
-              Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
-              if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){
-                missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+            noms=data.frame(M_year[M_year$Type %in% "Composante",],stringsAsFactors = FALSE)
+            colnames(noms)[1] =  colnames(nom_melange)[1] ="germplasm"
+            #       mel_year = strsplit(as.character(nom_melange$germplasm),"_")[[1]][3]
+            mel_year = as.character(as.numeric(as.character(unique(nom_melange$son_year)))-1)
+            noms$germplasm_2 = lapply(as.character(noms$germplasm),function(x){
+              d = data_S[grep(strsplit(x,"#")[[1]][1],data_S$father),]
+              d = d[d$son_person %in% paysan,]
+              d$year = unlist(lapply(as.character(d$sl_statut),function(y){strsplit(y,":")[[1]][1]}))
+              d=d[d$year %in% mel_year,]
+              germ = d$son
+              if(length(germ)>0){return(as.character(germ[grep("VA",germ)]))}else{return(x)}
+            })
+            noms = rbind(as.matrix(nom_melange),as.matrix(noms))
+            noms = as.data.frame(noms)
+          }else{
+            noms=M_year
+            colnames(noms)[1] = "germplasm"
+            noms$germplasm_2 = noms$germplasm
+          }
+          
+          if(length(unlist(noms$germplasm_2)) < nrow(noms)){noms$germplasm_2 = noms$germplasm}
+          if(length(unlist(noms$germplasm_2)) == nrow(noms)){
+            M_year$son = unlist(lapply(as.character(M_year$son),function(x){return(noms[which(noms$germplasm ==x),"germplasm_2"])}))
+            
+          }
+          melange = unlist(unique(noms[noms$Type%in%"Composante","expe_melange"]))
+          noms$son_germplasm = unlist(lapply(as.character(noms$germplasm_2),function(x){strsplit(x,"_")[[1]][1]}))
+          noms$son_year = max(as.numeric(as.character(noms$son_year)))
+          noms$son = paste(noms$son_germplasm, paysan, noms$son_year,"0001",sep="_")
+          noms=noms[noms$expe_melange %in% melange,]
+          return(noms)
+        })
+        
+        res_year = lapply(year,function(yr){
+          noms = Donnees[yr][[1]]
+          if(!is.null(noms)){
+            if(nrow(noms)>0){
+              melange = noms$son_germplasm[1]
+              mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model="model_1",param = "mu", year = yr)
+              Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
               
-              if(!missingComp){
-                MeanComp = apply(Comp, 1, mean)
-                M = cbind(Mel, MeanComp, Comp)
-                colnames(M)[colnames(M) %in% "MeanComp"] = paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
-              }else{return(NULL)}
-              
-              colnames(M)[colnames(M) %in% "Mel"] = paste("mu[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
-              M = apply(M,2,mean)
-              return(list("Tab"=M,"Comp"=names(Comp)))
+              if (length(Mel) > 0) {
+                Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
+                if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){
+                  missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+                
+                if(!missingComp){
+                  MeanComp = apply(Comp, 1, mean)
+                  M = cbind(Mel, MeanComp, Comp)
+                  colnames(M)[colnames(M) %in% "MeanComp"] = paste("mu[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
+                }else{return(NULL)}
+                
+                colnames(M)[colnames(M) %in% "Mel"] = paste("mu[", unique(noms[noms$Type %in% "Mélange","son_germplasm"]),",",paysan,":",yr,"]",sep="")
+                M = apply(M,2,mean)
+                return(list("Tab"=M,"Comp"=names(Comp)))
+              }else{
+                warning("No data for the mixture")
+                return(list("Tab"=NULL,"Comp"=NULL))
+              }
             }else{
-              warning("No data for the mixture")
+              warning(paste("No data for ",yr,sep=""))
               return(list("Tab"=NULL,"Comp"=NULL))
             }
           }else{
             warning(paste("No data for ",yr,sep=""))
             return(list("Tab"=NULL,"Comp"=NULL))
           }
-        }else{
-          warning(paste("No data for ",yr,sep=""))
-          return(list("Tab"=NULL,"Comp"=NULL))
-        }
-        
-      }) # end lapply(yr)
-      # ne garder l'overyielding que de la première année
-      comp=NULL
-      for (yr in 1:length(res_year)){if(!is.null(res_year[[yr]]$Tab) & is.null(comp)){comp=yr}}
-      if(!is.null(comp)){if(comp < length(res_year)){for(i in (comp+1):length(res_year)){res_year[[i]]$Tab=NULL}}}
-      return(res_year)
-    }) # end lapply(y)
-    return(mix_split)
-  }) # end lapply(x)
-  Tab = NULL
-  for (i in 1:length(d_env_b)){
-    d=d_env_b[[i]]
-    for(j in 1:length(d)){
-      dd=d[[j]]
-      for(k in dd){
-        if(!is.null(k$Tab)){
-          Comp = k$Comp
-          Comp = unlist(lapply(as.character(Comp),function(x){strsplit(strsplit(x,"[[]")[[1]][2],",")[[1]][1]}))
-          k = k$Tab
-          mod = unique(unlist(lapply(as.character(Comp),function(x){substr(strsplit(x,"#")[[1]][2],1,2)})))
-          comp=NULL ; for(l in 1:length(mod)){if(!(mod[l] %in% c("VA","VB","JA"))){comp=c(comp,l)}} ; if(length(comp)>0){mod=mod[-comp]} ; if(length(mod)==0){mod=NA}
-          nb_comp = length(Comp)
-          k = cbind(k,unlist(lapply(as.character(names(k)),function(x){strsplit(unlist(lapply(as.character(x),function(y){strsplit(y,",")[[1]][1]})),"[[]")[[1]][2]})))
-          colnames(k) = c("value","variete")
-          t = k[k[,"variete"]%in%Comp,]
           
-          mel = as.character(Melanges[Melanges %in% k[,"variete"]])
-          mel=mel[!(mel %in% t[,"variete"])]
-          if(is.na(mod)){a = grep("[.]2|[.]3",mel) ; if(length(a)>0){mel = mel[-a]}; mel_base=mel
-          }else if(mod%in%c("JA","VA")){mel = mel[grep("[.]2",mel)] ;  mel_base=gsub("[.]2","",mel)
-          }else if(mod%in%c("VB")){mel = mel[grep("[.]3",mel)];  mel_base=gsub("[.]3","",mel)
+        }) # end lapply(yr)
+        # ne garder l'overyielding que de la première année
+        comp=NULL
+        for (yr in 1:length(res_year)){if(!is.null(res_year[[yr]]$Tab) & is.null(comp)){comp=yr}}
+        if(!is.null(comp)){if(comp < length(res_year)){for(i in (comp+1):length(res_year)){res_year[[i]]$Tab=NULL}}}
+        return(res_year)
+      }) # end lapply(y)
+      return(mix_split)
+    }) # end lapply(x)
+    Tab = NULL
+    for (i in 1:length(d_env_b)){
+      d=d_env_b[[i]]
+      for(j in 1:length(d)){
+        dd=d[[j]]
+        for(k in dd){
+          if(!is.null(k$Tab)){
+            Comp = k$Comp
+            Comp = unlist(lapply(as.character(Comp),function(x){strsplit(strsplit(x,"[[]")[[1]][2],",")[[1]][1]}))
+            k = k$Tab
+            mod = unique(unlist(lapply(as.character(Comp),function(x){substr(strsplit(x,"#")[[1]][2],1,2)})))
+            comp=NULL ; for(l in 1:length(mod)){if(!(mod[l] %in% c("VA","VB","JA"))){comp=c(comp,l)}} ; if(length(comp)>0){mod=mod[-comp]} ; if(length(mod)==0){mod=NA}
+            nb_comp = length(Comp)
+            k = cbind(k,unlist(lapply(as.character(names(k)),function(x){strsplit(unlist(lapply(as.character(x),function(y){strsplit(y,",")[[1]][1]})),"[[]")[[1]][2]})))
+            colnames(k) = c("value","variete")
+            t = k[k[,"variete"]%in%Comp,]
+            
+            mel = as.character(Melanges[Melanges %in% k[,"variete"]])
+            mel=mel[!(mel %in% t[,"variete"])]
+            if(is.na(mod)){a = grep("[.]2|[.]3",mel) ; if(length(a)>0){mel = mel[-a]}; mel_base=mel
+            }else if(mod%in%c("JA","VA")){mel = mel[grep("[.]2",mel)] ;  mel_base=gsub("[.]2","",mel)
+            }else if(mod%in%c("VB")){mel = mel[grep("[.]3",mel)];  mel_base=gsub("[.]3","",mel)
+            }
+          
+            overY = k[(k[,"variete"]%in%c(mel,"MoyenneComposantes")),]
+            OverY = 100*(as.numeric(as.character(overY[overY[,"variete"] %in% mel,"value"])) - as.numeric(as.character(overY[overY[,"variete"] %in% "MoyenneComposantes","value"])))/as.numeric(as.character(overY[overY[,"variete"] %in% "MoyenneComposantes","value"]))
+            if(!is.null(tab_proportions)){
+              t[,"variete"] = unlist(lapply(t[,"variete"],function(x){strsplit(x,"#")[[1]][1]}))
+              comp=NULL
+              if(!(mel %in% tab_proportions$melange)){
+                if(mel_base %in% tab_proportions$melange){tab = tab_proportions[tab_proportions$melange %in% mel_base,]
+                }else{t = cbind(t,rep(1/nrow(t),nrow(t))) ; comp=1 ; colnames(t)[ncol(t)] = "proportion"}
+              }else{ tab = (tab_proportions[tab_proportions$melange %in% k[,"variete"],])}
+            if(is.null(comp)){
+              tab[,"germplasm"] = unlist(lapply(as.character(tab[,"germplasm"]),function(x){strsplit(x,"#")[[1]][1]}))
+              t = merge(t,tab,by.x = "variete",by.y = "germplasm")
+              t=t[t[,"melange"] %in% c(mel,mel_base),]
+            }
+            }else{
+              t = cbind(t,rep(1/nrow(t),nrow(t)))
+              colnames(t)[ncol(t)] = "proportion"
+            }
+            Wvar = weightedvar(as.numeric(as.character(t[,"value"])),  as.numeric(as.character(t[,"proportion"])), na.rm = FALSE)
+            Tab = rbind(Tab,c(mel,OverY,nb_comp,Wvar))
           }
-        
-          overY = k[(k[,"variete"]%in%c(mel,"MoyenneComposantes")),]
-          OverY = 100*(as.numeric(as.character(overY[overY[,"variete"] %in% mel,"value"])) - as.numeric(as.character(overY[overY[,"variete"] %in% "MoyenneComposantes","value"])))/as.numeric(as.character(overY[overY[,"variete"] %in% "MoyenneComposantes","value"]))
-          if(!is.null(tab_proportions)){
-            t[,"variete"] = unlist(lapply(t[,"variete"],function(x){strsplit(x,"#")[[1]][1]}))
-            comp=NULL
-            if(!(mel %in% tab_proportions$melange)){
-              if(mel_base %in% tab_proportions$melange){tab = tab_proportions[tab_proportions$melange %in% mel_base,]
-              }else{t = cbind(t,rep(1/nrow(t),nrow(t))) ; comp=1 ; colnames(t)[ncol(t)] = "proportion"}
-            }else{ tab = (tab_proportions[tab_proportions$melange %in% k[,"variete"],])}
-          if(is.null(comp)){
-            tab[,"germplasm"] = unlist(lapply(as.character(tab[,"germplasm"]),function(x){strsplit(x,"#")[[1]][1]}))
-            t = merge(t,tab,by.x = "variete",by.y = "germplasm")
-            t=t[t[,"melange"] %in% c(mel,mel_base),]
-          }
-          }else{
-            t = cbind(t,rep(1/nrow(t),nrow(t)))
-            colnames(t)[ncol(t)] = "proportion"
-          }
-          Wvar = weightedvar(as.numeric(as.character(t[,"value"])),  as.numeric(as.character(t[,"proportion"])), na.rm = FALSE)
-          Tab = rbind(Tab,c(mel,OverY,nb_comp,Wvar))
         }
       }
     }
+    colnames(Tab) = c("melange","overyielding","NbComp","WeightedVar")
+    Tab=as.data.frame(Tab)
+    correl1 = rcorr(Tab$overyielding,Tab$NbComp)
+    correl2 = rcorr(Tab$overyielding,Tab$WeightedVar)
+    return(c(correl1$r[1,2],correl1$P[2],correl2$r[1,2],correl2$P[2]))
+  })
+  names(a)=vec_variables
+  for (i in 1:length(a)){
+    Tab = rbind(Tab,a[[i]])
   }
-  colnames(Tab) = c("melange","overyielding","NbComp","WeightedVar")
-
+  rownames(Tab) = vec_variables
+  if(language == "french"){colnames(Tab)=c("Rcorr overyielding~Nb composantes", "pvalue overyielding~Nb composantes","Rcorr overyielding~Variance composantes", "pvalue overyielding~Variance composantes")}
+  if(language == "english"){colnames(Tab)=c("Rcorr overyielding~Nb components", "pvalue overyielding~Nb components","Rcorr overyielding~Variance components", "pvalue overyielding~Variance components")}
   
-}
+  return(list("Tab"=a,"Correlations"=Tab))
+}#end correlations
   
   
 #3. modalités de sélection ---------- 
