@@ -77,7 +77,7 @@ mixture_folder = function(
   data_S_all =  get(load(paste(pathway,"data_S_all.RData",sep="/")))
   data_SR_all =   get(load(paste(pathway,"data_SR_all.RData",sep="/")))
   if(file.exists(paste(pathway,"mix_to_delete.RData",sep="/"))){mix_to_delete = get(load(paste(pathway,"mix_to_delete.RData",sep="/")))}else{mix_to_delete=FALSE}
-  vec_variables_mod1 = intersect(vec_variables,names(res_model1))
+  vec_variables_mod1 = names(res_model1)
 
   list_trad = list(
     c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
@@ -546,14 +546,14 @@ Pour la comparaison du mélange à la moyenne des composantes est indiqué entre
                              language="english",
                              data_mixtures,
                              vec_variables = intersect(vec_variables,vec_variables_mod1), 
-                             data_S_all=NULL, 
+                             data_S_all=data_S_all, 
                              data_SR_all=NULL, 
                              path_to_tables = ".",
                              list_trad=list_trad,
                              tab_proportions = tab_proportions
                              )
   
-  Tab = apply(Table,2,function(x){
+  Tab = apply(Table$Correlations,2,function(x){
     return(c(paste(round(x[grep("Rcorr overyielding~Nb",names(x))],2), get_stars(x[grep("pvalue overyielding~Nb",names(x))])),
              paste(round(x[grep("Rcorr overyielding~Variance",names(x))],2), get_stars(x[grep("pvalue overyielding~Variance",names(x))]))))
   })
@@ -561,23 +561,31 @@ Pour la comparaison du mélange à la moyenne des composantes est indiqué entre
   if(language=="english"){rownames(Tab) = c("Correlation overyielding ~ Number of components","Correlation overyielding ~ variability across components")}
   Tab = cbind(rownames(Tab),Tab)
   Table2 = rbind(Table2,Tab)
-  attributes(Table)$invert =FALSE
+  attributes(Table2)$invert =FALSE
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La ligne du milieu présente le gain (ou la perte) moyenne des mélanges
 comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain (ou la perte) et le nombre de composantes dans le mélange ou la variabilité
 du caractère au sein des composantes : une valeur proche de 0 indique qu'il n'existe pas de corrélation, tandis qu'une valeur proche de 1 indique une forte corrélation. 
-Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
-indique une différence non significative. 
-                            ", "content" = list(Table),"landscape"=TRUE,"tab.lab"="OverY")) ; OUT=c(OUT,out)
+Les symboles indiques si le gain moyen et les corrélations sont significatifs (voir tableau \\ref{Signif} pour l'explication des symboles utilisés). 
+                            ", "content" = list(Table2),"landscape"=TRUE,"tab.lab"="OverY")) ; OUT=c(OUT,out)
   
 # 2.2.1.3. Corrélations entre overyieldings
-  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_corr_OverY.csv")){
-    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_corr_OverY.csv",sep=";",header=T)
+  Table = Table$overyielding
+  Tab=matrix(NA,ncol=ncol(Table)-1,nrow=ncol(Table)-1)
+  for(i in 2:(ncol(Table)-1)){
+    for(j in (i+1):ncol(Table)){
+      t=Table[,c(i,j)]
+      R = rcorr(as.numeric(as.character(t[,1])),as.numeric(as.character(t[,2])))
+      Tab[(i-1),(j-1)] = paste(round(R$r[1,2],3),get_stars(R$P[2]),sep=" ")
+    }
   }
-  attributes(Table)$invert =FALSE
+  Tab[,1] = vec_variables ; colnames(Tab)[2:ncol(Tab)]=vec_variables[-1]
+  Tab = Tab[-nrow(Tab),]
+  
+  attributes(Tab)$invert =FALSE
   out = list("table" = list("caption" = "Corrélations entre gains (ou perte) des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
 tandis qu'une valeur proche de 1 indique une forte corrélation. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
 indique une différence non significative. 
-                            ", "content" = list(Table),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
+                            ", "content" = list(Tab),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
   
   
   
