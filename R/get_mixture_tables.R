@@ -208,7 +208,7 @@ if(table.type == "distribution"){
 
 #2. corrélations ----------
 if(table.type == "correlations"){
-  Tab = NULL
+
   a = lapply(vec_variables,function(variable){
     d_env = plyr:::splitter_d(Mixtures, .(location))
     d_env_b = lapply(d_env, function(x){
@@ -385,17 +385,21 @@ if(table.type == "correlations"){
     Tab=as.data.frame(Tab)
     correl1 = rcorr(as.numeric(as.character(Tab$overyielding)),as.numeric(as.character(Tab$NbComp)))
     correl2 = rcorr(as.numeric(as.character(Tab$overyielding)),as.numeric(as.character(Tab$WeightedVar)))
-    return(c(correl1$r[1,2],correl1$P[2],correl2$r[1,2],correl2$P[2]))
+    return(list("Tab"=Tab,"Correl" = c(correl1$r[1,2],correl1$P[2],correl2$r[1,2],correl2$P[2])))
   })
   names(a)=vec_variables
+  Correl = NULL ; Tab = a[[1]]$Tab[,1:2]
   for (i in 1:length(a)){
-    Tab = cbind(Tab,a[[i]])
+    Correl = cbind(Correl,a[[i]]$Correl)
+    if(i>1){
+      Tab = join(Tab,a[[i]]$Tab[1:2],by="melange")
+    }
   }
-  colnames(Tab) = vec_variables
-  if(language == "french"){rownames(Tab)=c("Rcorr overyielding~Nb composantes", "pvalue overyielding~Nb composantes","Rcorr overyielding~Variance composantes", "pvalue overyielding~Variance composantes")}
-  if(language == "english"){rownames(Tab)=c("Rcorr overyielding~Nb components", "pvalue overyielding~Nb components","Rcorr overyielding~Variance components", "pvalue overyielding~Variance components")}
+  colnames(Correl) = colnames(Tab)[-1] = vec_variables
+  if(language == "french"){rownames(Correl)=c("Rcorr overyielding~Nb composantes", "pvalue overyielding~Nb composantes","Rcorr overyielding~Variance composantes", "pvalue overyielding~Variance composantes")}
+  if(language == "english"){rownames(Correl)=c("Rcorr overyielding~Nb components", "pvalue overyielding~Nb components","Rcorr overyielding~Variance components", "pvalue overyielding~Variance components")}
   
-  return(Tab)
+  return(list("overyielding" = Tab, "Correlations"=Correl))
 }#end correlations
   
   
