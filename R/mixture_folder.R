@@ -459,9 +459,7 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
   OUT=c(OUT,out)
   
 # 2.2.1.1 Résultats globaux : comparaisons mélanges / composantes 
-  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv")){
-    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_Glob.csv",sep=";",header=T)
-  }else{
+
     Table = get_mixture_tables(res_model1, year=NULL, year_DS=NULL, year_RS=NULL,
                            mix_to_delete=mix_to_delete,
                            language=language,
@@ -472,23 +470,63 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
                            path_to_tables = path_to_tables,
                            list_trad,
                            table.type="distribution")
+
+  if(language == "french"){
+    Table[c("Proportion mélanges > moyenne des composantes","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute"),] = apply(Table,2,function(x){
+      p1 = paste(round(as.numeric(as.character(x["Proportion mélanges > moyenne des composantes"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion mélanges > moyenne des composantes"])),1), "%"," (", x["nombre de gains significatifs"],")",sep="")
+      p2 = paste(round(as.numeric(as.character(x["Proportion mélanges < composante la plus basse"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion mélanges < composante la plus basse"])),1), "%",sep="")
+      p3 = paste(round(as.numeric(as.character(x["Proportion mélanges > composante la plus haute"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion mélanges > composante la plus haute"])),1), "%",sep="")
+      return(c(p1,p2,p3))})
+    Table = Table[-grep("nombre de gains significatifs",rownames(Table)),]
+    if(!is.null(dim(Table))){
+      Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),] = t(apply(Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),],1,function(x){return(round(as.numeric(as.character(x)),2))}))
+      Table["Gain moyen",] = apply(Table,2,function(x){paste(x["Gain moyen"],"% ",x["stars"],sep="") })
+      Table=Table[-grep("pvalue|stars",rownames(Table)),]
+      rownames(Table)[grep("Proportion",rownames(Table))] = gsub("Proportion","",rownames(Table)[grep("Proportion",rownames(Table))])
+      Table=cbind(rownames(Table),Table)
+    }else{
+      Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen")] = round(as.numeric(as.character(Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen")])),2)
+      Table["Gain moyen"] = paste(Table["Gain moyen"],"% ",Table["stars"],sep="")
+      Table=Table[-grep("pvalue|stars",names(Table))]
+      names(Table)[grep("Proportion",names(Table))] = gsub("Proportion","",names(Table)[grep("Proportion",names(Table))])
+      Table=cbind(names(Table),Table)
+      colnames(Table)[2] = intersect(vec_variables,vec_variables_mod1)
+    }
+    
+    Table1 = Table[grep("Nombre|>|<",rownames(Table)),]
+    Table2 = Table[-grep("Nombre|>|<",rownames(Table)),]
+  }else if(language == "english"){
+    Table[c("Proportion blend > components' mean","Proportion blend < lowest component","Proportion blend > highest component"),] = apply(Table,2,function(x){
+      p1 = paste(round(as.numeric(as.character(x["Proportion blend > components' mean"]))*as.numeric(as.character(x["Number of blends"]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion blend > components' mean"])),1), "%"," (", x["number significant overyieldings"],")",sep="")
+      p2 = paste(round(as.numeric(as.character(x["Proportion blend < lowest component"]))*as.numeric(as.character(x["Number of blends "]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion blend < lowest component"])),1), "%",sep="")
+      p3 = paste(round(as.numeric(as.character(x["Proportion blend > highest component"]))*as.numeric(as.character(x["Number of blends "]))/100,1)," - ", 
+                 round(as.numeric(as.character(x["Proportion blend > highest component"])),1), "%",sep="")
+      return(c(p1,p2,p3))})
+    Table = Table[-grep("number significant overyieldings",rownames(Table)),]
+    if(!is.null(dim(Table))){
+      Table[c("Mean components","Mean blends","Mean overyielding"),] = t(apply(Table[c("Mean components","Mean blends","Mean overyielding"),],1,function(x){return(round(as.numeric(as.character(x)),2))}))
+      Table["Mean overyielding",] = apply(Table,2,function(x){paste(x["Mean overyielding"],"% ",x["stars"],sep="") })
+      Table=Table[-grep("pvalue|stars",rownames(Table)),]
+      rownames(Table)[grep("Proportion",rownames(Table))] = gsub("Proportion","",rownames(Table)[grep("Proportion",rownames(Table))])
+      Table=cbind(rownames(Table),Table)
+    }else{
+      Table[c("Mean components","Mean blends","Mean overyielding")] = round(as.numeric(as.character(Table[c("Mean components","Mean blends","Mean overyielding")])),2)
+      Table["Mean overyielding"] = paste(Table["Mean overyielding"],"% ",Table["stars"],sep="")
+      Table=Table[-grep("pvalue|stars",names(Table))]
+      names(Table)[grep("Proportion",names(Table))] = gsub("Proportion","",names(Table)[grep("Proportion",names(Table))])
+      Table=cbind(names(Table),Table)
+      colnames(Table)[2] = intersect(vec_variables,vec_variables_mod1)
+    }
+    
+    Table1 = Table[grep("Nombre|>|<",rownames(Table)),]
+    Table2 = Table[-grep("Nombre|>|<",rownames(Table)),]
   }
-  Table[c("Proportion mélanges > moyenne des composantes","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute"),] = apply(Table,2,function(x){
-    p1 = paste(round(as.numeric(as.character(x["Proportion mélanges > moyenne des composantes"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
-               round(as.numeric(as.character(x["Proportion mélanges > moyenne des composantes"])),1), "%"," (", x["nombre de gains significiatifs"],")",sep="")
-    p2 = paste(round(as.numeric(as.character(x["Proportion mélanges < composante la plus basse"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
-               round(as.numeric(as.character(x["Proportion mélanges < composante la plus basse"])),1), "%",sep="")
-    p3 = paste(round(as.numeric(as.character(x["Proportion mélanges > composante la plus haute"]))*as.numeric(as.character(x["Nombre de mélanges"]))/100,1)," - ", 
-               round(as.numeric(as.character(x["Proportion mélanges > composante la plus haute"])),1), "%",sep="")
-    return(c(p1,p2,p3))})
-  Table = Table[-grep("nombre de gains significiatifs",rownames(Table)),]
-  Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),] = t(apply(Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),],1,function(x){return(round(as.numeric(as.character(x)),2))}))
-  Table["Gain moyen",] = apply(Table,2,function(x){paste(x["Gain moyen"],"% ",x["stars"],sep="") })
-  Table=Table[-grep("pvalue|stars",rownames(Table)),]
-  rownames(Table)[grep("Proportion",rownames(Table))] = gsub("Proportion","",rownames(Table)[grep("Proportion",rownames(Table))])
-  Table=cbind(rownames(Table),Table)
-  Table1 = Table[grep("Nombre|>|<",rownames(Table)),]
-  Table2 = Table[-grep("Nombre|>|<",rownames(Table)),]
+
   
   attributes(Table1)$invert =FALSE
   out = list("table" = list("caption" = "Comparaison des mélanges avec leurs composantes respectives par caractère sur le réseau. 
@@ -498,9 +536,31 @@ Pour la comparaison du mélange à la moyenne des composantes est indiqué entre
                             ", "content" = list(Table1),"landscape"=TRUE,"tab.lab"="Compmel")) ; OUT=c(OUT,out)
   
 # 2.2.1.2. Résultats globaux : Overyieldings et corrélations
-  if(file.exists("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_OverY_Corr.csv")){
-    Table = read.table("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/mixture_folder/tableaux/Tab_OverY_Corr.csv",sep=";",header=T)
-  }
+  Table = get_mixture_tables(res_model=res_model1,
+                             res_model_varintra = NULL,
+                             table.type="correlations",
+                             year=NULL,
+                             year_DS=NULL,
+                             year_RS=NULL,
+                             mix_to_delete=mix_to_delete,
+                             language="english",
+                             data_mixtures,
+                             vec_variables = intersect(vec_variables,vec_variables_mod1), 
+                             data_S_all=NULL, 
+                             data_SR_all=NULL, 
+                             path_to_tables = ".",
+                             list_trad=list_trad,
+                             tab_proportions = tab_proportions
+                             )
+  
+  Tab = apply(Table,2,function(x){
+    return(c(paste(round(x[grep("Rcorr overyielding~Nb",names(x))],2), get_stars(x[grep("pvalue overyielding~Nb",names(x))])),
+             paste(round(x[grep("Rcorr overyielding~Variance",names(x))],2), get_stars(x[grep("pvalue overyielding~Variance",names(x))]))))
+  })
+  if(language=="french"){rownames(Tab) = c("Corrélation gain ~ Nombre de composantes","Corrélation gain ~ variabilité dans les composantes")}
+  if(language=="english"){rownames(Tab) = c("Correlation overyielding ~ Number of components","Correlation overyielding ~ variability across components")}
+  Tab = cbind(rownames(Tab),Tab)
+  Table2 = rbind(Table2,Tab)
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La ligne du milieu présente le gain (ou la perte) moyenne des mélanges
 comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain (ou la perte) et le nombre de composantes dans le mélange ou la variabilité
