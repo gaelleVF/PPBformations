@@ -204,3 +204,16 @@ WMW = function(x, donnees, variable){
   return(c(mean(na.omit(as.numeric(vrac))),mean(na.omit(as.numeric(bouquet))),pval))
 }
 
+# Delete null elements of a list
+delete.NULLs  <-  function(x.list){   # delele null/empty entries in a list
+  to_delete = grep(0,unlist(lapply(x.list, function(x){length(unlist(x))})))
+  x.list=x.list[-to_delete]
+}
+
+weightedvar <- function(x, prop, na.rm = FALSE) {
+  # Récupérer la variance
+  sum.prop <- sum(prop)
+  sum.prop2 <- sum(prop^2)
+  mean.prop <- sum(x * prop) / sum(prop)
+  (sum.prop / (sum.prop^2 - sum.prop2)) * sum(prop * (x - mean.prop)^2)
+}
