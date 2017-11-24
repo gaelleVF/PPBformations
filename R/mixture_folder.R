@@ -444,6 +444,7 @@ Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne
 Enfin, on cherche à savoir s'il y a des corrélations entre les gains observés et le nombre de composantes dans le mélange et la variabilité du caractère au sein des différentes composantes (tableau \\ref{OverY}) et
 si on détecte des corrélations entre gains pour les différents caractères mesurés (tableau \\ref{CorrelOverY}). \\\\
 On remarque en particulier :
+
 \\begin{itemize}
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année (Table \\ref{Compmel}).
@@ -532,7 +533,9 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
   out = list("table" = list("caption" = "Comparaison des mélanges avec leurs composantes respectives par caractère sur le réseau. 
 Pour les comparaisons sont indiqués en premier lieu le nombre de mélanges concernés ainsi que la proportion que cela représente par rapport au nombre de mélanges testés.
 Pour la comparaison du mélange à la moyenne des composantes est indiqué entre parenthèse le nombre de cas pour lesquels la valeur du mélange est significativement supérieure
-à la valeur moyenne des composantes (risque de se tromper inférieur à 5%).
+à la valeur moyenne des composantes (risque de se tromper inférieur à 5%). \\\\
+\\textbf{Interprétation :} on a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
+semée en pur sans connaître les conditions de culture de l'année.
                             ", "content" = list(Table1),"landscape"=TRUE,"tab.lab"="Compmel")) ; OUT=c(OUT,out)
   
 # 2.2.1.2. Résultats globaux : Overyieldings et corrélations
@@ -563,9 +566,13 @@ Pour la comparaison du mélange à la moyenne des composantes est indiqué entre
   Table2 = rbind(Table2,Tab)
   attributes(Table2)$invert =FALSE
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La ligne du milieu présente le gain (ou la perte) moyenne des mélanges
-comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain (ou la perte) et le nombre de composantes dans le mélange ou la variabilité
+comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain et le nombre de composantes dans le mélange ou la variabilité
 du caractère au sein des composantes : une valeur proche de 0 indique qu'il n'existe pas de corrélation, tandis qu'une valeur proche de 1 indique une forte corrélation. 
-Les symboles indiques si le gain moyen et les corrélations sont significatifs (voir tableau \\ref{Signif} pour l'explication des symboles utilisés). 
+Les symboles indiquent si le gain moyen et les corrélations sont significatifs (voir tableau \\ref{Signif} pour l'explication des symboles utilisés). 
+\\\\
+\\textbf{Interprétation :} Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. 
+Une seule corrélation significative : le gain en hauteur du mélange lié à une plus grande variabilité de hauteur des composantes. 
+Hypothèse : lorsqu'on a une grande variabilité de hauteur les composantes les plus hautes prennent le dessus sur les composantes les plus basses.
                             ", "content" = list(Table2),"landscape"=TRUE,"tab.lab"="OverY")) ; OUT=c(OUT,out)
   
 # 2.2.1.3. Corrélations entre overyieldings
@@ -578,13 +585,14 @@ Les symboles indiques si le gain moyen et les corrélations sont significatifs (
       Tab[(i-1),(j-1)] = paste(round(R$r[1,2],3),get_stars(R$P[2]),sep=" ")
     }
   }
-  Tab[,1] = vec_variables ; colnames(Tab)[2:ncol(Tab)]=vec_variables[-1]
+  Tab[,1] = gsub("[.]"," ",vec_variables) ; colnames(Tab)[2:ncol(Tab)]=vec_variables[-1]
   Tab = Tab[-nrow(Tab),]
   
   attributes(Tab)$invert =FALSE
-  out = list("table" = list("caption" = "Corrélations entre gains (ou perte) des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
-tandis qu'une valeur proche de 1 indique une forte corrélation. Les * représentent la significativité du test : *** indiquent une valeur significativement différente de 0, tandis qu'aucun symbole
-indique une différence non significative. 
+  out = list("table" = list("caption" = "Corrélations entre gains des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
+tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\ref{Signif} pour l'explication des symboles utilisés.
+\\\\
+\\textbf{Interprétation :} un gain de pmg ou de nombre de grains par épi du mélange n'est pas nécessairement associé à une perte en taux de protéine
                             ", "content" = list(Tab),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
   
   
