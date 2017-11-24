@@ -196,9 +196,9 @@ if(table.type == "distribution"){
   
   colnames(Tab) = names(D)
   if(language=="english"){
-    rownames(Tab) = c("number blends","Blend > Components' mean","number significant overyieldings","Blend < Lowest component","Blend > Highest component","Mean components","Mean blends","Overyielding","pvalue overyielding","stars pval")
+    rownames(Tab) = c("Number of blends","Proportion blend > components' mean","number significant overyieldings","Proportion blend < lowest component","Proportion blend > highest component","Mean components","Mean blends","Mean overyielding","pvalue overyielding","stars")
   }else{
-    rownames(Tab) = c("Nombre de mélanges","Proportion mélanges > moyenne des composantes","nombre de gains significiatifs","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute",
+    rownames(Tab) = c("Nombre de mélanges","Proportion mélanges > moyenne des composantes","nombre de gains significatifs","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute",
                       "Moyenne des composantes","Moyenne des mélanges","Gain moyen","pvalue overyielding","stars")
     
   }
@@ -383,19 +383,19 @@ if(table.type == "correlations"){
     }
     colnames(Tab) = c("melange","overyielding","NbComp","WeightedVar")
     Tab=as.data.frame(Tab)
-    correl1 = rcorr(Tab$overyielding,Tab$NbComp)
-    correl2 = rcorr(Tab$overyielding,Tab$WeightedVar)
+    correl1 = rcorr(as.numeric(as.character(Tab$overyielding)),as.numeric(as.character(Tab$NbComp)))
+    correl2 = rcorr(as.numeric(as.character(Tab$overyielding)),as.numeric(as.character(Tab$WeightedVar)))
     return(c(correl1$r[1,2],correl1$P[2],correl2$r[1,2],correl2$P[2]))
   })
   names(a)=vec_variables
   for (i in 1:length(a)){
-    Tab = rbind(Tab,a[[i]])
+    Tab = cbind(Tab,a[[i]])
   }
-  rownames(Tab) = vec_variables
-  if(language == "french"){colnames(Tab)=c("Rcorr overyielding~Nb composantes", "pvalue overyielding~Nb composantes","Rcorr overyielding~Variance composantes", "pvalue overyielding~Variance composantes")}
-  if(language == "english"){colnames(Tab)=c("Rcorr overyielding~Nb components", "pvalue overyielding~Nb components","Rcorr overyielding~Variance components", "pvalue overyielding~Variance components")}
+  colnames(Tab) = vec_variables
+  if(language == "french"){rownames(Tab)=c("Rcorr overyielding~Nb composantes", "pvalue overyielding~Nb composantes","Rcorr overyielding~Variance composantes", "pvalue overyielding~Variance composantes")}
+  if(language == "english"){rownames(Tab)=c("Rcorr overyielding~Nb components", "pvalue overyielding~Nb components","Rcorr overyielding~Variance components", "pvalue overyielding~Variance components")}
   
-  return(list("Tab"=a,"Correlations"=Tab))
+  return(Tab)
 }#end correlations
   
   
