@@ -484,13 +484,13 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
     Table = Table[-grep("nombre de gains significatifs",rownames(Table)),]
     if(!is.null(dim(Table))){
       Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),] = t(apply(Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen"),],1,function(x){return(round(as.numeric(as.character(x)),2))}))
-      Table["Gain moyen",] = apply(Table,2,function(x){paste(x["Gain moyen"],"% ",x["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),")",sep="") })
+      Table["Gain moyen",] = apply(Table,2,function(x){paste(x["Gain moyen"],"% ",x["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),"% ",")",sep="") })
       Table=Table[-grep("pvalue|stars|Type",rownames(Table)),]
       rownames(Table)[grep("Proportion",rownames(Table))] = gsub("Proportion","",rownames(Table)[grep("Proportion",rownames(Table))])
       Table=cbind(rownames(Table),Table)
     }else{
       Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen")] = round(as.numeric(as.character(Table[c("Moyenne des composantes","Moyenne des mélanges","Gain moyen")])),2)
-      Table["Gain moyen"] = paste(Table["Gain moyen"],"% ",Table["stars"]," (+/-",round(as.numeric(as.character(Table["Ec.Type gain"])),1),")",sep="")
+      Table["Gain moyen"] = paste(Table["Gain moyen"],"% ",Table["stars"]," (+/-",round(as.numeric(as.character(Table["Ec.Type gain"])),1),"% ",")",sep="")
       Table=Table[-grep("pvalue|stars",names(Table))]
       names(Table)[grep("Proportion",names(Table))] = gsub("Proportion","",names(Table)[grep("Proportion",names(Table))])
       Table=cbind(names(Table),Table)
@@ -511,13 +511,13 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
     Table = Table[-grep("number significant overyieldings",rownames(Table)),]
     if(!is.null(dim(Table))){
       Table[c("Mean components","Mean blends","Mean overyielding"),] = t(apply(Table[c("Mean components","Mean blends","Mean overyielding"),],1,function(x){return(round(as.numeric(as.character(x)),2))}))
-      Table["Mean overyielding",] = apply(Table,2,function(x){paste(x["Mean overyielding"],"% ",x["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),")",sep="") })
+      Table["Mean overyielding",] = apply(Table,2,function(x){paste(x["Mean overyielding"],"% ",x["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),"% ",")",sep="") })
       Table=Table[-grep("pvalue|stars",rownames(Table)),]
       rownames(Table)[grep("Proportion",rownames(Table))] = gsub("Proportion","",rownames(Table)[grep("Proportion",rownames(Table))])
       Table=cbind(rownames(Table),Table)
     }else{
       Table[c("Mean components","Mean blends","Mean overyielding")] = round(as.numeric(as.character(Table[c("Mean components","Mean blends","Mean overyielding")])),2)
-      Table["Mean overyielding"] = paste(Table["Mean overyielding"],"% ",Table["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),")",sep="")
+      Table["Mean overyielding"] = paste(Table["Mean overyielding"],"% ",Table["stars"]," (+/-",round(as.numeric(as.character(x["Ec.Type gain"])),1),"% ",")",sep="")
       Table=Table[-grep("pvalue|stars",names(Table))]
       names(Table)[grep("Proportion",names(Table))] = gsub("Proportion","",names(Table)[grep("Proportion",names(Table))])
       Table=cbind(names(Table),Table)
