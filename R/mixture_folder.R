@@ -268,6 +268,7 @@ mixture_folder = function(
           \\caption{Schéma du dispositif sur 3 ans : les rectancles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
 Sur les flèches sont indiquées les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
           \\end{center} 
+          \\label{SchemaRecap}
           \\end{figure}
 
             
@@ -611,7 +612,8 @@ tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\
 P = list()
 for (variable in intersect(vec_variables,vec_variables_mod1)){
   var = paste(strsplit(variable,"[.]")[[1]],collapse="")
-  if(!is.null(mix_to_delete)){Mixtures_all$data = Mixtures_all$data[-grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm),]}
+  print(var)
+  if(!is.null(mix_to_delete)){if(length(grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm))>0){Mixtures_all$data = Mixtures_all$data[-grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm),]}}
   if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
@@ -667,8 +669,16 @@ voir partie \\ref{SymbolesSignif} pour les explication de la significativité de
   out = list("subsection" = list("text"="Effet des pratiques de sélection sur le comportement des mélanges")); OUT = c(OUT, out)
   out = list("text" = "En 2017 nous pouvons comparer l'effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
              une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3). \\\
-Le tableau suivant présente les différentiels de sélection moyen (moyenne des comparaisons bouquet de sélection vs. vrac) pour les différents caractères mesurés ainsi que l'effet de la sélection sur le comportement du mélange (réponse à la sélection : moyenne des comparaison
-de la modalité de sélection avec le mélange non sélectionné). 
+Le tableau suivant présente :
+\\begin{itemize}
+\\item pour chaque modalité de sélection (voir figure \\ref{SchemaRecap} pour l'explication des modalités de sélection),
+les \\textbf{différentiels de sélection moyen} (\"DS\", moyenne des comparaisons bouquet de sélection vs. vrac) pour les différents caractères mesurés ainsi que l'effet de la sélection 
+sur le comportement du mélange (réponse à la sélection \"RS\" : moyenne des comparaison de la modalité de sélection avec le mélange non sélectionné)
+\\item la comparaison du comportement du mélange sélectionné (Modalité 3) et du mélange issu des sélections dans les composantes (Modalité 2)
+\\item pour les caractères pour lesquelles on a des mesures individuelles, la comparaison de la variabilité observée dans le mélange sélectionné (Modalité 3) 
+et le mélange issu des sélections dans les composantes (Modalité 2)
+\\end{itemize}
+\\\\
 \\begin{itemize}
 \\item On constate pour certains caractères que malgré le différentiel de sélection important en 2016, ça n'a pas forcément un effet important sur le 
 mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l'épi, on a un effet plus important de la sélection sur le comportement du mélange.
@@ -731,9 +741,10 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
 et \\textbf{réponse à la sélection} (RS, données 2017). 
 La valeur indiquée est le gain (ou la perte) en pourcentage du bouquet de sélection par rapport au vrac pour DS, et de la modalité de sélection du mélange
-par rapport au mélange non sélectionné pour RS. Entre parenthèses est indiqué si la différence observée est significative ou non : voir tableau \\ref{Signif}
-pour l'explication des symboles utilisés. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 },
-tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : 
+par rapport au mélange non sélectionné pour RS. Les symboles indiquent si la différence observée est significative ou non : voir tableau \\ref{Signif}
+pour l'explication des symboles utilisés. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 :
+sélection dans le mélange vs. mélange des sélections dans les composantes},
+tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : pour ces deux dernières colonnes 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
 ", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,6,8,10,11))) ; OUT=c(OUT,out)
 
