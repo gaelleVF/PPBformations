@@ -567,7 +567,7 @@ semée en pur sans connaître les conditions de culture de l'année.
   Table2 = rbind(Table2,Tab)
   attributes(Table2)$invert =FALSE
   out = list("table" = list("caption" = "Résultats globaux par caractère sur l'ensemble des mélanges. La ligne du milieu présente le gain (ou la perte) moyenne des mélanges
-comparé à leurs composantes respectives. Les deux dernière lignes présentent les corrélations entre le gain et le nombre de composantes dans le mélange ou la variabilité
+comparé à leurs composantes respectives. Entre parenthèses est indiqué l'écart-type des gains sur l'ensemble des mélanges testés. Les deux dernière lignes présentent les corrélations entre le gain et le nombre de composantes dans le mélange ou la variabilité
 du caractère au sein des composantes : une valeur proche de 0 indique qu'il n'existe pas de corrélation, tandis qu'une valeur proche de 1 indique une forte corrélation. 
 Les symboles indiquent si le gain moyen et les corrélations sont significatifs (voir tableau \\ref{Signif} pour l'explication des symboles utilisés). 
 \\\\
