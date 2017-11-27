@@ -265,7 +265,7 @@ mixture_folder = function(
           \\begin{figure}[!h]
           \\begin{center} 
           \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
-          \\caption{Schéma du dispositif sur 3 ans : les rectancles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
+          \\caption{Schéma du dispositif sur 3 ans : les rectangles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
 Sur les flèches sont indiquées les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
           \\end{center} 
           \\label{SchemaRecap}
@@ -614,7 +614,7 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   var = paste(strsplit(variable,"[.]")[[1]],collapse="")
   print(var)
   if(!is.null(mix_to_delete)){if(length(grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm))>0){Mixtures_all$data = Mixtures_all$data[-grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm),]}}
-  if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
+  if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
                                  save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""), language=language)
@@ -668,7 +668,7 @@ voir partie \\ref{SymbolesSignif} pour les explication de la significativité de
   # 2.2.4. Réponse à la sélection ------
   out = list("subsection" = list("text"="Effet des pratiques de sélection sur le comportement des mélanges")); OUT = c(OUT, out)
   out = list("text" = "En 2017 nous pouvons comparer l'effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
-             une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3). \\\
+             une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3). \\\\
 Le tableau suivant présente :
 \\begin{itemize}
 \\item pour chaque modalité de sélection (voir figure \\ref{SchemaRecap} pour l'explication des modalités de sélection),
@@ -679,6 +679,7 @@ sur le comportement du mélange (réponse à la sélection \"RS\" : moyenne des 
 et le mélange issu des sélections dans les composantes (Modalité 2)
 \\end{itemize}
 \\\\
+Elements d'interprétation :
 \\begin{itemize}
 \\item On constate pour certains caractères que malgré le différentiel de sélection important en 2016, ça n'a pas forcément un effet important sur le 
 mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l'épi, on a un effet plus important de la sélection sur le comportement du mélange.
