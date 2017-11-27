@@ -378,7 +378,7 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
     for(i in 1:length(mix)){
       print(i)
       x=mix[[i]]
-      out = list("subsection" = unique(x$expe_melange)); OUT=c(OUT,out)
+      out = list("subsection" = list("text"=unique(x$expe_melange))); OUT=c(OUT,out)
       for (variable in vec_variables_mod1){
         print(variable)
         OUT = graphs_ferme_melanges(OUT,variable,titre=variable,mel = x)
