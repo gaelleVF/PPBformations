@@ -24,7 +24,8 @@ mixture_folder = function(
   person,
   pathway = ".",
   path_to_tables=".",
-  vec_variables)
+  vec_variables,
+  mix_to_delete)
 {
 # Set the right folder and create folders tex_files and feedback_folder ----------
   a = dir(dir)
@@ -404,9 +405,9 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
   out = list("subsection" = list("text" = "Explication des notations utilisées pour rendre compte de la significativité des tests de comparaison",
                                  "cross_ref" = "SymbolesSignif")); OUT = c(OUT, out)
   out = list("text" = "Dans les tableaux et gaphiques suivants seront comparés différentes populations/mélanges : si ces populations/mélanges sont significativement différents, c'est à dire que l'on a un faible risque de
-se tromper en déclarant qu'elle sont différentes, cela sera indiqué par des symboles ou des couleurs qui seront différents selon le niveau de risque que l'on prend. Par exemple, * signifie que l'on a entre 1% et 5% de chances
+se tromper en déclarant qu'ils sont différents, cela sera indiqué par des symboles ou des couleurs qui seront différents selon le niveau de risque que l'on prend. Par exemple, * signifie que l'on a entre 1% et 5% de chances
 de se tromper, tandis que *** signifie que l'on a moins de 0.1% de chances de se tromper. Le tableau suivant récapitule la signification des différents symboles. 
-Concernant les graphiques, ce niveau de risque sera indiqué par des couleurs différentes dont la signification sera précisée dans la légende. par exemple, s'il est indiqué \"significatif à 0.01\" cela signifie qu'on a 
+Concernant les graphiques, ce niveau de risque sera indiqué par des couleurs différentes dont la signification sera précisée dans la légende. Par exemple, s'il est indiqué \"significatif à 0.01\" cela signifie qu'on a 
 un risque de se tromper entre 0.1% et 1%.
   "); OUT=c(OUT,out)
   
@@ -435,11 +436,11 @@ un risque de se tromper entre 0.1% et 1%.
   out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
 \\begin{itemize}
 \\item le nombre de mélanges testés pour chaque caractère (tableau \\ref{Compmel}), 
-\\item la proportion de mélanges pour lesquels la valeur est supérieure à la moyenne de leurs composantes respectives ainsi qu'à leur composante la plus haute et la proportion de mélanges
-            dont la valeur est inférieure à leur composante la plus basse (tableau \\ref{Compmel}),
-\\item  les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) moyen.ne des mélanges par rapport à leurs composantes respectives (tableau \\ref{OverY}), calculé ainsi : \\\\
+\\item pour chaque caractère mesuré, la proportion de mélanges pour lesquels la valeur du mélange est supérieure à la valeur moyenne de ses composantes ainsi qu'à sa composante la plus haute et sa composante la plus basse (tableau \\ref{Compmel}),
+\\item  les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) moyen.ne des mélanges par rapport à la moyenne de leurs composantes respectives (tableau \\ref{OverY}), calculé ainsi : \\\\
 Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ 
 \\end{itemize}
+\\\\
 Enfin, on cherche à savoir s'il y a des corrélations entre les gains observés et le nombre de composantes dans le mélange et la variabilité du caractère au sein des différentes composantes (tableau \\ref{OverY}) et
 si on détecte des corrélations entre gains pour les différents caractères mesurés (tableau \\ref{CorrelOverY}). \\\\
 On remarque en particulier :
@@ -610,7 +611,7 @@ tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\
 P = list()
 for (variable in intersect(vec_variables,vec_variables_mod1)){
   var = paste(strsplit(variable,"[.]")[[1]],collapse="")
-  
+  if(!is.null(mix_to_delete)){Mixtures_all$data = Mixtures_all$data[-grep(paste(mix_to_delete,collapse="|"),Mixtures_all$data$son_germplasm),]}
   if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
