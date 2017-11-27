@@ -163,7 +163,7 @@ if(table.type == "distribution"){
                                    save=path_to_tables)
     }
     d = read.table(paste(path_to_tables,"/Distrib_",i,".csv",sep=""),header=T,sep=";",comment.char="")
-    if(!is.null(mix_to_delete)){d = d[-grep(paste(mix_to_delete,collapse="|"),d$true_melange),]}
+    if(!is.null(mix_to_delete)){if(length(grep(paste(mix_to_delete,collapse="|"),d$true_melange))>0){d = d[-grep(paste(mix_to_delete,collapse="|"),d$true_melange),]}}
     tmp=cbind(as.numeric(as.character(d[grep("Worst",d$parameter),"Moyenne"])),
               as.numeric(as.character(d[grep("MoyenneComposantes",d$parameter),"Moyenne"])),
               as.numeric(as.character(d[grep("Mélange",d$parameter),"Moyenne"])),
@@ -190,16 +190,16 @@ if(table.type == "distribution"){
     a = c(nrow(x),round(sum(as.numeric(as.character(x$'3.mélange'))>as.numeric(as.character(x$'2.moyenne composantes')))*100/nrow(x),3), sum(as.numeric(as.character(x$pvalue_overY))<=0.05 & as.numeric(as.character(x$overyielding))>0),
           round(sum(as.numeric(as.character(x$'3.mélange'))<as.numeric(as.character(x$'1.moins bonne')))*100/nrow(x),3),
           round(sum(as.numeric(as.character(x$'3.mélange'))>as.numeric(as.character(x$'4.meilleure')))*100/nrow(x),3),
-          mean(as.numeric(as.character(x$'2.moyenne composantes'))),mean(as.numeric(as.character(x$'3.mélange'))), mean(as.numeric(x$overyielding))*100,Signif,get_stars(Signif))
+          mean(as.numeric(as.character(x$'2.moyenne composantes'))),mean(as.numeric(as.character(x$'3.mélange'))), mean(as.numeric(x$overyielding))*100,100*sd(as.numeric(x$overyielding)),Signif,get_stars(Signif))
     Tab=cbind(Tab,a)
   }
   
   colnames(Tab) = names(D)
   if(language=="english"){
-    rownames(Tab) = c("Number of blends","Proportion blend > components' mean","number significant overyieldings","Proportion blend < lowest component","Proportion blend > highest component","Mean components","Mean blends","Mean overyielding","pvalue overyielding","stars")
+    rownames(Tab) = c("Number of blends","Proportion blend > components' mean","number significant overyieldings","Proportion blend < lowest component","Proportion blend > highest component","Mean components","Mean blends","Mean overyielding","Std.Dev. overyielding","pvalue overyielding","stars")
   }else{
     rownames(Tab) = c("Nombre de mélanges","Proportion mélanges > moyenne des composantes","nombre de gains significatifs","Proportion mélanges < composante la plus basse","Proportion mélanges > composante la plus haute",
-                      "Moyenne des composantes","Moyenne des mélanges","Gain moyen","pvalue overyielding","stars")
+                      "Moyenne des composantes","Moyenne des mélanges","Gain moyen","Ec.Type gain","pvalue overyielding","stars")
     
   }
   return(Tab)
