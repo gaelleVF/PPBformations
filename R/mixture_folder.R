@@ -93,7 +93,6 @@ mixture_folder = function(
   
   
   
-  
 # Créer title page --------
   a = paste(
     "	\\begin{titlepage}
@@ -585,7 +584,7 @@ Hypothèse : lorsqu'on a une grande variabilité de hauteur les composantes les 
       Tab[(i-1),(j-1)] = paste(round(R$r[1,2],3),get_stars(R$P[2]),sep=" ")
     }
   }
-  Tab[,1] = gsub("[.]"," ",vec_variables) ; colnames(Tab)[2:ncol(Tab)]=vec_variables[-1]
+  Tab[,1] = gsub("[.]"," ",colnames(Table)[-1]) ; colnames(Tab)[2:ncol(Tab)]=colnames(Table)[-c(1,2)]
   Tab = Tab[-nrow(Tab),]
   
   attributes(Tab)$invert =FALSE
