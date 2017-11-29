@@ -81,16 +81,16 @@ mixture_folder = function(
   vec_variables_mod1 = names(res_model1)
 
   list_trad = list(
-    c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
-    c("poids.de.l.epi","Poids de l'épi","Spike weight"),
-    c("longueur.de.l.epi","Longueur de l'épi","Spike lenght"),
-    c("LLSD","LLSD","LLSD"),
-    c("hauteur","hauteur","plant height"),
+    c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight","tkw---tkw"),
+    c("poids.de.l.epi","Poids de l'épi","Spike weight","spike_weight---spike_weight"),
+    c("longueur.de.l.epi","Longueur de l'épi","Spike lenght","spike_lenght---spike_lenght"),
+    c("LLSD","LLSD","LLSD","LLSD---LLSD"),
+    c("hauteur","hauteur","plant height","plant_height---plant_height"),
     c("nbr.estime.grain.par.epi","Nombre moyen de grains par épi","Mean number of grain per spike"),
-    c("taux.de.proteine","Taux de proteine","Protein content"),
-    c("couleur---couleur_M","Couleur","Color"),
-    c("barbe---barbe_M","Barbe","Awns"),
-    c("courbure---courbure_M","Courbure","Curve"),
+    c("taux.de.proteine","Taux de proteine","Protein content","protein---protein"),
+    c("couleur---couleur_M","Couleur","Color","color---color_M"),
+    c("barbe---barbe_M","Barbe","Awns","awns---awns_M"),
+    c("courbure---courbure_M","Courbure","Curve","curve---curve_M"),
     c("Réseau","Sur le réseau","On the network")
   )
   
