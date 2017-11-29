@@ -713,11 +713,11 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
       ds=x$DS ; rs=x$RS ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
       return(c(paste(ds["Total","mean"]," (",ds["Total","stars"],")",sep=""),
-               paste(ds[grep("M1",rownames(ds)),"mean"],ds[grep("M1",rownames(ds)),"stars"],sep=" "), 
+               paste(ds[grep("Mod 1",rownames(ds)),"mean"],ds[grep("Mod 1",rownames(ds)),"stars"],sep=" "), 
                         paste(rs["mean_gain","M1"],rs["stars","M1"],sep=" "),
-               paste(ds[grep("M2",rownames(ds)),"mean"],ds[grep("M2",rownames(ds)),"stars"],sep=" "), 
+               paste(ds[grep("Mod 2",rownames(ds)),"mean"],ds[grep("Mod 2",rownames(ds)),"stars"],sep=" "), 
                        paste(rs["mean_gain","M2"],rs["stars","M2"],sep=" "),
-               paste(ds[grep("M3",rownames(ds)),"mean"],ds[grep("M3",rownames(ds)),"stars"],sep=" "), 
+               paste(ds[grep("Mod 3",rownames(ds)),"mean"],ds[grep("Mod 3",rownames(ds)),"stars"],sep=" "), 
                        paste(rs["mean_gain","M3"],rs["stars","M3"],sep=" "),
                paste(rs["mean_gain","M3vsM2"],rs["stars","M3vsM2"],sep=" "),
                paste(vi["mean_gain","M3vsM2"],vi["stars","M3vsM2"],sep=" ")
