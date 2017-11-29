@@ -415,9 +415,15 @@ if(table.type %in% c("varIntra","selection.modalities")){
   
   VI = lapply(vec_variables,function(variable){
     if(variable %in% names(res_model_varintra)){
-      Tab = ggplot_mixture1(res_model = res_model_varintra, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, 
-                            melanges_tot = data_mixtures$Mix_tot, variable, year=c("2016","2017"), model = "model_varintra", 
-                            plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL)$Tab
+      if(!file.exists(paste(path_to_tables,"/Varintra/Rep_Sel_",variable,".csv",sep=""))){
+        Tab = ggplot_mixture1(res_model = res_model_varintra, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, 
+                              melanges_tot = data_mixtures$Mix_tot, variable, year=c("2016","2017"), model = "model_varintra", 
+                              plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL)$Tab
+        write.table(Tab,paste(path_to_tables,"/Varintra/Rep_Sel_",variable,".csv",sep=""),sep=";")
+      }else{
+        Tab = read.table(paste(path_to_tables,"/Varintra/Rep_Sel_",variable,".csv",sep=""),sep=";")
+      }
+    
       colnames(Tab) = c("Mod1","Mod2","Mod3","Mod3vsMod2")
       
       a = lapply(c("Mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
