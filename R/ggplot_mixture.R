@@ -511,9 +511,13 @@ dans composantes (Mod1)")
             
             if(ncol(mcmc) > 1){
               a = unlist(lapply(year,function(yr){return(length(grep(yr,names(mcmc))))}))
-              year_to_delete = c(year[a[a==1]],year[a[a==0]])
+              year_to_delete = c(year[a==1],year[a==0])
 
-              if(length(year_to_delete)>0){mcmc = mcmc[,-grep(paste(year_to_delete,collapse="|"),names(mcmc))] ; year = year[-grep(year_to_delete,year)]}
+              if(length(year_to_delete)>0){
+                b = grep(paste(year_to_delete,collapse="|"),names(mcmc))
+                if(length(b)>0){mcmc = mcmc[,-b]}
+                year = year[-grep(year_to_delete,year)]
+                }
 
               comp.mu = lapply(year, function(yr){
                 x = mcmc[,grep(yr,names(mcmc))]
