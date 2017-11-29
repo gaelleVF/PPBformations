@@ -442,12 +442,18 @@ if(table.type == "selection.modalities"){
       Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
                             year=year_DS, data_mixtures=data_mixtures, selection.type = "sel.diff.network")[[1]]$Tot[[1]]$tab
     }
-    
-    DS = get.gain(Tab,to_split="modalite",col="overyielding")
-    ds =  get.gain(Tab,to_split=NULL,col="overyielding")
-    DS=rbind(DS,ds)
-    rownames(DS)[4]="Total"
-    return(DS)
+    if(!is.null(Tab)){
+      DS = get.gain(Tab,to_split="modalite",col="overyielding")
+      ds =  get.gain(Tab,to_split=NULL,col="overyielding")
+      DS=rbind(DS,ds)
+      rownames(DS)[4]="Total"
+      return(DS)
+    }else{
+      DS = matrix(NA,ncol = 6,nrow=4)
+      colnames(DS) = c("mean","sd","statistic.t","pvalue","stars","test")
+      rownames(DS) = c("Composantes : Mod 1","Composantes : Mod 2","Mélanges : Mod 3","Total")
+      return(DS)
+    }
   })
   names(DS) = vec_variables
   
