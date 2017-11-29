@@ -158,7 +158,7 @@ if(table.type == "distribution"){
   D=list()
   for (i in vec_variables){
     if(!file.exists(paste(path_to_tables,"/Distrib_",i,".csv",sep=""))){
-      p = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, i, 
+      p = ggplot_mixture1(res_model = res_model, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, i, 
                                    year=year, model="model_1", plot.type = "mix.gain.distribution", person=NULL, nb_parameters_per_plot = 15,
                                    save=path_to_tables)
     }
@@ -445,7 +445,7 @@ if(table.type == "selection.modalities"){
     if(file.exists(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""))){
       Tab = read.table(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""),sep=";",header=T)
     }else{
-      Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+      Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
                             year=year_DS, data_mixtures=data_mixtures, selection.type = "sel.diff.network")[[1]]$Tot[[1]]$tab
     }
     if(!is.null(Tab)){
@@ -464,7 +464,7 @@ if(table.type == "selection.modalities"){
   names(DS) = vec_variables
   
   RS = lapply(vec_variables,function(variable){
-    Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+    Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
                             year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
 
     if(!is.null(Tab)){
