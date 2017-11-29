@@ -394,102 +394,106 @@ if(selection.type == "sel.diff.network" | selection.type == "diff.and.rep"){
 if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
   variables_mod1 = vec_variables[which(vec_variables %in% names(res_model1))]
   variables_semiquanti = setdiff(vec_variables,names(res_model1))
-  comp=NULL
+  RS=list()
   if(length(variables_mod1)>0){
     if(!is.null(table.save) & !dir.exists(file.path(table.save, "Rep_Sel"))){system(paste("mkdir ",table.save,"/Rep_Sel",sep="")) ; message("dir Rep_Sel have been created, tables dealing with response to selection will be saved there")}
     person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
     RS_mod1=lapply(variables_mod1,function(y){
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
-                                   year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)
-      if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges$Tab,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
+                                   year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)$Tab
+      if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
       return(p_melanges)
     })
     names(RS_mod1)=variables_mod1
+    RS=c(RS,RS_mod1)
   }
   if(length(variables_semiquanti)>0){
-    RS_semiQ = NULL
     if(!is.null(table.save) & !dir.exists(file.path(table.save, "Rep_Sel"))){system(paste("mkdir ",table.save,"/Rep_Sel",sep="")) ; message("dir Rep_Sel have been created, tables dealing with response to selection will be saved there")}
-    d_env =  plyr:::splitter_d(Mixtures_all$data, .(location))
-    
-    d_env_b = lapply(d_env,function(pers){
-      x = plyr:::splitter_d(pers, .(expe_melange))
-      x = x[names(x)%in%Melanges]
-      lapply(x,function(y){
-        M = unique(data_mixtures$Mix_tot$data$data[data_mixtures$Mix_tot$data$data$son_germplasm %in% unique(y$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
-        M = M[is.na(M$selection_id) & M$son_year %in% year,]
-        M$modalite = unlist(lapply(1:nrow(M),function(i){
-          d=M[i,]
-          comp=0
-          if(length(grep("[.]3",d$son))>0){return("Mod1") ; comp=1}
-          if(length(grep("[.]2",d$son))>0){return("Mod2") ; comp=1}
-          if(length(grep("#B",d$son))>0){return("Mod3") ; comp=1}
-          if(comp==0){return("Mod4")}
-        }))
-        M$germplasm = unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]}))
-        M = M[!duplicated(M[c("germplasm","son_year")]),]
-        M =  plyr:::splitter_d(M, .(son_year))
-        
-        y = lapply(year,function(yr){
-          m = M[yr][[1]]
-          if(!is.null(m)){
-            A = unlist(lapply(1:nrow(m),function(i){
-              d=m[i,]
-              Mod = d$modalite
-              if(d$modalite != "Mod4"){
-                a = strsplit(as.character(d$son),"_")[[1]]
-                if(length(grep("Mod4",m$modalite))>0){
-                  b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
-                  sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  sel=sel[!is.na(sel)]
-                  no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  no_sel=no_sel[!is.na(no_sel)]
-                  overY = 100*(mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
-                }else{overY = NA}
-                
-                names(overY) = Mod
-                if(Mod == "Mod2"){
-                  if(length(grep("Mod3",m$modalite))>0){
-                    b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
-                    m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  m2=m2[!is.na(m2)]
-                    m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  m3=m3[!is.na(m3)]
-                    overY = c(overY,100*(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
-                    names(overY)[2]="Mod3vsMod2"
+    RSQ = lapply(variables_semiquanti,function(variable){
+      d_env =  plyr:::splitter_d(Mixtures_all$data, .(location))
+      d_env_b = lapply(d_env,function(pers){
+        x = plyr:::splitter_d(pers, .(expe_melange))
+        x = x[names(x)%in%Melanges]
+        lapply(x,function(y){
+          M = unique(data_mixtures$Mix_tot$data$data[data_mixtures$Mix_tot$data$data$son_germplasm %in% unique(y$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
+          M = M[is.na(M$selection_id) & M$son_year %in% year,]
+          M$modalite = unlist(lapply(1:nrow(M),function(i){
+            d=M[i,]
+            comp=0
+            if(length(grep("[.]3",d$son))>0){return("Mod1") ; comp=1}
+            if(length(grep("[.]2",d$son))>0){return("Mod2") ; comp=1}
+            if(length(grep("#B",d$son))>0){return("Mod3") ; comp=1}
+            if(comp==0){return("Mod4")}
+          }))
+          M$germplasm = unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]}))
+          M = M[!duplicated(M[c("germplasm","son_year")]),]
+          M =  plyr:::splitter_d(M, .(son_year))
+          
+          y = lapply(year,function(yr){
+            m = M[yr][[1]]
+            if(!is.null(m)){
+              A = unlist(lapply(1:nrow(m),function(i){
+                d=m[i,]
+                Mod = d$modalite
+                if(d$modalite != "Mod4"){
+                  a = strsplit(as.character(d$son),"_")[[1]]
+                  if(length(grep("Mod4",m$modalite))>0){
+                    b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
+                    sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  sel=sel[!is.na(sel)]
+                    no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  no_sel=no_sel[!is.na(no_sel)]
+                    overY = (mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
+                  }else{overY = NA}
+                  
+                  names(overY) = Mod
+                  if(Mod == "Mod2"){
+                    if(length(grep("Mod3",m$modalite))>0){
+                      b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
+                      m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  m2=m2[!is.na(m2)]
+                      m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  m3=m3[!is.na(m3)]
+                      overY = c(overY,(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
+                      names(overY)[2]="Mod3vsMod2"
+                    }
                   }
-                }
-                return(overY)
-              }else{return(NA)}
-            }))
-            A=A[!is.na(A)]
-            if(length(A)>0){
-              if(length(grep("Mod4",m$modalite))>0){A=c(paste(m[grep("Mod4",m$modalite),"germplasm"],unique(m$son_year),sep="_"),A)
-              }else{A=c(paste(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],unique(m$son_year),sep="_"),A)}
-              names(A)[1]="melange"
-              if(!("Mod1"%in%names(A))){A=c(A,"Mod1"=NA)}
-              if(!("Mod2"%in%names(A))){A=c(A,"Mod2"=NA)}
-              if(!("Mod3"%in%names(A))){A=c(A,"Mod3"=NA)}
-              if(!("Mod3vsMod2"%in%names(A))){A=c(A,"Mod3vsMod2"=NA)}
-            }else{A=NULL}
-            return(A)
-          }else{return(NULL)}
+                  return(overY)
+                }else{return(NA)}
+              }))
+              A=A[!is.na(A)]
+              if(length(A)>0){
+                if(length(grep("Mod4",m$modalite))>0){A=c(paste(m[grep("Mod4",m$modalite),"germplasm"],unique(m$son_year),sep="_"),A)
+                }else{A=c(paste(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],unique(m$son_year),sep="_"),A)}
+                names(A)[1]="melange"
+                if(!("Mod1"%in%names(A))){A=c(A,"Mod1"=NA)}
+                if(!("Mod2"%in%names(A))){A=c(A,"Mod2"=NA)}
+                if(!("Mod3"%in%names(A))){A=c(A,"Mod3"=NA)}
+                if(!("Mod3vsMod2"%in%names(A))){A=c(A,"Mod3vsMod2"=NA)}
+              }else{A=NULL}
+              return(A)
+            }else{return(NULL)}
+          })
+          names(y) = year
+          a = unlist(lapply(y,function(x){length(x)>0}))
+          y=y[a]
+          if(length(y)>0){
+            A=NULL
+            for(i in 1:length(y)){A = rbind(A,y[[i]])}
+          }else{A=NULL}
+          return(A)
         })
-        names(y) = year
-        a = unlist(lapply(y,function(x){length(x)>0}))
-        y=y[a]
-        if(length(y)>0){
-          A=NULL
-          for(i in 1:length(y)){A = rbind(A,y[[i]])}
-        }else{A=NULL}
-        return(A)
-     })
-    })
-    Tab=NULL
-    for(pers in d_env_b){
-      for(mel in pers){
-        if(!is.null(mel)){Tab = rbind(Tab,mel)}
+      })
+      Tab=NULL
+      for(pers in d_env_b){
+        for(mel in pers){
+          if(!is.null(mel)){Tab = rbind(Tab,mel)}
+        }
       }
-    }
-    if(!is.null(table.save)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),sep=""),sep=";")}
-    
+      rownames(Tab) = Tab[,"melange"]
+      Tab=Tab[,-grep("melange",colnames(Tab))]
+      if(!is.null(table.save)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),sep=""),sep=";")}
+      return(Tab)
+    })
+    names(RSQ) = variables_semiquanti
+    RS=c(RS,RSQ)
   }
-  if(is.null(comp)){RS=NULL}
   if(selection.type == "response.sel.mixture"){return(RS)}
 }
  
