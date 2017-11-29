@@ -458,18 +458,18 @@ if(table.type == "selection.modalities"){
   names(DS) = vec_variables
   
   RS = lapply(vec_variables,function(variable){
-    if(file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year_RS,collapse="-"),".csv",sep=""))){
-      Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year_RS,collapse="-"),".csv",sep=""),sep=";",header=T)
-    }else{
-      Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
-                            year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")[[1]]$Tab
-    }
-    
+    Tab = analyse.selection(Mixtures_all, res_model1, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+                            year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
+
     if(!is.null(Tab)){
-      a=lapply(c("mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
+      Tab=as.data.frame(Tab)
+      Tab = apply(Tab,2,function(x){as.numeric(as.character(x))})
+      a=lapply(colnames(Tab),function(x){get.gain(Tab,to_split=NULL,col=x)})
       Res=NULL
       for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
       rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
+      colnames(Res) = colnames(Tab)
+      Res = Res[,order(colnames(Res))]
       colnames(Res) = c("M1","M2","M3","M3vsM2")
       return(Res)
     }else{
