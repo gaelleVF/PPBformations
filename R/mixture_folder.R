@@ -83,6 +83,9 @@ mixture_folder = function(
   list_trad = list(
     c("poids.de.mille.grains","Poids de mille grains","Thousand kernel weight"),
     c("poids.de.l.epi","Poids de l'épi","Spike weight"),
+    c("longueur.de.l.epi","Longueur de l'épi","Spike lenght"),
+    c("LLSD","LLSD","LLSD"),
+    c("hauteur","hauteur","plant height"),
     c("nbr.estime.grain.par.epi","Nombre moyen de grains par épi","Mean number of grain per spike"),
     c("taux.de.proteine","Taux de proteine","Protein content"),
     c("couleur---couleur_M","Couleur","Color"),
@@ -253,20 +256,20 @@ mixture_folder = function(
   # 1.1 Pourquoi ce dossier -----
   a=paste("	\\chapter{Pourquoi ce dossier?}
       Cet essai, mis en place depuis l'automne 2015, vise à comparer les effets de différentes pratiques de sélection des mélanges sur leur comportement. 
-      Chaque paysan choisi les populations qu'il souhaite assembler, c'est à partir de ce(s) mélange(s) que sont testées différentes pratiques de sélection : 
-                      \\begin{itemize}
-             \\item deux années de sélection dans les composantes avant de mélanger (Modalité 1 sur le schéma ci-dessous) ; 
+      Chaque paysan choisi les populations qu'il souhaite assembler, c'est à partir de ce(s) mélange(s) que sont testées différentes pratiques de sélection (voir schéma ci-dessous) : 
+            \\begin{enumerate}
+             \\item deux années de sélection dans les composantes avant de mélanger (Modalité 1 sur le schéma) ; 
              \\item une sélection dans les composantes avant de mélanger puis une sélection dans le mélange (Modalité 2) ; 
              \\item à partir du mélange créé sans sélection dans les composantes, deux années de sélection dans le mélange (Modalité 3).
-           \\end{itemize}
-             Ces pratiques de sélection sont comparées au mélange évoluant sans sélection massale (Modalité 4)
+           \\end{enumerate}
+             Ces pratiques de sélection sont comparées au mélange évoluant sans sélection massale (Modalité 4). \\\\
 
 
-          \\begin{figure}[!h]
+          \\begin{figure}[!ht]
           \\begin{center} 
           \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
           \\caption{Schéma du dispositif sur 3 ans : les rectangles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
-Sur les flèches sont indiquées les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
+Sur les flèches sont indiqués les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
           \\end{center} 
           \\label{SchemaRecap}
           \\end{figure}
@@ -275,7 +278,7 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
             Le dispositif expérimental est adapté de celui utilisé en routine, avec le(s) témoin(s) répétés deux fois, le(s) mélange(s) répétés deux fois et les composantes non répétées.
             Cet essai peut tout à fait être semé dans la même parcelle que des populations que vous voudriez tester qui ne seraient pas intégrées dans le mélange, car les témoins utilisés sont les mêmes.
              Ce dossier présente les résultats des premières années d'essai. Si vous voulez mettre en place cet essai chez vous, c'est tout à fait possible,
-          contactez votre animateur ou l'équipe de recherche !
+          contactez votre animateur ou l'équipe de recherche ! \\\\
 
           Ce dossier présente les résultats des essais depuis la saison 2015-2016. 
           \\begin{enumerate}
@@ -311,8 +314,9 @@ Sur les flèches sont indiquées les noms données aux lots de graines sélectio
     out = list("text" = "Vous n'avez pas mis en place l'essai de sélection pour les mélanges sur votre ferme."); OUT=c(OUT,out)
   }else{
 
-    out=list("text"="Les graphiques suivants présentent, pour chaque caractère mesuré, les valeurs des différentes modalités de sélection des mélanges 
-    ainsi que des composantes et la valeur moyenne des composantes si celles-ci ont été semées. Les populations qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.") ; OUT=c(OUT,out)
+    out=list("text"="Les graphiques suivants présentent, pour chaque caractère mesuré et pour chaque mélange testé, les valeurs des différentes modalités de sélection des mélanges 
+    ainsi que des composantes et la valeur moyenne des composantes si celles-ci ont été semées. 
+             Les populations qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.") ; OUT=c(OUT,out)
     
     ## par mélange, donner d'abord la comparaison mélange/composantes, puis différentiel de sélection, puis réponse à la sélection pour chaque mélange et chaque caractère
     Mixtures_all_person = Mixtures_all$data[Mixtures_all$data$location %in% person,]
@@ -437,8 +441,10 @@ un risque de se tromper entre 0.1% et 1%.
   out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
 \\begin{itemize}
 \\item le nombre de mélanges testés pour chaque caractère (tableau \\ref{Compmel}), 
-\\item pour chaque caractère mesuré, la proportion de mélanges pour lesquels la valeur du mélange est supérieure à la valeur moyenne de ses composantes ainsi qu'à sa composante la plus haute et sa composante la plus basse (tableau \\ref{Compmel}),
-\\item  les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) moyen.ne des mélanges par rapport à la moyenne de leurs composantes respectives (tableau \\ref{OverY}), calculé ainsi : \\\\
+\\item pour chaque caractère mesuré, la proportion de mélanges pour lesquels la valeur du mélange est supérieure à la valeur moyenne de ses composantes ainsi 
+qu'à sa composante la plus haute et sa composante la plus basse (tableau \\ref{Compmel}),
+\\item  les valeurs moyennes des mélanges et des composantes, ainsi que le gain (ou la perte) moyen.ne des mélanges par rapport à la moyenne de leurs composantes respectives 
+(tableau \\ref{OverY}), calculé ainsi : \\\\
 Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne des composantes}{Valeur moyenne des composantes}$ 
 \\end{itemize}
 \\\\
@@ -449,8 +455,8 @@ On remarque en particulier :
 \\begin{itemize}
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année (Table \\ref{Compmel}).
-\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. Les deux caractères pour lesquels on a une perte 
-ne présentent pas une perte significativement différente de 0 (Table \\ref{OverY}).
+\\item Pour la plupart des caractères on a un gain significatif des mélanges par rapport à la moyenne de leurs composantes respectives. On observe une  faible perte en PMG globalement
+des mélanges par rapport à la moyenne des composantes respectives : en compétition avec des génotypes différents les plantes produisent plus de grains plus petits (Table \\ref{OverY}).
 \\item Il n'y a qu'une corrélation significative et importante : le gain en hauteur du mélange par rapport à la variabilité de hauteur des composantes. On peut émettre l'hypothèse que 
 lorsqu'on a une grande variabilité de hauteur les composantes les plus hautes prennent le dessus sur les composantes les plus basses, donnant alors une hauteur moyenne du mélange plus importante
 que la hauteur moyenne des composantes (Table \\ref{OverY}).
@@ -607,7 +613,7 @@ tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\
               si la différence entre mélange et ses composantes est significative ou non (voir légende de chaque graphique et voir partie \\ref{SymbolesSignif} pour l'explication de la significativité des tests de comparaison).
              Un histogramme décalé vers la droite par rapport à 0 indique qu'une majorité des mélanges se sont mieux comportés que la moyenne de leurs composantes. 
              A l'inverse si l'histogramme est décalé vers la gauche la majorité des mélanges se sont moins bien comportés que la moyenne de leurs composantes.
-             Entre parenthèses est indiqué la significativité du test : voir tableau \\ref{Signif} pour l'explication des symboles utilisés"); OUT = c(OUT, out)
+             Entre parenthèses est indiqué si le gain moyen est significativement différent de 0 : voir tableau \\ref{Signif} pour l'explication des symboles utilisés."); OUT = c(OUT, out)
 
 P = list()
 for (variable in intersect(vec_variables,vec_variables_mod1)){
@@ -640,13 +646,15 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   
   # 2.2.3. Différentiel de sélection ------
   out = list("subsection" = list("text"="Différentiels de sélection sur le réseau")); OUT = c(OUT, out)
-  out = list("text" = "Ces graphiques présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
+  out = list("text" = "Les graphiques suivants présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
              séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
             Chaque élément de l'histogramme représente une comparaison entre un bouquet de sélection et son vrac correspondant, et la couleur représente la significativité
             de la comparaison (voir légende pour chaque graphique et voir partie \\ref{SymbolesSignif} pour l'explication de la significativité des tests de comparaison).
-             Pour le \\textbf{PMG, poids de l'épi et taux de protéine}, un histogramme décalé vers la droite par rapport à 0 (ligne pointillée) indique que globalement le différentiel de sélection est positif (sélection > vrac),
+             Pour le \\textbf{PMG, poids de l'épi et taux de protéine}, un histogramme décalé vers la droite par rapport à 0 (ligne pointillée) indique que globalement le 
+              différentiel de sélection est positif (sélection > vrac),
              tandis qu'un histogramme décalé vers la gauche indique un différentiel de sélection négatif. \\\\
-             Pour la \\textbf{couleur, présence de barbe et courbure}, un histogramme décalé vers la droite indique que les bouquets de sélection sont globalement plus foncés, plus barbus ou plus courbés respectivement.
+             Pour la \\textbf{couleur, présence de barbe et courbure}, un histogramme décalé vers la droite indique que les bouquets de sélection sont globalement plus foncés, 
+            plus barbus ou plus courbés respectivement.
              A l'inverse si l'histogramme est décalé vers la gauche alors les bouquets sont globalement plus clairs, moins barbus et moins courbés respectivement.
             \\\\
              La ligne pointillée indique le zéro (différentiel de sélection nul).\\\\
@@ -656,7 +664,7 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   out = list("includeimage" = list("content"= "./tex_files/Explication_DiffSel.png", 
 "caption"= "Explication des graphiques qui suivent : pour chaque événement de sélection est calculé le différentiel de sélection.
 Sur les graphiques sont présentés les histogrammes de ces différentiels de sélection, séparément pour les sélections faites dans les composantes (histogramme du dessus)
-et les sélections faites dans les mélanges(histogramme du dessous). Les différentes couleurs représentent la significativité de chaque différentiel de sélection :
+et les sélections faites dans les mélanges (histogramme du dessous). Les différentes couleurs représentent la significativité de chaque différentiel de sélection :
 voir partie \\ref{SymbolesSignif} pour les explication de la significativité des tests de comparaison.")) ; OUT=c(OUT,out)
   }
 
@@ -667,13 +675,13 @@ voir partie \\ref{SymbolesSignif} pour les explication de la significativité de
   
   # 2.2.4. Réponse à la sélection ------
   out = list("subsection" = list("text"="Effet des pratiques de sélection sur le comportement des mélanges")); OUT = c(OUT, out)
-  out = list("text" = "En 2017 nous pouvons comparer l'effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
-             une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3). \\\\
+  out = list("text" = "En 2017 nous pouvons comparer l'\\textbf{effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
+             une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3)}. \\\\
 Le tableau suivant présente :
 \\begin{itemize}
-\\item pour chaque modalité de sélection (voir figure \\ref{SchemaRecap} pour l'explication des modalités de sélection),
-les \\textbf{différentiels de sélection moyen} (\"DS\", moyenne des comparaisons bouquet de sélection vs. vrac) pour les différents caractères mesurés ainsi que l'effet de la sélection 
-sur le comportement du mélange (réponse à la sélection \"RS\" : moyenne des comparaison de la modalité de sélection avec le mélange non sélectionné)
+\\item pour chaque modalité de sélection (voir schéma du dispositif pour l'explication des modalités de sélection),
+les \\textbf{différentiels de sélection moyen} (\"DS\", moyenne des comparaisons bouquet de sélection vs. vrac) pour les différents caractères mesurés 
+ainsi que l'\\textbf{effet de la sélection sur le comportement du mélange} (réponse à la sélection \"RS\" : moyenne des comparaison de la modalité de sélection avec le mélange non sélectionné)
 \\item la comparaison du comportement du mélange sélectionné (Modalité 3) et du mélange issu des sélections dans les composantes (Modalité 2)
 \\item pour les caractères pour lesquelles on a des mesures individuelles, la comparaison de la variabilité observée dans le mélange sélectionné (Modalité 3) 
 et le mélange issu des sélections dans les composantes (Modalité 2)
@@ -689,10 +697,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
 
 "); OUT = c(OUT, out)
   
-  if(file.exists(paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""))){
-    Table = read.table(paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
-  }else{
-    t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)), year_RS=as.character(seq(2016,as.numeric(year),1)),
+  t = get_mixture_tables(res_model1, year=NULL, year_DS=as.character(seq(2016,as.numeric(year)-1,1)), year_RS=as.character(seq(2016,as.numeric(year),1)),
                                    mix_to_delete=NULL,
                                    language=language,
                                    data_mixtures=data_mixtures,
@@ -704,7 +709,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
                                    table.type="selection.modalities",
                                    res_model_varintra = res_model_varintra)
     
-    table = lapply(t,function(x){
+  table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
       return(c(paste(ds["Total","mean"]," (",ds["Total","stars"],")",sep=""),
@@ -718,26 +723,25 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
                paste(vi["mean_gain","M3vsM2"],vi["stars","M3vsM2"],sep=" ")
       ))
     })
-    Table = NULL
-    for (i in table){Table=rbind(Table,i)}
-    rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
-    Table=cbind(rownames(Table),Table)
+  Table = NULL
+  for (i in table){Table=rbind(Table,i)}
+  rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
+  Table=cbind(rownames(Table),Table)
 
-    if(language == "french"){
-      colnames(Table) = c("Caractère", "Toutes modalités - DS", 
+  if(language == "french"){
+    colnames(Table) = c("Caractère", "Toutes modalités - DS", 
                       "Modalité 1 - DS" , "Modalité 1 - RS",
                       "Modalité 2 - DS" , "Modalité 2 - RS",
                       "Modalité 3 - DS" , "Modalité 3 - RS",
                       "Modalité 3 vs Modalité 2","Variabilité au sein des mélanges M3 vs M2")
-    }else{
-      colnames(Table) = c("CVariable","All modalities - DS", 
+  }else{
+    colnames(Table) = c("CVariable","All modalities - DS", 
                       "Modality 1 - DS" , "Modality 1 - RS",
                       "Modality 2 - DS" , "Modality 2 - RS",
                       "Modality 3 - DS" , "Modality 3 - RS",
                       "Modality 3 vs Modality 2","Intra mixture variability M3 vs M2")
-    }
-    write.table(Table,file=paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";")
   }
+  write.table(Table,file=paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";")
   attributes(Table)$invert =FALSE
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
 et \\textbf{réponse à la sélection} (RS, données 2017). 
