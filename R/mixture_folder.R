@@ -265,7 +265,7 @@ mixture_folder = function(
              Ces pratiques de sélection sont comparées au mélange évoluant sans sélection massale (Modalité 4). \\\\
 
 
-          \\begin{figure}[!ht]
+          \\begin{figure}[!H]
           \\begin{center} 
           \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
           \\caption{Schéma du dispositif sur 3 ans : les rectangles représentent les parcelles (plein : mélange ; vide : composante) et les flèches une sélection (trait plein) ou non (trait pointillé). 
