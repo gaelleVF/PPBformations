@@ -313,7 +313,7 @@ Sur les flèches sont indiqués les noms données aux lots de graines sélection
   if (is.null(data_PPB_mixture$data)) { 
     out = list("text" = "Vous n'avez pas mis en place l'essai de sélection pour les mélanges sur votre ferme."); OUT=c(OUT,out)
   }else{
-
+    cat("Résultats sur la ferme -----------------------------------------------------")
     out=list("text"="Les graphiques suivants présentent, pour chaque caractère mesuré et pour chaque mélange testé, les valeurs des différentes modalités de sélection des mélanges 
     ainsi que des composantes et la valeur moyenne des composantes si celles-ci ont été semées. 
              Les populations qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.") ; OUT=c(OUT,out)
@@ -397,6 +397,7 @@ Sur les flèches sont indiqués les noms données aux lots de graines sélection
 } #end resultats sur la ferme
   
   # 2.2. Résultats sur le réseau de fermes -----
+  cat("Résultats sur le réseau ---------------------------------------")
   out = list("section" = list("text"="Résultats sur le réseau de fermes")); OUT = c(OUT, out)
   out = list("text" = "Dans cette partie sont présentés les résultats de l'essai mélange sur le réseau de fermes. 
              Dans un premier temps on s'intéresse aux bénéfices que peuvent apporter les mélanges en comparant les mélanges à la moyenne de leurs composantes : \\textbf{a-t-on
@@ -437,6 +438,7 @@ un risque de se tromper entre 0.1% et 1%.
   
   
   # 2.2.1. Tableau récapitulatif -----
+  car("tableaux ------------------------------------------------------")
   out=list("subsection" = list("text"="Résultats globaux sur le réseau")); OUT = c(OUT, out)
   out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
 \\begin{itemize}
@@ -607,6 +609,7 @@ tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\
   
   
   # 2.2.2. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
+  cat("Histogrammes overyielding ---------------------------------------------------------------")
   out = list("subsection" = list("text"="Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau")); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
               Chaque élément de ces histogrammes représente une comparaison entre un mélange et la moyenne de ses composantes, la couleur de chaque élément indique
@@ -645,6 +648,7 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
 
   
   # 2.2.3. Différentiel de sélection ------
+  cat("Différentiel de sélection -----------------------------------------")
   out = list("subsection" = list("text"="Différentiels de sélection sur le réseau")); OUT = c(OUT, out)
   out = list("text" = "Les graphiques suivants présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
              séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
@@ -674,6 +678,7 @@ voir partie \\ref{SymbolesSignif} pour les explication de la significativité de
 
   
   # 2.2.4. Réponse à la sélection ------
+  cat("Réponse à la sélection -----------------------------------------------------")
   out = list("subsection" = list("text"="Effet des pratiques de sélection sur le comportement des mélanges")); OUT = c(OUT, out)
   out = list("text" = "En 2017 nous pouvons comparer l'\\textbf{effet des pratiques de sélection testées sur le comportement des mélanges (1 année de sélection) : 
              une année de sélection dans les composantes avant de mélanger (M2) et la sélection dans le mélange (M3)}. \\\\
@@ -712,7 +717,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
-      return(c(paste(ds["Total","mean"]," (",ds["Total","stars"],")",sep=""),
+      return(c(paste(ds["Total","mean"],ds["Total","stars"],sep=""),
                paste(ds[grep("Mod 1",rownames(ds)),"mean"],ds[grep("Mod 1",rownames(ds)),"stars"],sep=" "), 
                         paste(rs["mean_gain","M1"],rs["stars","M1"],sep=" "),
                paste(ds[grep("Mod 2",rownames(ds)),"mean"],ds[grep("Mod 2",rownames(ds)),"stars"],sep=" "), 
@@ -735,7 +740,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
                       "Modalité 3 - DS" , "Modalité 3 - RS",
                       "Modalité 3 vs Modalité 2","Variabilité au sein des mélanges M3 vs M2")
   }else{
-    colnames(Table) = c("CVariable","All modalities - DS", 
+    colnames(Table) = c("Variable","All modalities - DS", 
                       "Modality 1 - DS" , "Modality 1 - RS",
                       "Modality 2 - DS" , "Modality 2 - RS",
                       "Modality 3 - DS" , "Modality 3 - RS",
