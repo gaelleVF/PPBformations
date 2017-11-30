@@ -464,8 +464,13 @@ if(table.type == "selection.modalities"){
   names(DS) = vec_variables
   
   RS = lapply(vec_variables,function(variable){
-    Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
-                            year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
+    if(!file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""))){
+      Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+                              year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
+    }else{
+      Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
+    }
+   
 
     if(!is.null(Tab)){
       Tab=as.data.frame(Tab)
