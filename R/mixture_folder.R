@@ -731,6 +731,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   Table = NULL
   for (i in table){Table=rbind(Table,i)}
   rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
+  rownames(Table) =  unlist(lapply(vec_variables,function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
 
   if(language == "french"){
