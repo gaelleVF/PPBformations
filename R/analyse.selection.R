@@ -488,7 +488,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
       }
       rownames(Tab) = Tab[,"melange"]
       Tab=Tab[,-grep("melange",colnames(Tab))]
-      if(!is.null(table.save)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),sep=""),sep=";")}
+      if(!is.null(table.save)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
       return(Tab)
     })
     names(RSQ) = variables_semiquanti
