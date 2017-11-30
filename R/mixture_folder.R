@@ -313,7 +313,7 @@ Sur les flèches sont indiqués les noms données aux lots de graines sélection
   if (is.null(data_PPB_mixture$data)) { 
     out = list("text" = "Vous n'avez pas mis en place l'essai de sélection pour les mélanges sur votre ferme."); OUT=c(OUT,out)
   }else{
-    cat("Résultats sur la ferme -----------------------------------------------------")
+    cat("Résultats sur la ferme -----------------------------------------------------   \n")
     out=list("text"="Les graphiques suivants présentent, pour chaque caractère mesuré et pour chaque mélange testé, les valeurs des différentes modalités de sélection des mélanges 
     ainsi que des composantes et la valeur moyenne des composantes si celles-ci ont été semées. 
              Les populations qui partagent le même groupe (représenté par une même lettre) ne sont pas significativement différentes.") ; OUT=c(OUT,out)
@@ -397,7 +397,7 @@ Sur les flèches sont indiqués les noms données aux lots de graines sélection
 } #end resultats sur la ferme
   
   # 2.2. Résultats sur le réseau de fermes -----
-  cat("Résultats sur le réseau ---------------------------------------")
+  cat("Résultats sur le réseau ---------------------------------------   \n")
   out = list("section" = list("text"="Résultats sur le réseau de fermes")); OUT = c(OUT, out)
   out = list("text" = "Dans cette partie sont présentés les résultats de l'essai mélange sur le réseau de fermes. 
              Dans un premier temps on s'intéresse aux bénéfices que peuvent apporter les mélanges en comparant les mélanges à la moyenne de leurs composantes : \\textbf{a-t-on
@@ -438,7 +438,7 @@ un risque de se tromper entre 0.1% et 1%.
   
   
   # 2.2.1. Tableau récapitulatif -----
-  cat("tableaux ------------------------------------------------------")
+  cat("tableaux ------------------------------------------------------ \n")
   out=list("subsection" = list("text"="Résultats globaux sur le réseau")); OUT = c(OUT, out)
   out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
 \\begin{itemize}
@@ -609,7 +609,7 @@ tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\
   
   
   # 2.2.2. Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau -----
-  cat("Histogrammes overyielding ---------------------------------------------------------------")
+  cat("Histogrammes overyielding --------------------------------------------------------------- \n")
   out = list("subsection" = list("text"="Distribution du gain du mélange par rapport à la moyenne de ses composantes sur le réseau")); OUT = c(OUT, out)
   out = list("text" = "Ces graphiques présentent le comportement des mélanges par rapport à la moyenne de leurs composantes respectives. 
               Chaque élément de ces histogrammes représente une comparaison entre un mélange et la moyenne de ses composantes, la couleur de chaque élément indique
@@ -648,7 +648,7 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
 
   
   # 2.2.3. Différentiel de sélection ------
-  cat("Différentiel de sélection -----------------------------------------")
+  cat("Différentiel de sélection ----------------------------------------- \n")
   out = list("subsection" = list("text"="Différentiels de sélection sur le réseau")); OUT = c(OUT, out)
   out = list("text" = "Les graphiques suivants présentent les résultats de la \\textbf{comparaison entre les bouquets de sélection et le vrac correspondant}, 
              séparément pour les sélections faites dans les composantes et celles faites dans les mélanges. \\\\
@@ -731,7 +731,7 @@ mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l
   Table = NULL
   for (i in table){Table=rbind(Table,i)}
   rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
-  rownames(Table) =  unlist(lapply(vec_variables,function(x){strsplit(x,"-")[[1]][1]}))
+  rownames(Table) =  unlist(lapply( rownames(Table),function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
 
   if(language == "french"){
