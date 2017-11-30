@@ -438,7 +438,7 @@ un risque de se tromper entre 0.1% et 1%.
   
   
   # 2.2.1. Tableau récapitulatif -----
-  car("tableaux ------------------------------------------------------")
+  cat("tableaux ------------------------------------------------------")
   out=list("subsection" = list("text"="Résultats globaux sur le réseau")); OUT = c(OUT, out)
   out=list("text"="Les tableaux suivant présentent les résultats sur l'ensemble des mélanges testés. Y sont reportés : 
 \\begin{itemize}
