@@ -1,7 +1,27 @@
 # 0. help -----------------------------------------------------------------
 #' Function to get tables containing results from mixture experiment
 #' 
-#' @param pathway pathway to files needed
+#' @param res_model results from PPBstats models
+#' 
+#' @param table.type type of table to be returned
+#' \itemize{
+#'  \item \code{distribution} to get a table containing :
+#'  \itemize
+#'     \item the number of mixtures tested
+#'     \iem the proportion of mixtures which value exceeds the predicted value based on the mean of components' values
+#'     \item the number of mixtures for which the mixture significantly exceeds the predicted value (alpha = 0.05)
+#'     \item the proportion of mixtures which value is lower than its lowest component
+#'     \item the proportion of mixtures which value is higher than its highest component
+#'     \item mean value of all components
+#'     \item mean value of all mixtures
+#'     \item mean overyielding over all the mixtures tested. The overyielding is calculated as : 
+#'     \deqn{\frac{1}{N} \sum\limits_{i=1}^N \frac{\overline{Y_{Mixture_{i}}} - \overline{Y_{Mean of components_{i}}}}{\overline{Y_{Mean of components_{i}}}} }
+#'           
+#'     \item standard deviation of overyieldings
+#'     \item pvalue of the comparison test mean overyielding vs 0
+#' }
+#' 
+#' @param res_model_varintra if 
 #
 #' @details 
 #' 
@@ -9,8 +29,8 @@
 #' 
 #' @author Pierre Rivière, Gaelle Van Frank
 #' 
-#' 
-#' 
+
+
 get_mixture_tables <- function(res_model,
                                res_model_varintra = NULL,
                                year=NULL,
