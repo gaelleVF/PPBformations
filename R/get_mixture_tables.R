@@ -19,7 +19,25 @@
 #'     \item standard deviation of overyieldings
 #'     \item pvalue of the comparison test mean overyielding vs 0
 #'  }
-#'     
+#'  \item \code{correlations} to get a table containing:
+#'  \itemize{
+#'    \item the correlation of the overyielding with: the number of components in the mixture and the variance observed among components
+#'    \item the pvalue of the correlation
+#'  }
+#'  \item \code{varIntra} and \code{selection.modalities} to get tables containing:
+#'  \itemize{
+#'    \item Focusing on phenotypic mean for \code{selection.modalities} and phenotypic variability for \code{varIntra}: 
+#'    the comparison of the selected mixture and the non-selected mixture for all selection modalities, and the comparison between the different selection modalities:
+#'    \itemize{
+#'       \item mean value of the differences over all the mixtures tested
+#'       \item standard deviation of differences
+#'       \item statistic value for the comparison test (t.test if normal distribution of values, wilcox.test otherwise)
+#'       \item pvalue of the comparison test
+#'       \item significance symbol
+#'       \item test used for the comparison
+#'    }
+#'  }
+#'  
 #' }
 #' 
 #' @param res_model_varintra if 
@@ -30,6 +48,7 @@
 #' 
 #' @author Pierre Rivière, Gaelle Van Frank
 #' 
+
 
 
 get_mixture_tables <- function(res_model,
