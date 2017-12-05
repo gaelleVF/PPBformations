@@ -556,7 +556,7 @@ Pour la comparaison du mélange à la moyenne des composantes est indiqué entre
 à la valeur moyenne des composantes (risque de se tromper inférieur à 5%). \\\\
 \\textbf{Interprétation :} on a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année. Pour la majorité des caractères, 2/3 à 3/4 des mélanges sont supérieurs aux moyennes des composantes sauf pour le PMG 
-et la teneur en protéine pour lesquels seulement 40\% des mélanges sont supérieurs.
+et la teneur en protéine pour lesquels seulement 40% des mélanges sont supérieurs.
                             ", "content" = list(Table1),"landscape"=TRUE,"tab.lab"="Compmel")) ; OUT=c(OUT,out)
   
 # 2.2.1.2. Résultats globaux : Overyieldings et corrélations
