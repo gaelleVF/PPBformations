@@ -352,8 +352,8 @@ mixture_folder = function(
    #     for (yr in 1:length(p_melanges[[1]][[i]])){
    #       if(!is.null(p_melanges[[1]][[i]][[yr]]$plot)){
             i = ifelse(language=="french",2,3)
-            out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",list_trad[[grep(variable,list_trad)]][i],"} du/des mélange(s) et de ses/leurs composantes (si les composantes ont été semées) et comparaison
-                                                          des différents modalités de sélection du/des mélange(s) (si ces modalités ont été semées). 
+            out = list("figure" = list("caption" = paste("Comparaison du \\textbf{",list_trad[[grep(variable,list_trad)]][i],"} du(des) mélange(s) et de ses(leurs) composantes (si les composantes ont été semées) et comparaison
+                                                          des différents modalités de sélection du(des) mélange(s) (si ces modalités ont été semées). 
                                                        Les populations qui appartiennent le même groupe (représenté par une même lettre) ne sont pas significativement différentes (risque de se tromper de 5%).
                                                        ",sep=""), "content" = a, "layout" = matrix(c(1,2), ncol = 1), "width" = 1, "landscape" = FALSE))
             OUT = c(OUT, out)#}
