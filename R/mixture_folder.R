@@ -462,7 +462,7 @@ On remarque en particulier :
 \\begin{itemize}
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année (Table \\ref{Compmel}).
-\\item Pour la majorité des caractères, 2/3 à 3/4 des mélanges sont supérieurs aux moyennes des composantes sauf pour le PMG et la teneur en protéine pour lesquels seulement 40\% des mélanges sont supérieurs.
+\\item Pour la majorité des caractères, 2/3 à 3/4 des mélanges sont supérieurs aux moyennes des composantes sauf pour le PMG et la teneur en protéine pour lesquels seulement 40% des mélanges sont supérieurs.
 \\item Pour la plupart des caractères on a une différence positive et significatif des mélanges par rapport à la moyenne de leurs composantes respectives. On observe une  faible perte en PMG globalement
 des mélanges par rapport à la moyenne des composantes respectives : en compétition avec des génotypes différents les plantes produisent plus de grains plus petits (Table \\ref{OverY}).
 \\item Il n'y a qu'une seule corrélation significative et importante : la différence en hauteur du mélange et de la moyenne de ses composantes par rapport à la variabilité de hauteur des composantes. 
