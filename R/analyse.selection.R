@@ -236,7 +236,7 @@ analyse.selection <- function(Mixtures,
           return(Signif)
         }))
         names(Signif)=unique(Data$type)
-        Data$type = unlist(lapply(Data$type, function(x){paste(x,ifelse(language=="english","- Mean gain: "," - Gain moyen : "),round((Mean[x])*100,2)," % ",get_stars(Signif[x])," (n = ",nrow(Data[Data$type %in% x,])," )", sep="")}))
+        Data$type = unlist(lapply(Data$type, function(x){paste(x,ifelse(language=="english","- Mean gain: "," - Différentiel moyen : "),round((Mean[x])*100,2)," % ",get_stars(Signif[x])," (n = ",nrow(Data[Data$type %in% x,])," )", sep="")}))
         
       }
       
