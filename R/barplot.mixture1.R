@@ -24,8 +24,9 @@ dans composantes (Mod2)","Mélange sélectionné (Mod3)"))
   
   # ajouter les groupes de significativité
   p = p + geom_text(data = x, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
-  p = p + ggtitle(paste(title,"
-  ","Gain du mélange par rapport à la moyenne des composantes :",Gain,"%",sep=" ")) + ylab("")
+  if(!is.null(Gain)){title = paste(title,"
+  ","Différence normalisé entre valeur du mélange et valeur moyenne des composantes :",Gain,"%",sep=" ")}
+  p = p + ggtitle(title) + ylab("")
   
   # pivoter légende axe abscisses
   p = p + xlab("") + theme(axis.text.x = element_text(angle = 90)) + ylim(0, x[1,"max"])
