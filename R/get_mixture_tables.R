@@ -24,10 +24,8 @@
 #'    \item the correlation of the overyielding with: the number of components in the mixture and the variance observed among components
 #'    \item the pvalue of the correlation
 #'  }
-#'  \item \code{varIntra} and \code{selection.modalities} to get tables containing:
-#'  \itemize{
-#'    \item Focusing on phenotypic mean for \code{selection.modalities} and phenotypic variability for \code{varIntra}: 
-#'    the comparison of the selected mixture and the non-selected mixture for all selection modalities, and the comparison between the different selection modalities:
+#'  \item \code{selection.modalities} (focusing on phenotypic mean) and \code{varIntra} (focusing on phenotypic variability) to get tables containing
+#'  the comparison of the selected mixture and the non-selected mixture for all selection modalities, and the comparison between the different selection modalities:
 #'    \itemize{
 #'       \item mean value of the differences over all the mixtures tested
 #'       \item standard deviation of differences
@@ -36,13 +34,37 @@
 #'       \item significance symbol
 #'       \item test used for the comparison
 #'    }
-#'  }
 #'  
 #' }
 #' 
 #' @param res_model_varintra if 
+#' 
+#' @param year for \code{table.type = 'distribution'} and \code{table.type = 'correlations'}, a character vector containing the years to be analyzed. If NULL, all years from 2015 will be analyzed.
+#' 
+#' @param year_DS for \code{table.type = 'selection.modalities'), a character vector containing the years for which the selection differential has to be analyzed. If NULL, all years from 2015 will be analyzed.
+#' 
+#' @param year_RS for \code{table.type = 'selection.modalities'), a character vector containing the years for which the response to selection has to be analyzed. If NULL, all years from 2015 will be analyzed.
+#' 
+#' @param mix_to_delete names of the mixtures that should not be analyzed (default is NULL).
+#' 
+#' @param language \code{"french"} or \code{"english"}: the language in which the tables must be returned
+#' 
+#' @param data_mixtures result from \code{\link{analyse_feedback_folder_1}
+#' 
+#' @param vec_variables the variables to be analyzed
+#' 
+#' @param data_S_all result from \code{\link{analyse_feedback_folder_1}
+#' 
+#' @param data_SR_all result from \code{\link{analyse_feedback_folder_1}
+#' 
+#' @param path_to_tables the path to were the tables should be saved (current directory as default)
+#' 
+#' @param tab_proportions if \code{table.type = 'correlations'}, a table containing the proportion of each component in each mixtures for the calculation of weighted variability among components.
+#' If NULL, components will be considered as equally abondant in mixtures.
+#' 
+
 #
-#' @details 
+#' @details=
 #' 
 #' @return Generate tex and pdf files
 #' 
