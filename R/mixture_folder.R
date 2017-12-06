@@ -709,7 +709,7 @@ et dans le mélange issu des sélections dans les composantes (Modalité 2)
 \\end{itemize}
 \\\\
 
-\emph{Elements d'interprétation :}
+\\emph{Elements d'interprétation :}
 \\begin{itemize}
 \\item On constate pour certains caractères que malgré le différentiel de sélection important en 2016, ça n'a pas forcément un effet important sur le 
 mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l'épi et le nombre de grains par épi, on a un effet important de la sélection sur le comportement du mélange 
