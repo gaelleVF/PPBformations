@@ -130,8 +130,18 @@ mag = function(d){
     d$data$"rdt" = a
   }
   
-  if( length(grep("^rdt_parcelle---rdt_parcelle$", colnames(d$data))) > 0 ) {
-    a = as.numeric(as.character(d$data$"rdt_parcelle---rdt_parcelle"))
+  if( length(grep("^rdt_parcelle---rdt_parcelle$|^rdt_micro_parcelle---rdt_micro_parcelle$", colnames(d$data))) > 0 ) {
+    a1 = length(grep("^rdt_parcelle---rdt_parcelle$", colnames(d$data)))
+    a2 = length(grep("^rdt_micro_parcelle---rdt_micro_parcelle$", colnames(d$data)))
+    if(length(a1)==1 & length(a2)==1){
+      a1 = as.numeric(as.character(d$data$"rdt_parcelle---rdt_parcelle"))
+      a2 = as.numeric(as.character(d$data$"rdt_micro_parcelle---rdt_micro_parcelle"))
+      a1 = unlist(lapply(1:length(a1),function(i){if(!is.na(a2[i])){return(a2[i])}else{return(a1[i])}}))
+    }else if(length(a1)==1 & length(a2)==0){
+      a = as.numeric(as.character(d$data$"rdt_parcelle---rdt_parcelle"))
+    }else if(length(a1)==0 & length(a2)==1){
+      a = as.numeric(as.character(d$data$"rdt_micro_parcelle---rdt_micro_parcelle"))
+    }
     a[which(a <= 5)] = NA
     a[which(a > 100)] = NA
     d$data$"rdt_parcelle---rdt_parcelle" = a
@@ -147,6 +157,7 @@ mag = function(d){
   
   return(d)
 }
+
 
 # Traduire les vec_variables
 traduction = function(tab,row_or_col)	{
