@@ -266,19 +266,6 @@ mixture_folder = function(
            \\end{enumerate}
              Ces pratiques de sélection sont comparées au mélange évoluant sans sélection massale (Modalité 4). \\\\
 
-
-          \\begin{figure}[!h]
-          \\begin{center} 
-          \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
-          \\caption{Schéma du dispositif sur 3 ans : les rectangles représentent les parcelles (plein : mélange ; vide : composante) 
-          et les flèches une sélection (trait plein) ou une multiplication sans sélection massale (trait pointillé). 
-          Sur les flèches sont indiqués les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). 
-          Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
-          \\end{center} 
-          \\label{SchemaRecap}
-          \\end{figure}
-
-            
             Le dispositif expérimental est adapté à partir de celui utilisé en routine, avec le(s) témoin(s) répété(s) deux fois, le(s) mélange(s) répété(s) deux fois et les composantes non répétées.
             Cet essai peut tout à fait être semé dans la même parcelle que des populations que vous voudriez tester qui ne seraient pas intégrées dans le mélange, car les témoins utilisés sont les mêmes.
              Ce dossier présente les résultats des premières années d'essai. Si vous voulez mettre en place cet essai chez vous, c'est tout à fait possible,
@@ -300,6 +287,18 @@ mixture_folder = function(
               \\item Quel sont les impacts des patiques de sélection des mélanges sur les caractères mesurés ?
           \\end{itemize}
           \\end{enumerate}
+
+          \\begin{figure}[!h]
+          \\begin{center} 
+          \\includegraphics[width=.80\\textwidth]{",we_are_here,"tex_files/dispositifMelanges.png}
+          \\caption{Schéma du dispositif sur 3 ans : les rectangles représentent les parcelles (plein : mélange ; vide : composante) 
+          et les flèches une sélection (trait plein) ou une multiplication sans sélection massale (trait pointillé). 
+          Sur les flèches sont indiqués les noms données aux lots de graines sélectionnés en fonction de la modalité de sélection (#VA,JA...). 
+          Les fermes satellites mettent en places les modalités 2, 3 et 4 tandis que les fermes régionales mettent en place l'ensemble des modalités.}
+          \\end{center} 
+          \\label{SchemaRecap}
+          \\end{figure}
+
   \\newpage",sep="/")
   
   p = paste(we_are_here, "/tex_files/intro_melanges", ".tex", sep = "")
