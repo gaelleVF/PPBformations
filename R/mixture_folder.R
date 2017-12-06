@@ -554,7 +554,7 @@ ou entre le nombre de grains par épi et le taux de protéine : un gain de pmg o
 Pour les comparaisons sont indiqués en premier lieu le nombre de mélanges concernés ainsi que la proportion que cela représente par rapport au nombre de mélanges testés.
 Pour la comparaison du mélange à la moyenne des composantes est indiqué entre parenthèse le nombre de cas pour lesquels la valeur du mélange est significativement supérieure
 à la valeur moyenne des composantes (risque de se tromper inférieur à 5%). \\\\
-\\textbf{Interprétation :} on a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
+\\emph{Interprétation :} on a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
 semée en pur sans connaître les conditions de culture de l'année. Pour la majorité des caractères, 2/3 à 3/4 des mélanges sont supérieurs aux moyennes des composantes sauf pour le PMG 
 et la teneur en protéine pour lesquels seulement 40% des mélanges sont supérieurs.
                             ", "content" = list(Table1),"landscape"=TRUE,"tab.lab"="Compmel")) ; OUT=c(OUT,out)
@@ -592,7 +592,7 @@ sur l'ensemble des mélanges testés. Les deux dernière lignes présentent les 
 ou la variabilité du caractère au sein des composantes : une valeur proche de 0 indique qu'il n'existe pas de corrélation, tandis qu'une valeur proche de 1 indique une forte corrélation. 
 Les symboles indiquent si le gain moyen et les corrélations sont significatifs (voir tableau \\ref{Signif} pour l'explication des symboles utilisés). 
 \\\\
-\\textbf{Interprétation :} Pour la plupart des caractères on a un différence positive significative des mélanges par rapport à la moyenne de leurs composantes respectives. 
+\\emph{Interprétation :} Pour la plupart des caractères on a un différence positive significative des mélanges par rapport à la moyenne de leurs composantes respectives. 
 Une seule corrélation significative : le gain en hauteur du mélange lié à une plus grande variabilité de hauteur des composantes. 
 Hypothèse : lorsqu'on a une grande variabilité de hauteur les composantes les plus hautes prennent le dessus sur les composantes les plus basses.
                             ", "content" = list(Table2),"landscape"=TRUE,"tab.lab"="OverY")) ; OUT=c(OUT,out)
@@ -614,7 +614,7 @@ Hypothèse : lorsqu'on a une grande variabilité de hauteur les composantes les 
   out = list("table" = list("caption" = "Corrélations entre gains des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
 tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\ref{Signif} pour l'explication des symboles utilisés.
 \\\\
-\\textbf{Interprétation :} un gain de pmg ou de nombre de grains par épi du mélange n'est pas nécessairement associé à une perte en taux de protéine.
+\\emph{Interprétation :} un gain de pmg ou de nombre de grains par épi du mélange n'est pas nécessairement associé à une perte en taux de protéine.
 L'augmentation du poids des épis des mélanges se fait grâce à une augmentation de longueur des épis et de nombre de grains par épi.
                             ", "content" = list(Tab),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
   
@@ -709,7 +709,7 @@ et dans le mélange issu des sélections dans les composantes (Modalité 2)
 \\end{itemize}
 \\\\
 
-Elements d'interprétation :
+\emph{Elements d'interprétation :}
 \\begin{itemize}
 \\item On constate pour certains caractères que malgré le différentiel de sélection important en 2016, ça n'a pas forcément un effet important sur le 
 mélange l'année suivante (PMG). Pour d'autres caractères, comme le poids de l'épi et le nombre de grains par épi, on a un effet important de la sélection sur le comportement du mélange 
