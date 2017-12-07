@@ -242,7 +242,8 @@ ggplot_mixture1 = function(res_model,
                 comp.mu = res_model[res_model$son %in% noms$son,c("son",variable)]
                 if(nrow(comp.mu) >0){
                   comp.mu = comp.mu[!is.na(comp.mu[,variable]),]
-                  comp.mu = aggregate(as.numeric(as.character(comp.mu[,variable])), by=list(comp.mu$son), FUN=mean) 
+                  colnames(comp.mu) = c("son","median")
+                  comp.mu = aggregate(as.numeric(as.character(comp.mu[,"median"])), by=list(comp.mu$son), FUN=mean)
                   colnames(comp.mu) = c("son","median")
                   comp.mu$germplasm = unlist(lapply(as.character(comp.mu$son),function(x){strsplit(x,"_")[[1]][1]}))
                   comp.mu$pval=NA
