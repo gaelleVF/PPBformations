@@ -1,7 +1,7 @@
 # 0. help -----------------------------------------------------------------
 #' Barplot for the comparison of the mixture vs its components & the mean of its components
 #' 
-#' @param res_model output from the \code{PPBstats::analyse.outputs} function
+#' @param res_model output from the \code{PPBstats::analyse.outputs} function or from \code{shinemas2R::get.data} function
 #' 
 #' @param farmers_data output from the \code{shinemas2R::get.data} function, with argument query type == "data.mixture.1"
 #' 
@@ -16,6 +16,8 @@
 #'  \item "comp.mod" to compare the selection modalities of a mixture
 #'  \item "comp.mod.network" to get, for all mixtures, the comparison of the different selection modalities with the non selected mixture and the comparison of the different selection modalities
 #' }
+#'
+#' @param model the model from which the results comes from. If NULL res_model must come from \code{shinemas2R::get.data} function
 #'
 #' @param person if plot.type = "comp.in.farm" or "comp.mod", the farmers you want the analysis done to
 #' 
@@ -52,6 +54,13 @@ ggplot_mixture1 = function(res_model,
   if(!is.null(model)){
     if(model=="model_1"){param = "mu"}
     if(model=="model_varintra"){param = "sigma"}
+  }else{
+    if(class(res_model) == "list"){
+      res_model=res_model$data
+      if(class(res_model) == "list"){
+        res_model=res_model$data
+      }
+    }
   }
   
   #0. functions -----------
@@ -198,13 +207,15 @@ ggplot_mixture1 = function(res_model,
           if(!is.null(noms)){
             if(nrow(noms)>0){
               melange = noms$son_germplasm[1]
-              mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = param, year = yr)
-              Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
-              
-              if (length(Mel) > 0) {
-                Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
-                if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
-
+              if(!is.null(model)){
+                # Data from model results
+                mcmc = get_result_model(res_model, noms, type_result = "MCMC", variable, model,param = param, year = yr)
+                Mel = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Mélange"),"son_germplasm"]]
+                
+                if (length(Mel) > 0) {
+                  Comp = mcmc[,unlist(rm_between(colnames(mcmc), "[", ",", extract=TRUE)) %in% noms[which(noms$Type == "Composante"),"son_germplasm"]]
+                  if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
+                  
                   if(!missingComp){
                     MeanComp = apply(Comp, 1, mean)
                     M = cbind(Mel, MeanComp, Comp)
@@ -217,16 +228,28 @@ ggplot_mixture1 = function(res_model,
                   comp.mu = mean_comparisons.check_model_1(M, param, get.at.least.X.groups = 1)
                   
                   C=comp.mu$data_mean_comparisons[[1]]$Mpvalue
-
+                  
                   if(!missingComp){
                     A = cbind(C[which(rownames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep="")),], C[,which(colnames(C) == paste(param,"[",melange,",",paysan,":",yr,"]",sep=""))]) 
                     A = apply(A,1,sum)
                   }else{A=NA}
-                 
+                  
                   comp.mu=comp.mu$data_mean_comparisons[[1]]$mean.comparisons
                   comp.mu$germplasm = unlist(rm_between(comp.mu$parameter, "[", ",", extract=TRUE))
                   comp.mu$pval=A[as.character(comp.mu$parameter)]
-
+                }else{comp.mu=NULL}
+              }else{ # Data from row table (shinemas2R::get.data)
+                comp.mu = res_model[res_model$son %in% noms$son,c("son",variable)]
+                if(nrow(comp.mu) >0){
+                  comp.mu = comp.mu[!is.na(comp.mu[,variable]),]
+                  comp.mu = aggregate(as.numeric(as.character(comp.mu[,variable])), by=list(comp.mu$son), FUN=mean) 
+                  colnames(comp.mu) = c("son","median")
+                  comp.mu$germplasm = unlist(lapply(as.character(comp.mu$son),function(x){strsplit(x,"_")[[1]][1]}))
+                  comp.mu$pval=NA
+                  comp.mu$entry = comp.mu$germplasm
+                }else{comp.mu=NULL}
+              }
+             if(!is.null(comp.mu)){
                   type = NULL
                   for (i in 1:nrow(comp.mu)) { 
                     a = unique(unlist(noms[noms$son_germplasm %in% comp.mu[i,"germplasm"],"Type"]))
@@ -267,14 +290,14 @@ dans composantes (Mod1)")
                     Data_split = plyr:::splitter_d(Data, .(split))
                     
                     # faire le graph pour chaque split
-                    bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",variable,", ","données ",yr, sep=""),melange = melange))})
+                    bp = lapply(Data_split , function(z){return(barplot.mixture1(z,title = paste(person, " : ",strsplit(as.character(variable),"---")[[1]][1],", ","données ",yr, sep=""),melange = melange))})
                     
                     return(list("Tab" = Data,"plot"= bp))
                   }
                   if ((plot.type == "mix.comp.distribution" | plot.type == "mix.gain.distribution") & missingComp == FALSE) {
                     return(list("Tab" = Data,"plot" = NULL))
                   }
-              }else{
+              }else{  # a retirer comp.mu=NULL
                 warning("No data for the mixture")
                 return(list("Tab" = NULL,"plot"= NULL))
               }
