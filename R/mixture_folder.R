@@ -338,7 +338,8 @@ mixture_folder = function(
    #   out = list("subsection" = titre); OUT = c(OUT, out)
       
       # Comparaison mélange vs composantes
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1", 
+      if(variable %in% vec_variables_mod1){res_model = res_model1 ; model="model_1"}else{res_model=data_all ; model=NULL}
+      p_melanges = ggplot_mixture1(res_model = res_model, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = model, 
                                    plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL, language=language)
       
       p = lapply(p_melanges, function(x){
@@ -391,9 +392,10 @@ mixture_folder = function(
       print(i)
       x=mix[[i]]
       out = list("subsection" = list("text"=unique(x$expe_melange))); OUT=c(OUT,out)
-      for (variable in vec_variables_mod1){
+      for (variable in vec_variables){
         print(variable)
-        OUT = graphs_ferme_melanges(OUT,variable,titre=variable,mel = x)
+        if(variable %in% vec_variables_mod1  |  variable %in% colnames(data_all$data$data))
+        OUT = graphs_ferme_melanges(OUT,variable,titre=variable, mel = x)
       }
     }
     
