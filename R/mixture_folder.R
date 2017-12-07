@@ -271,7 +271,8 @@ mixture_folder = function(
              Ce dossier présente les résultats des premières années d'essai. Si vous voulez mettre en place cet essai chez vous, c'est tout à fait possible,
           contactez votre animateur ou l'équipe de recherche ! \\\\
 
-          Ce dossier présente les résultats des essais depuis la saison 2015-2016. 
+          Ce dossier présente les résultats des essais depuis la saison 2015-2016. N'hésitez pas à nous faire part de vos réflexions à la lecture de ce dossier (choses à améliorer, élements
+          qui vous semblent cohérent par rapport à ce que vous observez chez vous ou au contraire qui s'en éloignent, si ces résultats soulèvent des interrogations, ...).
           \\begin{enumerate}
           \\item \\textbf{Une première partie traite des résultats dans votre ferme.}
           Si vous avez mis en place un essai mélange chez vous la première partie reprend l'ensemble des résultats sur votre ferme : 
@@ -456,7 +457,8 @@ Moyenne sur l'ensemble des mélanges de $\\frac{Valeur mélange - Valeur moyenne
 \\\\
 Enfin, on cherche à savoir s'il y a des corrélations entre les différences observés (mélange vs moyenne des composantes) et le nombre de composantes dans le mélange et la variabilité du caractère au sein des différentes composantes (tableau \\ref{OverY}) et
 si on détecte des corrélations entre ces différences pour les différents caractères mesurés (tableau \\ref{CorrelOverY}). \\\\
-On remarque en particulier :
+
+\\emph{On remarque en particulier :}
 
 \\begin{itemize}
 \\item On a peu de cas pour lesquels le mélange est inférieur à la composante la plus basse : on prend donc moins de risques à semer un mélange qu'à miser sur une variété 
@@ -683,7 +685,7 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   out = list("includeimage" = list("content"= "./tex_files/Explication_DiffSel.png", 
 "caption"= "Explication des graphiques qui suivent : pour chaque événement de sélection est calculé le différentiel de sélection.
 Sur les graphiques sont présentés les histogrammes de ces différentiels de sélection, séparément pour les sélections faites dans les composantes (histogramme du dessus)
-et les sélections faites dans les mélanges (histogramme du dessous). Les différentes couleurs représentent la significativité de chaque différentiel de sélection :
+et les sélections faites dans les mélanges (histogramme du dessous). Les différentes couleurs sur le graphique représentent la significativité de chaque différentiel de sélection :
 voir partie \\ref{SymbolesSignif} pour les explication de la significativité des tests de comparaison.")) ; OUT=c(OUT,out)
   }
 
