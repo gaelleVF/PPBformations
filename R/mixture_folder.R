@@ -94,7 +94,23 @@ mixture_folder = function(
     c("Réseau","Sur le réseau","On the network")
   )
   
-  
+  if(length(grep("verse",vec_variables))>0){
+    D=data_all$data$data
+    if(!is.null(D$"verse---verse_2")){
+      D$"verse" = unlist(lapply(D$"verse---verse_2",function(x){
+        b=NULL
+        if(!is.null(x) & x %in% c("à plat","a plat","à  plat","plat","100% a plat","100 a plat")){a=1 ; b=1}
+        if(!is.null(x) & x %in% c("couché","couche","100% couché")){a=2 ; b=1}
+        if(!is.null(x) & x %in% c("intermediaire","intermédiaire","intermédiaire- presque droit","100 intermédiaire","100% intermédiaire")){a=3 ; b=1}
+        if(!is.null(x) & x %in% c("presque droit","presque droits","presque droit- droit")){a=4 ; b=1}
+        if(!is.null(x) & x %in% c("droit","100 droit","100% droit")){a=5 ; b=1}
+        if(is.null(x) | is.na(x)){a=NA}
+        if(is.null(b)){a=NA}
+        return(a)
+      }))
+    }
+    data_all$data$data = D
+  }
   
   
 # Créer title page --------
