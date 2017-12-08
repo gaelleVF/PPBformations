@@ -94,6 +94,7 @@ mixture_folder = function(
     c("Réseau","Sur le réseau","On the network")
   )
   
+  # Verse et rendement
   if(length(grep("verse",vec_variables))>0){
     D=data_all$data$data
     if(!is.null(D$"verse---verse_2")){
@@ -112,6 +113,11 @@ mixture_folder = function(
     data_all$data$data = D
   }
   
+  if(length(grep("rendement",vec_variables))>0){
+    data_all$data$data$"rendement" = data_all$data$data$"rdt_parcelle---rdt_parcelle"
+    data_all$data$data$"rendement" = gsub(",",".",data_all$data$data$"rendement")
+  }
+
   
 # Créer title page --------
   a = paste(
@@ -385,7 +391,8 @@ mixture_folder = function(
       
       # Comparaison modalités de sélection
       if(length(a)<2){
-        p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = "model_1",
+        if(variable %in% vec_variables_mod1){res_model = res_model1 ; model="model_1"}else{res_model=data_all ; model=NULL}
+        p_melanges = ggplot_mixture1(res_model = res_model, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = model,
                                      plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL,language=language)
         p = lapply(p_melanges, function(x){
           lapply(x,function(y){
@@ -411,7 +418,7 @@ mixture_folder = function(
       for (variable in vec_variables){
         print(variable)
         if(variable %in% vec_variables_mod1  |  variable %in% colnames(data_all$data$data))
-        OUT = graphs_ferme_melanges(OUT,variable,titre=variable, mel = x)
+        OUT = graphs_ferme_melanges(OUT,variable, titre=variable, mel = x)
       }
     }
     
