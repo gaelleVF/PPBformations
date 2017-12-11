@@ -220,13 +220,21 @@ get_mixture_tables <- function(res_model,
 if(table.type == "global.info"){
  a = melanges_tot[!is.na(melanges_tot[,grep(vec_variables,colnames(melanges_tot))]),]
  Mix = Mixtures[Mixtures$son_germplasm %in% unique(a$son_germplasm),]
- Mix =  plyr:::splitter_d(Mix, .(expe_melange))  
- Nb_comp = unlist(lapply(Mix,function(M){
+ M1 =  plyr:::splitter_d(Mix, .(expe_melange))  
+ # Number of components for each mixture
+ Nb_comp = unlist(lapply(M1,function(M){
    M=M[M$germplasm_father != M$germplasm_son,]
    M=M[M$germplasm_son == M$expe_melange,]
    return(nrow(M))
  }))
- return(Nb_comp)
+ 
+ # Number of locations per year
+ M2 =  plyr:::splitter_d(Mix, .(year))
+ Nb_location = lapply(M2,function(yr){
+   return(unique(yr$location))
+ })
+ 
+ return(list("Nb_comp"=Nb_comp,"Nb_location"=Nb_location)
 }
   
 # 1. Distribution-------
