@@ -5,6 +5,7 @@
 #' 
 #' @param table.type type of table to be returned
 #' \itemize{
+#'  \item \code{global.info} to get a table containing 
 #'  \item \code{distribution} to get a table containing :
 #'  \itemize{
 #'     \item the number of mixtures tested
@@ -215,6 +216,19 @@ get_mixture_tables <- function(res_model,
   }
   
 
+# 1.Global information on mixtures
+if(table.type == "global.info"){
+ a = melanges_tot[!is.na(melanges_tot[,grep(vec_variables,colnames(melanges_tot))]),]
+ Mix = Mixtures[Mixtures$son_germplasm %in% unique(a$son_germplasm),]
+ Mix =  plyr:::splitter_d(Mix, .(expe_melange))  
+ Nb_comp = unlist(lapply(Mix,function(M){
+   M=M[M$germplasm_father != M$germplasm_son,]
+   M=M[M$germplasm_son == M$expe_melange,]
+   return(nrow(M))
+ }))
+ return(Nb_comp)
+}
+  
 # 1. Distribution-------
 if(table.type == "distribution"){
   D=list()
