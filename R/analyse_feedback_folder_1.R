@@ -280,7 +280,7 @@ analyse_feedback_folder_1 = function(
     M = unique(Mixtures_all$data[Mixtures_all$data$sl_statut %in% "son" & !is.na(Mixtures_all$data$expe_melange),"son_germplasm"])
     Mix = get.data(db_user = db_user, db_host = db_host, db_name = db_name, db_password = db_password,
                    query.type ="data-classic", filter.on="father-son",data.type="relation",germplasm.in=M)
-
+    Mix = translate.data(Mix, list_translation)
 
 #1.1.3. Get selection data for Mixture experiment
   data_S_Mixtures = get.data(db_user = db_user, db_host = db_host, db_name = db_name, db_password = db_password,
