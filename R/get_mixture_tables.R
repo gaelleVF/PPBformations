@@ -234,7 +234,13 @@ if(table.type == "global.info"){
    return(unique(yr$location))
  })
  
- return(list("Nb_comp"=Nb_comp,"Nb_location"=Nb_location)
+ # Nombre de mélanges par ferme
+ a = unique(Mix[,c("location","expe_melange")])
+ a$expe_melange = 1
+ b = by(a$expe_melange, a$location, sum)
+ b = do.call(rbind, list(b))
+ rownames(b) = "Nombre_melanges"
+ return(list("Nb_comp"=Nb_comp,"Nb_fermes"=Nb_location,"Nb_mel"=b))
 }
   
 # 1. Distribution-------
