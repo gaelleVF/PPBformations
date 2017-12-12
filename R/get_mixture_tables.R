@@ -189,7 +189,7 @@ get_mixture_tables <- function(res_model,
   get.gain <- function(tab,to_split=NULL,col=NULL){
     tab = as.data.frame(tab)
     if(length(na.omit(tab[,col]))==0){
-      return(rep(NA,6))
+      return(rep(NA,7))
     }else{
       if(!is.null(to_split)){
         tab$split = as.numeric(as.factor(tab[,to_split]))
@@ -206,7 +206,7 @@ get_mixture_tables <- function(res_model,
           a = wilcox.test(d[,col],mu=0)
           type="wilcox.test"
         }
-        return(c("mean"=round(100*mean(na.omit(d[,col])),3),"sd"=round(100*sd(na.omit(d[,col])),3),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type))
+        return(c("mean"=round(100*mean(na.omit(d[,col])),3),"sd"=round(100*sd(na.omit(d[,col])),3),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type, "n"=length(na.omit(d[,col]))))
       })
       Res=NULL
       for (i in a){Res=rbind(Res,i)}
@@ -545,8 +545,8 @@ if(table.type == "selection.modalities"){
       rownames(DS)[4]="Total"
       return(DS)
     }else{
-      DS = matrix(NA,ncol = 6,nrow=4)
-      colnames(DS) = c("mean","sd","statistic.t","pvalue","stars","test")
+      DS = matrix(NA,ncol = 7,nrow=4)
+      colnames(DS) = c("mean","sd","statistic.t","pvalue","stars","test","n")
       rownames(DS) = c("Composantes : Mod 1","Composantes : Mod 2","Mélanges : Mod 3","Total")
       return(DS)
     }
@@ -561,21 +561,21 @@ if(table.type == "selection.modalities"){
       Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
     }
    
-
+    if(class(Tab) == "list"){Tab=Tab[[1]]}
     if(!is.null(Tab)){
       Tab=as.data.frame(Tab)
       Tab = apply(Tab,2,function(x){as.numeric(as.character(x))})
       a=lapply(colnames(Tab),function(x){get.gain(Tab,to_split=NULL,col=x)})
       Res=NULL
       for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
-      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
+      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
       colnames(Res) = colnames(Tab)
       Res = Res[,order(colnames(Res))]
       colnames(Res) = c("M1","M2","M3","M3vsM2")
       return(Res)
     }else{
-      Res = matrix(NA,ncol=4,nrow=6)
-      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
+      Res = matrix(NA,ncol=4,nrow=7)
+      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
       colnames(Res) = c("M1","M2","M3","M3vsM2")
       return(Res)
     }
