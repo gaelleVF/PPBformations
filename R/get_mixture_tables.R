@@ -521,8 +521,8 @@ if(table.type %in% c("varIntra","selection.modalities")){
       a = lapply(c("Mod1","Mod2","Mod3","Mod3vsMod2"),function(x){get.gain(Tab,to_split=NULL,col=x)})
       Res=NULL
       for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
-    }else{Res=matrix(NA,nrow=6,ncol=4)}
-    rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test")
+    }else{Res=matrix(NA,nrow=7,ncol=4)}
+    rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
     colnames(Res) = c("M1","M2","M3","M3vsM2")
     return(Res)
   })
