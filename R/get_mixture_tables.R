@@ -199,15 +199,17 @@ get_mixture_tables <- function(res_model,
       tab = plyr:::splitter_d(tab, .(split))
       
       a = lapply(tab,function(d){
-        if(shapiro.test(d[,col])$p.value<=0.05){
-          a = t.test(d[,col],mu=0)
-          type = "t.test"
-        }else{
-          a = wilcox.test(d[,col],mu=0)
-          type="wilcox.test"
-        }
-        return(c("mean"=round(100*mean(na.omit(d[,col])),3),"sd"=round(100*sd(na.omit(d[,col])),3),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type, "n"=length(na.omit(d[,col]))))
-      })
+        if(length(na.omit(d[,col]))>0){
+          if(shapiro.test(d[,col])$p.value<=0.05){
+            a = t.test(d[,col],mu=0)
+            type = "t.test"
+          }else{
+            a = wilcox.test(d[,col],mu=0)
+            type="wilcox.test"
+          }
+          return(c("mean"=round(100*mean(na.omit(d[,col])),3),"sd"=round(100*sd(na.omit(d[,col])),3),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type, "n"=length(na.omit(d[,col]))))
+        }else{return(rep(NA,7))}
+        })
       Res=NULL
       for (i in a){Res=rbind(Res,i)}
       rownames(Res)=unlist(lapply(tab,function(x){unique(x[,to_split])}))
@@ -556,7 +558,7 @@ if(table.type == "selection.modalities"){
   RS = lapply(vec_variables,function(variable){
     if(!file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""))){
       Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
-                              year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture")
+                              year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture", data_SR_all=data_SR_all)
     }else{
       Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
     }
@@ -564,14 +566,26 @@ if(table.type == "selection.modalities"){
     if(class(Tab) == "list"){Tab=Tab[[1]]}
     if(!is.null(Tab)){
       Tab=as.data.frame(Tab)
-      Tab = apply(Tab,2,function(x){as.numeric(as.character(x))})
-      a=lapply(colnames(Tab),function(x){get.gain(Tab,to_split=NULL,col=x)})
+      Tab[,1:(ncol(Tab)-1)] = apply(Tab[,1:(ncol(Tab)-1)],2,function(x){as.numeric(as.character(x))})
+      Tab$type = as.character(Tab$type)
+      a=lapply(colnames(Tab)[-ncol(Tab)],function(x){
+        t = get.gain(Tab,to_split="type",col=x)
+        if(length(grep("1",x))==0){t = t[grep("melange",rownames(t)),]}
+        return(t)
+      })
+      names(a) = colnames(Tab)[-ncol(Tab)]
       Res=NULL
-      for(i in a){i=as.vector(i) ; Res=cbind(Res,i)}
-      rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
-      colnames(Res) = colnames(Tab)
+      for(i in a){
+        if(class(i)=="character"){i=as.vector(i)} 
+        Res=rbind(Res,i)
+      }
+      colnames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
+      rownames(Res)[grep("composante",rownames(Res))] = "M1 Composantes"
+      rownames(Res)[grep("melange",rownames(Res))] = "M1 Melanges"
+      rownames(Res)[grep("i",rownames(Res))] =  colnames(Tab)[2:4]
+      Res=t(Res)
       Res = Res[,order(colnames(Res))]
-      colnames(Res) = c("M1","M2","M3","M3vsM2")
+      colnames(Res) = c("M1 Composantes","M1 Melanges","M2","M3","M3vsM2")
       return(Res)
     }else{
       Res = matrix(NA,ncol=4,nrow=7)
