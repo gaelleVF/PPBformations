@@ -28,7 +28,9 @@ analyse.selection <- function(Mixtures,
                               language="english", 
                               list_trad, 
                               year=NULL, 
-                              data_mixtures=NULL)
+                              data_mixtures=NULL,
+                              data_S_all=NULL,
+                              data_SR_all=NULL)
 {
   
 #0.1. functions
@@ -134,14 +136,14 @@ analyse.selection <- function(Mixtures,
     
     #1. If the data was analyzed using bayesian model -----------
     if (class(donnees) == "list"){
-      if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
+      if (!(variable %in% names(donnees))){warning("Variable must be one of donnees's names") ; return(list("histo" = NULL, "tab" = NULL))}
       result = apply(data,1,FUN=compare_model,donnees, variable)
       if(class(result) == "list"){Res=NULL; comp = NULL; for (i in 1:length(result)){if(!is.null(result[[i]])){Res=cbind(Res,result[[i]])}else{comp = c(comp,i)}}; result=Res; data=data[-comp,]}
     }
     
     #2. If the data was not analyzed using the bayesian model: semi-quantitative data such as awns, color, curve --> use Wilcoxon-Mann-Whitney test to compare selection vs bulk-----------
     if(class(donnees) == "data.frame"){
-      if (!(variable %in% names(donnees))){stop("Variable must be one of donnees's names")}
+      if (!(variable %in% names(donnees))){warning("Variable must be one of donnees's names") ; return(list("histo" = NULL, "tab" = NULL))}
       result = apply(data,1,FUN=WMW, donnees, variable)
     }
     
@@ -395,12 +397,59 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
   variables_mod1 = vec_variables[which(vec_variables %in% names(res_model1))]
   variables_semiquanti = setdiff(vec_variables,names(res_model1))
   RS=list()
+  
+  if(!is.null(data_SR_all)){
+    D = data_SR_all$data$data
+    D=D[grep("(R)",D$expe_name_2),]
+    D=D[D$sl_statut %in% "2017:bouquetR",]
+    D$sel_name = unlist(lapply(as.character(D$son),function(x){
+      strsplit(strsplit(x,"_")[[1]][1],"#")[[1]][2]
+    }))
+    D=D[grep("JA|VA",D$expe_name_2),]  # on perd le vrac...!
+    
+    # fonction compare_model
+    D$vrac = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," | ")[[1]][1]}))
+    D$vrac = unlist(lapply(as.character(D$vrac),function(x){
+      a = strsplit(x,"_")[[1]]
+      return(paste("mu[",a[[1]],",",a[2],":",a[3],"]",sep=""))
+    }))
+    
+    D$bouquet = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," | ")[[1]][3]}))
+    D$bouquet = unlist(lapply(as.character(D$bouquet),function(x){
+      a = strsplit(x,"_")[[1]]
+      return(paste("mu[",a[[1]],",",a[2],":",a[3],"]",sep=""))
+    }))
+    data_SR = D[,c("vrac","bouquet","sl_statut","expe_name")]
+    data_SR = unique(data_SR)
+    colnames(data_SR)[grep("expe_name",colnames(a))] = "group"
+  }else{data_SR=NULL}
+
+  
   if(length(variables_mod1)>0){
     if(!is.null(table.save) & !dir.exists(file.path(table.save, "Rep_Sel"))){system(paste("mkdir ",table.save,"/Rep_Sel",sep="")) ; message("dir Rep_Sel have been created, tables dealing with response to selection will be saved there")}
     person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
     RS_mod1=lapply(variables_mod1,function(y){
       p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
                                    year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)$Tab
+      p_melanges = cbind(p_melanges,rep("melange",nrow(p_melanges)))
+      colnames(p_melanges)[ncol(p_melanges)]="type"
+      if(!is.null(data_SR)){
+        result = apply(data_SR,1,FUN=compare_model,donnees=res_model1, variable=variable)
+        if(class(result) == "list"){Res=NULL; comp = NULL; for (i in 1:length(result)){if(!is.null(result[[i]])){Res=cbind(Res,result[[i]])}else{comp = c(comp,i)}}; result=Res; data_SR=data_SR[-comp,]}
+        result = t(result)
+        colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
+        Data = cbind(paste(a$vrac,a$bouquet,sep="-"),result)
+        Data=as.data.frame(Data)
+        Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet))/as.numeric(as.character(Data$MoyenneVrac))-1
+        write.table(Data, file=paste("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")
+        Data = Data[!is.na(Data$overyielding),]
+        Data$type="composante"
+        Data = cbind(Data$overyielding,rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$type)
+        colnames(Data)=colnames(p_melanges)
+        rownames(Data) = paste(Data[,"type"],seq(1,nrow(Data),1),sep="-")
+        p_melanges = rbind(p_melanges,Data)
+      }
+      
       if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
       return(p_melanges)
     })
@@ -488,7 +537,18 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
       }
       rownames(Tab) = Tab[,"melange"]
       Tab=Tab[,-grep("melange",colnames(Tab))]
-      if(!is.null(table.save)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
+      
+      
+      # to do !!!!
+      result = apply(a,1,FUN=WMW, donnees=data_SR_all$data$data, variable)
+      result = t(result)
+      colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
+      Data = cbind(paste(a$vrac,a$bouquet,sep="-"),result)
+      Data=as.data.frame(Data)
+      Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet)) - as.numeric(as.character(Data$MoyenneVrac))
+      
+      
+      if(!is.null(table.save) & !is.null(Tab)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
       return(Tab)
     })
     names(RSQ) = variables_semiquanti
