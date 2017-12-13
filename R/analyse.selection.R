@@ -541,7 +541,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
       colnames(Tab)[ncol(Tab)] = "type"
       
       # to do !!!!
-      result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][4])
+      result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][1])
       result = t(result)
       colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
       Data = cbind(paste(data_SR$vrac,data_SR$bouquet,sep="-"),result)
