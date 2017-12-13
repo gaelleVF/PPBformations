@@ -91,6 +91,8 @@ mixture_folder = function(
     c("couleur---couleur_M","Couleur","Color","color---color_M"),
     c("barbe---barbe_M","Barbe","Awns","awns---awns_M"),
     c("courbure---courbure_M","Courbure","Curve","curve---curve_M"),
+    c("rendement","Rendement","Yield","rendement"),
+    c("verse","Verse","Lodging","verse"),
     c("Réseau","Sur le réseau","On the network")
   )
   
@@ -762,15 +764,16 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
-      return(c(paste(ds["Total","mean"],ds["Total","stars"],sep=""),
-               paste(ds[grep("Mod 1",rownames(ds)),"mean"],ds[grep("Mod 1",rownames(ds)),"stars"],sep=" "), 
-                        paste(rs["mean_gain","M1"],rs["stars","M1"],sep=" "),
-               paste(ds[grep("Mod 2",rownames(ds)),"mean"],ds[grep("Mod 2",rownames(ds)),"stars"],sep=" "), 
-                       paste(rs["mean_gain","M2"],rs["stars","M2"],sep=" "),
-               paste(ds[grep("Mod 3",rownames(ds)),"mean"],ds[grep("Mod 3",rownames(ds)),"stars"],sep=" "), 
-                       paste(rs["mean_gain","M3"],rs["stars","M3"],sep=" "),
-               paste(rs["mean_gain","M3vsM2"],rs["stars","M3vsM2"],sep=" "),
-               paste(vi["mean_gain","M3vsM2"],vi["stars","M3vsM2"],sep=" ")
+      return(c(paste(ds["Total","mean"]," ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
+               paste(ds[grep("Mod 1",rownames(ds)),"mean"]," ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
+                        paste(rs["mean_gain","M1 Composantes"]," ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
+                        paste(rs["mean_gain","M1 Melanges"]," ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
+              paste(ds[grep("Mod 2",rownames(ds)),"mean"]," ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
+                       paste(rs["mean_gain","M2"]," ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=" "),
+               paste(ds[grep("Mod 3",rownames(ds)),"mean"]," ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
+                       paste(rs["mean_gain","M3"]," ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
+               paste(rs["mean_gain","M3vsM2"]," ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
+               paste(vi["mean_gain","M3vsM2"]," ",vi["stars","M3vsM2"]," (n=",vi["n","M3vsM2"],")",sep="")
       ))
     })
   Table = NULL
@@ -781,13 +784,13 @@ plus importante que mélanger les sélections faites dans les composantes (notam
 
   if(language == "french"){
     colnames(Table) = c("Caractère", "Toutes modalités - DS", 
-                      "Modalité 1 - DS" , "Modalité 1 - RS",
+                      "Modalité 1 - DS" , "Modalité 1 - Composantes RS", "Modalité 1 - Melanges RS",
                       "Modalité 2 - DS" , "Modalité 2 - RS",
                       "Modalité 3 - DS" , "Modalité 3 - RS",
                       "Modalité 3 vs Modalité 2","Variabilité au sein des mélanges M3 vs M2")
   }else{
     colnames(Table) = c("Variable","All modalities - DS", 
-                      "Modality 1 - DS" , "Modality 1 - RS",
+                      "Modality 1 - DS" , "Modality 1 - Components RS", "Modality 1 - Mixtures RS",
                       "Modality 2 - DS" , "Modality 2 - RS",
                       "Modality 3 - DS" , "Modality 3 - RS",
                       "Modality 3 vs Modality 2","Intra mixture variability M3 vs M2")
