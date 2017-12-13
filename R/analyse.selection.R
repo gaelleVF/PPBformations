@@ -421,7 +421,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
     }))
     data_SR = D[,c("vrac","bouquet","sl_statut","expe_name")]
     data_SR = unique(data_SR)
-    colnames(data_SR)[grep("expe_name",colnames(a))] = "group"
+    colnames(data_SR)[grep("expe_name",colnames(data_SR))] = "group"
   }else{data_SR=NULL}
 
   
@@ -488,8 +488,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
                   a = strsplit(as.character(d$son),"_")[[1]]
                   if(length(grep("Mod4",m$modalite))>0){
                     b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
-                    sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  sel=sel[!is.na(sel)]
-                    no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  no_sel=no_sel[!is.na(no_sel)]
+                    sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  sel=sel[!is.na(sel)]
+                    no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  no_sel=no_sel[!is.na(no_sel)]
                     overY = (mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
                   }else{overY = NA}
                   
@@ -497,8 +497,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
                   if(Mod == "Mod2"){
                     if(length(grep("Mod3",m$modalite))>0){
                       b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
-                      m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]]  ;  m2=m2[!is.na(m2)]
-                      m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][4]] ;  m3=m3[!is.na(m3)]
+                      m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  m2=m2[!is.na(m2)]
+                      m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  m3=m3[!is.na(m3)]
                       overY = c(overY,(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
                       names(overY)[2]="Mod3vsMod2"
                     }
@@ -537,16 +537,24 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
       }
       rownames(Tab) = Tab[,"melange"]
       Tab=Tab[,-grep("melange",colnames(Tab))]
-      
+      Tab = cbind(Tab,"melange")
+      colnames(Tab)[ncol(Tab)] = "type"
       
       # to do !!!!
-      result = apply(a,1,FUN=WMW, donnees=data_SR_all$data$data, variable)
+      result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][4])
       result = t(result)
       colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
-      Data = cbind(paste(a$vrac,a$bouquet,sep="-"),result)
+      Data = cbind(paste(data_SR$vrac,data_SR$bouquet,sep="-"),result)
       Data=as.data.frame(Data)
       Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet)) - as.numeric(as.character(Data$MoyenneVrac))
       
+      write.table(Data, file=paste("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")
+      Data = Data[!is.na(Data$overyielding),]
+      Data$type="composante"
+      Data = cbind(rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$overyielding,Data$type)
+      colnames(Data)=colnames(Tab)
+      rownames(Data) = paste(Data[,"type"],seq(1,nrow(Data),1),sep="-")
+      Tab = rbind(Tab,Data)
       
       if(!is.null(table.save) & !is.null(Tab)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
       return(Tab)
