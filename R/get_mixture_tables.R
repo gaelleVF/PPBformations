@@ -88,7 +88,8 @@ get_mixture_tables <- function(res_model,
                                path_to_tables = ".",
                                list_trad=NULL,
                                table.type="distribution",
-                               tab_proportions = NULL)
+                               tab_proportions = NULL
+                               )
 {
 
   Mixtures = data_mixtures$Mixtures_all$data
@@ -215,6 +216,45 @@ get_mixture_tables <- function(res_model,
       rownames(Res)=unlist(lapply(tab,function(x){unique(x[,to_split])}))
       return(Res)
     }
+  }
+  
+  get_DS_RS <- function(data_SR, project =NULL, variable){
+    D=data_SR$data$data
+    if(!is.null(project)){D = D[D$son_project %in% project,]}
+    D$type = unlist(lapply(as.character(D$expe_name),function(x){strsplit(x," ")[[1]][4]}))
+    D$vrac = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," ")[[1]][1]}))
+    D$bouquet = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," ")[[1]][3]}))
+    D$ID =  unlist(lapply(as.character(D$son),function(x){substr(x,start = 1,stop = nchar(x)-5)}))
+    Res = get_result_model(res_model1,data=D,type_result = "comparison",model="model_1",variable = variable,param="mu")[,c("ID","median")]
+    D = merge(D,Res,by="ID")
+    
+    D$ID_father = unlist(lapply(as.character(D$father),function(x){substr(x,start = 1,stop = nchar(x)-5)}))
+    D_S = D[grep("vracS|bouquetS",D$sl_statut),]; colnames(D_S)[ncol(D_S)-1]="median_S"
+    D_SR = D[grep("vracR|bouquetR",D$sl_statut),]; colnames(D_SR)[ncol(D_SR)-1]="median_R"
+    colnames(D_S)[grep("^ID$",colnames(D_S))] = "ID_son"
+    
+    M = merge(D_S[,c("expe_name_2","ID_son","son","sl_statut","son_person","vrac","bouquet","median_S")], D_SR[,c("ID","ID_father","father","sl_statut","expe_name_2","vrac","bouquet","median_R")],
+              by.x="ID_son",by.y="ID_father")
+    M = unique(M)
+    M_vrac = M[grep("vrac",M$sl_statut.x),]; colnames(M_vrac)[grep("median_S",colnames(M_vrac))] = "median_S_vrac"; colnames(M_vrac)[grep("median_R",colnames(M_vrac))] = "median_R_vrac"
+    M_bouquet = M[grep("bouquet",M$sl_statut.x),]; colnames(M_bouquet)[grep("median_S",colnames(M_bouquet))] = "median_S_bouquet"; colnames(M_bouquet)[grep("median_R",colnames(M_bouquet))] = "median_R_bouquet"
+    
+    M_S_SR = merge(M_vrac[,c("expe_name_2.x","expe_name_2.y","son_person","median_S_vrac","median_R_vrac")], M_bouquet[,c("expe_name_2.x","expe_name_2.y","median_S_bouquet","median_R_bouquet")],
+                   by="expe_name_2.x")
+    
+    M_S_SR = unique(M_S_SR)
+    M_S_SR$germplasm = unlist(lapply(as.character(M_S_SR$expe_name_2.x),function(x){strsplit(x,"_")[[1]][1]}))
+    M = M_S_SR[!duplicated(M_S_SR[,c("median_S_vrac","median_R_vrac","median_S_bouquet","median_R_bouquet","germplasm")]),]
+    
+    M$Diff_sel = M$median_S_bouquet - M$median_S_vrac
+    M$rep_sel = M$median_R_bouquet - M$median_R_vrac
+    M$real_hered = M$rep_sel / M$Diff_sel
+    M$real_hered[which(as.numeric(as.character(M$real_hered))<0)] = 0
+    M$real_hered[which(as.numeric(as.character(M$real_hered))>1)] = 1
+    
+    A=c(mean(M$Diff_sel),mean(M$rep_sel),mean(M$rep_sel)/mean(M$Diff_sel),mean(M$real_hered), wilcox.test(M$real_hered,mu=0)$statistic, wilcox.test(M$real_hered,mu=0)$p.value)
+    
+    names(A)=c("Diff_sel","Rep_sel","Hered_sur_moy","Hered")
   }
   
 
@@ -533,28 +573,6 @@ if(table.type %in% c("varIntra","selection.modalities")){
 if(table.type == "selection.modalities"){
   Melanges=unique(Mixtures[Mixtures$sl_statut %in% "son" & unlist(lapply(as.character(Mixtures$son), function(x){return(strsplit(x,"_")[[1]][1])})) != unlist(lapply(as.character(Mixtures$father), function(x){return(strsplit(x,"_")[[1]][1])})), "son_germplasm"])
   
-  DS = lapply(vec_variables,function(variable){
-    if(file.exists(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""))){
-      Tab = read.table(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""),sep=";",header=T)
-    }else{
-      Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
-                            year=year_DS, data_mixtures=data_mixtures, selection.type = "sel.diff.network")[[1]]$Tot[[1]]$tab
-    }
-    if(!is.null(Tab)){
-      DS = get.gain(Tab,to_split="modalite",col="overyielding")
-      ds =  get.gain(Tab,to_split=NULL,col="overyielding")
-      DS=rbind(DS,ds)
-      rownames(DS)[4]="Total"
-      return(DS)
-    }else{
-      DS = matrix(NA,ncol = 7,nrow=4)
-      colnames(DS) = c("mean","sd","statistic.t","pvalue","stars","test","n")
-      rownames(DS) = c("Composantes : Mod 1","Composantes : Mod 2","Mélanges : Mod 3","Total")
-      return(DS)
-    }
-  })
-  names(DS) = vec_variables
-  
   RS = lapply(vec_variables,function(variable){
     if(!file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""))){
       Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
@@ -562,7 +580,7 @@ if(table.type == "selection.modalities"){
     }else{
       Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
     }
-   
+    
     if(class(Tab) == "list"){Tab=Tab[[1]]}
     if(!is.null(Tab)){
       Tab=as.data.frame(Tab)
@@ -586,16 +604,47 @@ if(table.type == "selection.modalities"){
       Res=t(Res)
       Res = Res[,order(colnames(Res))]
       colnames(Res) = c("M1 Composantes","M1 Melanges","M2","M3","M3vsM2")
-      return(Res)
+      return(list("Res"=Res,"Tab"=Tab))
     }else{
       Res = matrix(NA,ncol=4,nrow=7)
       rownames(Res) = c("mean_gain","sd_gain","statistic","pvalue","stars","test","n")
       colnames(Res) = c("M1","M2","M3","M3vsM2")
-      return(Res)
+      return(list("Res"=Res, "Tab"=NULL))
     }
-
+    
   })
   names(RS)=vec_variables
+  
+  DS = lapply(vec_variables,function(variable){
+    mel_to_get = rownames(RS[[variable]]$Tab[grep("melange", RS[[variable]]$Tab$type),])
+    comp_to_get = Mixtures[grep(paste(mel_to_get,collapse="|"),Mixtures$expe_melange),]
+    comp_to_get = comp_to_get[comp_to_get$sl_statut %in% "son",c("germplasm_father","year","location","expe_melange","germplasm_son")]
+    if(file.exists(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""))){
+      Tab = read.table(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""),sep=";",header=T)
+    }else{
+      Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+                            year=year_DS, data_mixtures=data_mixtures, selection.type = "sel.diff.network", data_S_all=data_S_all, data_SR_all=data_SR_all)[[1]]$Tot[[1]]$tab
+    }
+
+    if(!is.null(Tab)){
+      #get only DS for populations we have a RS
+      Tab_melange = Tab[Tab$germplasm %in% mel_to_get,]
+      Tab_composantes = Tab[Tab$germplasm %in% comp_to_get$germplasm_father & Tab$location %in% comp_to_get$location & Tab$year %in% comp_to_get$year,]
+      Tab=rbind(Tab_melange, Tab_composantes)
+      DS = get.gain(Tab,to_split="modalite",col="overyielding")
+      ds =  get.gain(Tab,to_split=NULL,col="overyielding")
+      DS=rbind(DS,ds)
+      rownames(DS)[4]="Total"
+      return(DS)
+    }else{
+      DS = matrix(NA,ncol = 7,nrow=4)
+      colnames(DS) = c("mean","sd","statistic.t","pvalue","stars","test","n")
+      rownames(DS) = c("Composantes : Mod 1","Composantes : Mod 2","Mélanges : Mod 3","Total")
+      return(DS)
+    }
+  })
+  names(DS) = vec_variables
+  
 
   
   M = lapply(vec_variables,function(variable){ return(list("DS"=DS[[variable]],"RS"=RS[[variable]],"varIntra"=VI[[variable]]))  })
