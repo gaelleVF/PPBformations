@@ -441,7 +441,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
         Data = cbind(paste(a$vrac,a$bouquet,sep="-"),result)
         Data=as.data.frame(Data)
         Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet))/as.numeric(as.character(Data$MoyenneVrac))-1
-        write.table(Data, file=paste("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")
+        if(!is.null(table.save) & !is.null(Data)){write.table(Data, file=paste(table.save,"/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")}
         Data = Data[!is.na(Data$overyielding),]
         Data$type="composante"
         Data = cbind(Data$overyielding,rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$type)
@@ -512,8 +512,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
               }))
               A=A[!is.na(A)]
               if(length(A)>0){
-                if(length(grep("Mod4",m$modalite))>0){A=c(paste(m[grep("Mod4",m$modalite),"germplasm"],unique(m$son_year),sep="_"),A)
-                }else{A=c(paste(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],unique(m$son_year),sep="_"),A)}
+                if(length(grep("Mod4",m$modalite))>0){A=c(m[grep("Mod4",m$modalite),"germplasm"],A)
+                }else{A=c(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],A)}
                 names(A)[1]="melange"
                 if(!("Mod1"%in%names(A))){A=c(A,"Mod1"=NA)}
                 if(!("Mod2"%in%names(A))){A=c(A,"Mod2"=NA)}
@@ -548,16 +548,23 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
       result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][1])
       result = t(result)
       colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
-      Data = cbind(paste(data_SR$vrac,data_SR$bouquet,sep="-"),result)
+      Data=result
       Data=as.data.frame(Data)
+      rownames(Data) = paste(
+        unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][1]})),
+        " | ",
+        unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][3]})),sep=""
+      )
       Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet)) - as.numeric(as.character(Data$MoyenneVrac))
       
-      write.table(Data, file=paste("/home/deap/Documents/Gaelle/scriptsR/dossiers_retour/dossier_retour_2016-2017/AnalyseDonnees/donnees_brutes/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")
+      if(!is.null(table.save) & !is.null(Data)){write.table(Data, file=paste(table.save,"/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")}
       Data = Data[!is.na(Data$overyielding),]
       Data$type="composante"
+      name = rownames(Data)
       Data = cbind(rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$overyielding,Data$type)
       colnames(Data)=colnames(Tab)
-      rownames(Data) = paste(Data[,"type"],seq(1,nrow(Data),1),sep="-")
+      rownames(Data) = name
+      
       Tab = rbind(Tab,Data)
       
       if(!is.null(table.save) & !is.null(Tab)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
