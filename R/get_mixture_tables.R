@@ -536,6 +536,7 @@ if(table.type == "selection.modalities"){
   Melanges=unique(Mixtures[Mixtures$sl_statut %in% "son" & unlist(lapply(as.character(Mixtures$son), function(x){return(strsplit(x,"_")[[1]][1])})) != unlist(lapply(as.character(Mixtures$father), function(x){return(strsplit(x,"_")[[1]][1])})), "son_germplasm"])
   
   RS = lapply(vec_variables,function(variable){
+    print(variable)
     if(!file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""))){
       Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
                               year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture", data_SR_all=data_SR_all)
@@ -579,7 +580,9 @@ if(table.type == "selection.modalities"){
   
   DS = lapply(vec_variables,function(variable){
     mel_to_get = rownames(RS[[variable]]$Tab[grep("melange", RS[[variable]]$Tab$type),])
-    comp_to_get = rownames(RS[[variable]]$Tab[grep("composante", RS[[variable]]$Tab$type),])
+    comp_to_get_Mod1 = rownames(RS[[variable]]$Tab[grep("composante", RS[[variable]]$Tab$type),])
+    comp_to_get = Mixtures[Mixtures$sl_statut %in% "son",]
+    comp_to_get = comp_to_get[comp_to_get$expe_melange %in% mel_to_get,c("father_germplasm","location","year")]
     if(file.exists(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""))){
       Tab = read.table(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""),sep=";",header=T)
     }else{
@@ -590,8 +593,9 @@ if(table.type == "selection.modalities"){
     if(!is.null(Tab)){
       #get only DS for populations we have a RS
       Tab_melange = Tab[Tab$germplasm %in% mel_to_get,]
-      Tab_composantes = Tab[Tab$group %in% comp_to_get,]
-      Tab=rbind(Tab_melange, Tab_composantes)
+      Tab_composantes_Mod1 = Tab[Tab$group %in% comp_to_get_Mod1,]
+      Tab_composantes = Tab[Tab$germplasm %in% comp_to_get$father_germplasm & Tab$location %in% comp_to_get$location,]
+      Tab=rbind(Tab_melange, Tab_composantes, Tab_composantes_Mod1)
       DS = get.gain(Tab,to_split="modalite",col="overyielding")
       ds =  get.gain(Tab,to_split=NULL,col="overyielding")
       DS=rbind(DS,ds)
