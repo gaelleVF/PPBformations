@@ -428,8 +428,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
   if(length(variables_mod1)>0){
     if(!is.null(table.save) & !dir.exists(file.path(table.save, "Rep_Sel"))){system(paste("mkdir ",table.save,"/Rep_Sel",sep="")) ; message("dir Rep_Sel have been created, tables dealing with response to selection will be saved there")}
     person=as.character(na.omit(unique(data_mixtures$Mixtures_all$data$son_person)))
-    RS_mod1=lapply(variables_mod1,function(y){
-      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, y, 
+    RS_mod1=lapply(variables_mod1,function(variable){
+      p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = data_mixtures$Mixtures_all, data_S = data_mixtures$Mixtures_selection, melanges_tot = data_mixtures$Mix_tot, variable, 
                                    year=year, model = "model_1", plot.type = "comp.mod.network", person=NULL, nb_parameters_per_plot = 20, save=NULL, language=language)$Tab
       p_melanges = cbind(p_melanges,rep("melange",nrow(p_melanges)))
       colnames(p_melanges)[ncol(p_melanges)]="type"
@@ -454,7 +454,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
         p_melanges = rbind(p_melanges,Data)
       }
       
-      if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges,file=paste(table.save,"/Rep_Sel/sel_response_",y,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
+      if(!is.null(table.save) & !is.null(p_melanges)){write.table(p_melanges,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",dec=".")}
       return(p_melanges)
     })
     names(RS_mod1)=variables_mod1
