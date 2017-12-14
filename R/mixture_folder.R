@@ -762,7 +762,7 @@ plus importante que mélanger les sélections faites dans les composantes (notam
                                    res_model_varintra = res_model_varintra)
     
   table = lapply(t,function(x){
-      ds=x$DS ; rs=x$RS ; vi=x$varIntra
+      ds=x$DS ; rs=x$RS$Res ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
       return(c(paste(ds["Total","mean"]," ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
                paste(ds[grep("Mod 1",rownames(ds)),"mean"]," ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
@@ -781,7 +781,7 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
   rownames(Table) =  unlist(lapply( rownames(Table),function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
-
+  Table = gsub("[(]n=[)]","",Table)
   if(language == "french"){
     colnames(Table) = c("Caractère", "Toutes modalités - DS", 
                       "Modalité 1 - DS" , "Modalité 1 - Composantes RS", "Modalité 1 - Melanges RS",
@@ -805,7 +805,7 @@ pour l'explication des symboles utilisés. L'avant dernière colonne présente l
 sélection dans le mélange vs. sélections dans les composantes pour former le mélange},
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : pour ces deux dernières colonnes 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
-", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,6,8,10,11))) ; OUT=c(OUT,out)
+", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,7,9,11,12))) ; OUT=c(OUT,out)
 
   
   # /!\ Get pdf ----------
