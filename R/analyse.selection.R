@@ -446,7 +446,11 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
         Data$type="composante"
         Data = cbind(Data$overyielding,rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$type)
         colnames(Data)=colnames(p_melanges)
-        rownames(Data) = paste(Data[,"type"],seq(1,nrow(Data),1),sep="-")
+        rownames(Data) = paste(
+          unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][1]})),
+          " | ",
+          unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][3]})),sep=""
+        )
         p_melanges = rbind(p_melanges,Data)
       }
       
