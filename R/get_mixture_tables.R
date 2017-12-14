@@ -218,45 +218,6 @@ get_mixture_tables <- function(res_model,
     }
   }
   
-  get_DS_RS <- function(data_SR, project =NULL, variable){
-    D=data_SR$data$data
-    if(!is.null(project)){D = D[D$son_project %in% project,]}
-    D$type = unlist(lapply(as.character(D$expe_name),function(x){strsplit(x," ")[[1]][4]}))
-    D$vrac = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," ")[[1]][1]}))
-    D$bouquet = unlist(lapply(as.character(D$expe_name_2),function(x){strsplit(x," ")[[1]][3]}))
-    D$ID =  unlist(lapply(as.character(D$son),function(x){substr(x,start = 1,stop = nchar(x)-5)}))
-    Res = get_result_model(res_model1,data=D,type_result = "comparison",model="model_1",variable = variable,param="mu")[,c("ID","median")]
-    D = merge(D,Res,by="ID")
-    
-    D$ID_father = unlist(lapply(as.character(D$father),function(x){substr(x,start = 1,stop = nchar(x)-5)}))
-    D_S = D[grep("vracS|bouquetS",D$sl_statut),]; colnames(D_S)[ncol(D_S)-1]="median_S"
-    D_SR = D[grep("vracR|bouquetR",D$sl_statut),]; colnames(D_SR)[ncol(D_SR)-1]="median_R"
-    colnames(D_S)[grep("^ID$",colnames(D_S))] = "ID_son"
-    
-    M = merge(D_S[,c("expe_name_2","ID_son","son","sl_statut","son_person","vrac","bouquet","median_S")], D_SR[,c("ID","ID_father","father","sl_statut","expe_name_2","vrac","bouquet","median_R")],
-              by.x="ID_son",by.y="ID_father")
-    M = unique(M)
-    M_vrac = M[grep("vrac",M$sl_statut.x),]; colnames(M_vrac)[grep("median_S",colnames(M_vrac))] = "median_S_vrac"; colnames(M_vrac)[grep("median_R",colnames(M_vrac))] = "median_R_vrac"
-    M_bouquet = M[grep("bouquet",M$sl_statut.x),]; colnames(M_bouquet)[grep("median_S",colnames(M_bouquet))] = "median_S_bouquet"; colnames(M_bouquet)[grep("median_R",colnames(M_bouquet))] = "median_R_bouquet"
-    
-    M_S_SR = merge(M_vrac[,c("expe_name_2.x","expe_name_2.y","son_person","median_S_vrac","median_R_vrac")], M_bouquet[,c("expe_name_2.x","expe_name_2.y","median_S_bouquet","median_R_bouquet")],
-                   by="expe_name_2.x")
-    
-    M_S_SR = unique(M_S_SR)
-    M_S_SR$germplasm = unlist(lapply(as.character(M_S_SR$expe_name_2.x),function(x){strsplit(x,"_")[[1]][1]}))
-    M = M_S_SR[!duplicated(M_S_SR[,c("median_S_vrac","median_R_vrac","median_S_bouquet","median_R_bouquet","germplasm")]),]
-    
-    M$Diff_sel = M$median_S_bouquet - M$median_S_vrac
-    M$rep_sel = M$median_R_bouquet - M$median_R_vrac
-    M$real_hered = M$rep_sel / M$Diff_sel
-    M$real_hered[which(as.numeric(as.character(M$real_hered))<0)] = 0
-    M$real_hered[which(as.numeric(as.character(M$real_hered))>1)] = 1
-    
-    A=c(mean(M$Diff_sel),mean(M$rep_sel),mean(M$rep_sel)/mean(M$Diff_sel),mean(M$real_hered), wilcox.test(M$real_hered,mu=0)$statistic, wilcox.test(M$real_hered,mu=0)$p.value)
-    
-    names(A)=c("Diff_sel","Rep_sel","Hered_sur_moy","Hered")
-  }
-  
 
 # 1.Global information on mixtures
 if(table.type == "global.info"){
@@ -535,6 +496,7 @@ if(table.type == "correlations"){
 }#end correlations
   
   
+  
 #3. modalités de sélection ---------- 
 if(table.type %in% c("varIntra","selection.modalities")){
   Mixtures$expe_melange = unlist(lapply(1:nrow(Mixtures),function(i){
@@ -617,8 +579,7 @@ if(table.type == "selection.modalities"){
   
   DS = lapply(vec_variables,function(variable){
     mel_to_get = rownames(RS[[variable]]$Tab[grep("melange", RS[[variable]]$Tab$type),])
-    comp_to_get = Mixtures[grep(paste(mel_to_get,collapse="|"),Mixtures$expe_melange),]
-    comp_to_get = comp_to_get[comp_to_get$sl_statut %in% "son",c("germplasm_father","year","location","expe_melange","germplasm_son")]
+    comp_to_get = rownames(RS[[variable]]$Tab[grep("composante", RS[[variable]]$Tab$type),])
     if(file.exists(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""))){
       Tab = read.table(paste(path_to_tables,"/Diff_Sel/DifferentielSelection_",variable,"_",paste(year_DS,collapse="-"),".csv",sep=""),sep=";",header=T)
     }else{
@@ -629,7 +590,7 @@ if(table.type == "selection.modalities"){
     if(!is.null(Tab)){
       #get only DS for populations we have a RS
       Tab_melange = Tab[Tab$germplasm %in% mel_to_get,]
-      Tab_composantes = Tab[Tab$germplasm %in% comp_to_get$germplasm_father & Tab$location %in% comp_to_get$location & Tab$year %in% comp_to_get$year,]
+      Tab_composantes = Tab[Tab$group %in% comp_to_get,]
       Tab=rbind(Tab_melange, Tab_composantes)
       DS = get.gain(Tab,to_split="modalite",col="overyielding")
       ds =  get.gain(Tab,to_split=NULL,col="overyielding")
