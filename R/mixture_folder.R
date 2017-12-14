@@ -769,7 +769,7 @@ plus importante que mélanger les sélections faites dans les composantes (notam
                         paste(rs["mean_gain","M1 Composantes"]," ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
                         paste(rs["mean_gain","M1 Melanges"]," ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
               paste(ds[grep("Mod 2",rownames(ds)),"mean"]," ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
-                       paste(rs["mean_gain","M2"]," ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=" "),
+                       paste(rs["mean_gain","M2"]," ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=""),
                paste(ds[grep("Mod 3",rownames(ds)),"mean"]," ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
                        paste(rs["mean_gain","M3"]," ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
                paste(rs["mean_gain","M3vsM2"]," ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
@@ -784,14 +784,14 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   Table = gsub("[(]n=[)]","",Table)
   if(language == "french"){
     colnames(Table) = c("Caractère", "Toutes modalités - DS", 
-                      "Modalité 1 - DS" , "Modalité 1 - Composantes RS", "Modalité 1 - Melanges RS",
-                      "Modalité 2 - DS" , "Modalité 2 - RS",
+                      "Modalité 1 - DS" , "Modalité 1 - Composantes RS", "Modalité 1 - Melanges RP",
+                      "Modalité 2 - DS" , "Modalité 2 - RP",
                       "Modalité 3 - DS" , "Modalité 3 - RS",
                       "Modalité 3 vs Modalité 2","Variabilité au sein des mélanges M3 vs M2")
   }else{
     colnames(Table) = c("Variable","All modalities - DS", 
-                      "Modality 1 - DS" , "Modality 1 - Components RS", "Modality 1 - Mixtures RS",
-                      "Modality 2 - DS" , "Modality 2 - RS",
+                      "Modality 1 - DS" , "Modality 1 - Components RS", "Modality 1 - Mixtures RP",
+                      "Modality 2 - DS" , "Modality 2 - RP",
                       "Modality 3 - DS" , "Modality 3 - RS",
                       "Modality 3 vs Modality 2","Intra mixture variability M3 vs M2")
   }
