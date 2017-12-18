@@ -42,7 +42,8 @@ ggplot_mixture1 = function(res_model,
                            person=NULL,
                            nb_parameters_per_plot = 8,
                            save=NULL,
-                           col_plot = "pval") 
+                           col_plot = "pval",
+                           tab_proportions=NULL) 
 {
   if(class(melanges_PPB_mixture)=="list"){melanges_PPB_mixture=melanges_PPB_mixture$data}
   melanges_tot=melanges_tot$data$data
@@ -217,7 +218,21 @@ ggplot_mixture1 = function(res_model,
                   if(!is.null(ncol(Comp))){if (ncol(Comp) < length(unique(noms[noms$Type == "Composante","son_germplasm"])) | length(noms[noms$Type == "Composante","Type"])==0){missingComp = TRUE}else{missingComp=FALSE}}else{missingComp=TRUE}
                   
                   if(!missingComp){
-                    MeanComp = apply(Comp, 1, mean)
+                    if(!is.null(tab_proportions)){
+                      Comp = Comp[,order(names(Comp))]
+                      mel = tab_proportions[grep(melange,tab_proportions$melange),]
+                      #sum if we have several times same component
+                      mel = by(as.numeric(as.character(mel$proportion)),list(mel$germplasm),sum)
+                      mel = mel[!is.na(mel)]
+                      mel = mel[grep(paste(unlist(lapply(names(x),function(y){strsplit(strsplit(y,",")[[1]][1],"[[]")[[1]][2]})),collapse="|"),names(x))]
+                      if(length(mel) == ncol(Comp) & length(unique(mel))>1){
+                        MeanComp = apply(Comp, 1, function(x){return(x*mel*length(x))})
+                      }else{
+                        MeanComp = apply(Comp, 1, mean)
+                      }
+                    }else{
+                      MeanComp = apply(Comp, 1, mean)
+                    }
                     M = cbind(Mel, MeanComp, Comp)
                     colnames(M)[colnames(M) %in% "MeanComp"] = paste(param,"[","MoyenneComposantes",",",paysan,":",yr,"]",sep="")
                   }else{M = cbind(Mel, Comp)}
