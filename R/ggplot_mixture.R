@@ -224,9 +224,9 @@ ggplot_mixture1 = function(res_model,
                       #sum if we have several times same component
                       mel = by(as.numeric(as.character(mel$proportion)),list(mel$germplasm),sum)
                       mel = mel[!is.na(mel)]
-                      mel = mel[grep(paste(unlist(lapply(names(x),function(y){strsplit(strsplit(y,",")[[1]][1],"[[]")[[1]][2]})),collapse="|"),names(x))]
+                      mel = mel[grep(paste(unlist(lapply(names(Comp),function(y){strsplit(strsplit(y,",")[[1]][1],"[[]")[[1]][2]})),collapse="|"),names(x))]
                       if(length(mel) == ncol(Comp) & length(unique(mel))>1){
-                        MeanComp = apply(Comp, 1, function(x){return(x*mel*length(x))})
+                        MeanComp = apply(Comp, 1, function(x){return(sum(x*mel))})
                       }else{
                         MeanComp = apply(Comp, 1, mean)
                       }
