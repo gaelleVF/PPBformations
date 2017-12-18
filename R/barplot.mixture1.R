@@ -23,7 +23,7 @@ dans composantes (Mod2)","Mélange sélectionné (Mod3)"))
 "Mélange issu 1 année sélection \ndans composantes (Mod2)"="gold1","Mélange sélectionné (Mod3)"="skyblue1"))
   
   # ajouter les groupes de significativité
-  if("group" %in% colnames(x)){
+  if("groups" %in% colnames(x)){
     p = p + geom_text(data = x, aes(x = reorder(germplasm, median), y = median/2, label = groups), angle = 90, color = "white")
   }
  
