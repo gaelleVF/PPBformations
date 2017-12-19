@@ -364,7 +364,7 @@ mixture_folder = function(
       # Comparaison mélange vs composantes
       if(variable %in% vec_variables_mod1){res_model = res_model1 ; model="model_1"}else{res_model=data_all ; model=NULL}
       p_melanges = ggplot_mixture1(res_model = res_model, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = model, 
-                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL, language=language)
+                                   plot.type = "comp.in.farm", person, nb_parameters_per_plot = 20, save=NULL, language=language, tab_proportions = tab_proportions)
       
       p = lapply(p_melanges, function(x){
         lapply(x,function(y){
@@ -395,7 +395,7 @@ mixture_folder = function(
       if(length(a)<2){
         if(variable %in% vec_variables_mod1){res_model = res_model1 ; model="model_1"}else{res_model=data_all ; model=NULL}
         p_melanges = ggplot_mixture1(res_model = res_model, melanges_PPB_mixture = mel, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, year=c("2016","2017"), model = model,
-                                     plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL,language=language)
+                                     plot.type = "comp.mod", person, nb_parameters_per_plot = 20, save=NULL,language=language,tab_proportions = tab_proportions)
         p = lapply(p_melanges, function(x){
           lapply(x,function(y){
             lapply(y,function(z){return(z$plot)})
@@ -668,11 +668,11 @@ for (variable in intersect(vec_variables,vec_variables_mod1)){
   if (!file.exists(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))){
     p_melanges = ggplot_mixture1(res_model = res_model1, melanges_PPB_mixture = Mixtures_all, data_S = Mixtures_S, melanges_tot = Mix_tot, variable, 
                                  year=c("2016","2017"), model="model_1", plot.type = "mix.gain.distribution", person, nb_parameters_per_plot = 15,
-                                 save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""), language=language)
+                                 save=paste(we_are_here,"/AnalyseDonnees/donnees_brutes",sep=""), language=language,tab_proportions = tab_proportions)
     save(p_melanges,file=paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep=""))
     P=c(P,list(p_melanges$plot$plot))
     png(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".png",sep=""))
-    p_melanges
+      print(p_melanges)
     dev.off()
   }else{
     p = get(load(paste(we_are_here,"/mixture_folder/figures/Histo_",var,".RData",sep="")))
@@ -764,16 +764,16 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS$Res ; vi=x$varIntra
       ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
-      return(c(paste(ds["Total","mean"]," ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
-               paste(ds[grep("Mod 1",rownames(ds)),"mean"]," ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
-                        paste(rs["mean_gain","M1 Composantes"]," ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
-                        paste(rs["mean_gain","M1 Melanges"]," ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
-              paste(ds[grep("Mod 2",rownames(ds)),"mean"]," ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
-                       paste(rs["mean_gain","M2"]," ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=""),
-               paste(ds[grep("Mod 3",rownames(ds)),"mean"]," ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
-                       paste(rs["mean_gain","M3"]," ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
-               paste(rs["mean_gain","M3vsM2"]," ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
-               paste(vi["mean_gain","M3vsM2"]," ",vi["stars","M3vsM2"]," (n=",vi["n","M3vsM2"],")",sep="")
+      return(c(paste(ds["Total","mean"],"% ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
+               paste(ds[grep("Mod 1",rownames(ds)),"mean"],"% ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
+                        paste(rs["mean_gain","M1 Composantes"],"% ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
+                        paste(rs["mean_gain","M1 Melanges"],"% ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
+              paste(ds[grep("Mod 2",rownames(ds)),"mean"],"% ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
+                       paste(rs["mean_gain","M2"],"% ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=""),
+               paste(ds[grep("Mod 3",rownames(ds)),"mean"],"% ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
+                       paste(rs["mean_gain","M3"],"% ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
+               paste(rs["mean_gain","M3vsM2"],"% ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
+               paste(vi["mean_gain","M3vsM2"],"% ",vi["stars","M3vsM2"]," (n=",vi["n","M3vsM2"],")",sep="")
       ))
     })
   Table = NULL
@@ -782,6 +782,7 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   rownames(Table) =  unlist(lapply( rownames(Table),function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
   Table = gsub("[(]n=[)]","",Table)
+  Table = gsub("[(]n= [)]","",Table)
   if(language == "french"){
     colnames(Table) = c("Caractère", "Toutes modalités - DS", 
                       "Modalité 1 - DS" , "Modalité 1 - Composantes RS", "Modalité 1 - Melanges RP",
@@ -810,7 +811,7 @@ une valeur positive indique que la modalité 3 a une valeur supérieur à la mod
   
   # /!\ Get pdf ----------
   get.pdf(dir = paste(we_are_here, "/mixture_folder", sep = ""), 
-          form.name = paste(person, year, sep = ":"), 
+          form.name = paste("test", year, sep = ":"), 
           LaTeX_head = "../tex_files/structure.tex", 
           LaTeX_body = OUT, 
           compile.tex = TRUE,
