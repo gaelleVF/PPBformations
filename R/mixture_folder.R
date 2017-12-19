@@ -763,7 +763,8 @@ plus importante que mélanger les sélections faites dans les composantes (notam
     
   table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS$Res ; vi=x$varIntra
-      if(nrow(na.omit(ds))>0 | nrow(na.omit(rs))>0 | nrow(na.omit(vi))>0){
+      b = unique(unlist(lapply(list(ds,rs,vi),function(x){return(unique(apply(rs, 1, function(x) all(is.na(x)))))})))
+      if(b != TRUE | length(b)>1){
         ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
         return(c(paste(ds["Total","mean"],"% ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
                  paste(ds[grep("Mod 1",rownames(ds)),"mean"],"% ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
@@ -785,7 +786,7 @@ plus importante que mélanger les sélections faites dans les composantes (notam
   for (i in table){Table=rbind(Table,i)}
   null = vec_variables[grep("NULL",table)]
   warning(paste("no data for ",null,sep=""))
-  variables = vec_variables[-grep(null, vec_variables)]
+  variables = vec_variables[-grep(paste(null,collapse="|"), vec_variables)]
   rownames(Table) =  unlist(lapply(variables,function(x){gsub("[.]"," ",x)}))
   rownames(Table) =  unlist(lapply( rownames(Table),function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
