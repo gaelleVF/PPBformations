@@ -208,7 +208,7 @@ get_mixture_tables <- function(res_model,
             a = wilcox.test(d[,col],mu=0)
             type="wilcox.test"
           }
-          return(c("mean"=round(100*mean(na.omit(d[,col])),3),"sd"=round(100*sd(na.omit(d[,col])),3),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type, "n"=length(na.omit(d[,col]))))
+          return(c("mean"=round(100*mean(na.omit(d[,col])),2),"sd"=round(100*sd(na.omit(d[,col])),2),"statistic" = a$statistic,"pvalue"=a$p.value, "stars"=get_stars(a$p.value), "test"=type, "n"=length(na.omit(d[,col]))))
         }else{return(rep(NA,7))}
         })
       Res=NULL
