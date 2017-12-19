@@ -539,36 +539,38 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
           if(!is.null(mel)){Tab = rbind(Tab,mel)}
         }
       }
-      rownames(Tab) = Tab[,"melange"]
-      Tab=Tab[,-grep("melange",colnames(Tab))]
-      Tab = cbind(Tab,"melange")
-      colnames(Tab)[ncol(Tab)] = "type"
-      
-      # to do !!!!
-      result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][1])
-      result = t(result)
-      colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
-      Data=result
-      Data=as.data.frame(Data)
-      rownames(Data) = paste(
-        unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][1]})),
-        " | ",
-        unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][3]})),sep=""
-      )
-      Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet)) - as.numeric(as.character(Data$MoyenneVrac))
-      
-      if(!is.null(table.save) & !is.null(Data)){write.table(Data, file=paste(table.save,"/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")}
-      Data = Data[!is.na(Data$overyielding),]
-      Data$type="composante"
-      name = rownames(Data)
-      Data = cbind(rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$overyielding,Data$type)
-      colnames(Data)=colnames(Tab)
-      rownames(Data) = name
-      
-      Tab = rbind(Tab,Data)
-      
-      if(!is.null(table.save) & !is.null(Tab)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
-      return(Tab)
+      if(!is.null(Tab)){
+        rownames(Tab) = Tab[,"melange"]
+        Tab=Tab[,-grep("melange",colnames(Tab))]
+        Tab = cbind(Tab,"melange")
+        colnames(Tab)[ncol(Tab)] = "type"
+        
+        result = apply(data_SR,1,FUN=WMW, donnees=data_SR_all$data$data, list_trad[[grep(variable,list_trad)]][1])
+        result = t(result)
+        colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
+        Data=result
+        Data=as.data.frame(Data)
+        rownames(Data) = paste(
+          unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][1]})),
+          " | ",
+          unlist(lapply(as.character(data_SR$group),function(x){strsplit(x," ")[[1]][3]})),sep=""
+        )
+        Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet)) - as.numeric(as.character(Data$MoyenneVrac))
+        
+        if(!is.null(table.save) & !is.null(Data)){write.table(Data, file=paste(table.save,"/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")}
+        Data = Data[!is.na(Data$overyielding),]
+        Data$type="composante"
+        name = rownames(Data)
+        Data = cbind(rep(NA,nrow(Data)),rep(NA,nrow(Data)),rep(NA,nrow(Data)),Data$overyielding,Data$type)
+        colnames(Data)=colnames(Tab)
+        rownames(Data) = name
+        
+        Tab = rbind(Tab,Data)
+        
+        if(!is.null(table.save) & !is.null(Tab)){write.table(Tab,file=paste(table.save,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";")}
+        return(Tab)
+      }else{return(NULL)}
+    
     })
     names(RSQ) = variables_semiquanti
     RS=c(RS,RSQ)
