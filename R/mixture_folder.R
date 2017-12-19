@@ -763,22 +763,30 @@ plus importante que mélanger les sélections faites dans les composantes (notam
     
   table = lapply(t,function(x){
       ds=x$DS ; rs=x$RS$Res ; vi=x$varIntra
-      ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
-      return(c(paste(ds["Total","mean"],"% ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
-               paste(ds[grep("Mod 1",rownames(ds)),"mean"],"% ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
-                        paste(rs["mean_gain","M1 Composantes"],"% ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
-                        paste(rs["mean_gain","M1 Melanges"],"% ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
-              paste(ds[grep("Mod 2",rownames(ds)),"mean"],"% ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
-                       paste(rs["mean_gain","M2"],"% ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=""),
-               paste(ds[grep("Mod 3",rownames(ds)),"mean"],"% ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
-                       paste(rs["mean_gain","M3"],"% ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
-               paste(rs["mean_gain","M3vsM2"],"% ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
-               paste(vi["mean_gain","M3vsM2"],"% ",vi["stars","M3vsM2"]," (n=",vi["n","M3vsM2"],")",sep="")
-      ))
+      if(nrow(na.omit(ds))>0 | nrow(na.omit(rs))>0 | nrow(na.omit(vi))>0){
+        ds[is.na(ds)] = " " ; rs[is.na(rs)] = " " ; vi[is.na(vi)] = " "
+        return(c(paste(ds["Total","mean"],"% ",ds["Total","stars"]," (n=",ds["Total","n"],")",sep=""),
+                 paste(ds[grep("Mod 1",rownames(ds)),"mean"],"% ",ds[grep("Mod 1",rownames(ds)),"stars"]," (n=",ds[grep("Mod 1",rownames(ds)),"n"],")",sep=""), 
+                 paste(rs["mean_gain","M1 Composantes"],"% ",rs["stars","M1 Composantes"]," (n=",rs["n","M1 Composantes"],")",sep=""),
+                 paste(rs["mean_gain","M1 Melanges"],"% ",rs["stars","M1 Melanges"]," (n=",rs["n","M1 Melanges"],")",sep=""),
+                 paste(ds[grep("Mod 2",rownames(ds)),"mean"],"% ",ds[grep("Mod 2",rownames(ds)),"stars"]," (n=",ds[grep("Mod 2",rownames(ds)),"n"],")",sep=""), 
+                 paste(rs["mean_gain","M2"],"% ",rs["stars","M2"]," (n=",rs["n","M2"],")",sep=""),
+                 paste(ds[grep("Mod 3",rownames(ds)),"mean"],"% ",ds[grep("Mod 3",rownames(ds)),"stars"]," (n=",ds[grep("Mod 3",rownames(ds)),"n"],")",sep=""), 
+                 paste(rs["mean_gain","M3"],"% ",rs["stars","M3"]," (n=",rs["n","M3"],")",sep=""),
+                 paste(rs["mean_gain","M3vsM2"],"% ",rs["stars","M3vsM2"]," (n=",rs["n","M3vsM2"],")",sep=""),
+                 paste(vi["mean_gain","M3vsM2"],"% ",vi["stars","M3vsM2"]," (n=",vi["n","M3vsM2"],")",sep="")
+        ))
+      }else{
+        return(NULL)
+      }
+      
     })
   Table = NULL
   for (i in table){Table=rbind(Table,i)}
-  rownames(Table) =  unlist(lapply(vec_variables,function(x){gsub("[.]"," ",x)}))
+  null = vec_variables[grep("NULL",table)]
+  warning(paste("no data for ",null,sep=""))
+  variables = vec_variables[-grep(null, vec_variables)]
+  rownames(Table) =  unlist(lapply(variables,function(x){gsub("[.]"," ",x)}))
   rownames(Table) =  unlist(lapply( rownames(Table),function(x){strsplit(x,"-")[[1]][1]}))
   Table=cbind(rownames(Table),Table)
   Table = gsub("[(]n=[)]","",Table)
