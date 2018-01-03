@@ -123,11 +123,11 @@ mag = function(d){
   }
   
   #  rdt
-  if( length(grep("^rdt$", colnames(d$data))) > 0 ) {
-    a = as.numeric(as.character(d$data$"rdt"))
+  if( length(grep("yield---yield", colnames(d$data))) > 0 ) {
+    a = as.numeric(as.character(d$data$"yield---yield"))
     a[which(a <= 5)] = NA
     a[which(a > 100)] = NA
-    d$data$"rdt" = a
+    d$data$"yield---yield" = a
   }
   
   if( length(grep("^rdt_parcelle---rdt_parcelle$|^rdt_micro_parcelle---rdt_micro_parcelle$", colnames(d$data))) > 0 ) {
