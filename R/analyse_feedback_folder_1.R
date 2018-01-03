@@ -151,7 +151,9 @@ analyse_feedback_folder_1 = function(
     c("nbr_sterile_spikelets","nbr.epillets.stériles"),
     c("measured_grain_weight","poids.grains.mesure"),
     c("estimated_nbr_grain_spike","nbr.estime.grain.par.epi"),
-    c("LLSD","LLSD")
+    c("LLSD","LLSD"),
+    c("yield","rendement"),
+    c("rdt","rendement")
   )
 
   
@@ -164,16 +166,16 @@ analyse_feedback_folder_1 = function(
           1.1. get data
           -------------------------------------
           -------------------------------------")
-  todelete=NULL
+  todelete = NULL
   # If spike_length, get total height and height of spike base to calculate it if not in the database
-  if("spike_length" %in% vec_variables  &  !("plant_height_2"%in%vec_variables)){
+  if ("spike_length" %in% vec_variables  &  !("plant_height_2" %in% vec_variables)){
     a = setdiff(c("plant_height","plant_height_2"),vec_variables)
     todelete=c(todelete,a)
     vec_variables=c(vec_variables,a)
   }
   
   #If we want to calculate the estimated number of grains per spike
-  if("estimated_nbr_grain_spike" %in% vec_variables){
+  if ("estimated_nbr_grain_spike" %in% vec_variables){
     a = setdiff(c("tkw","measured_grain_weight","nbr_spike","total_nbr_spikes","nbr_spikes","spike_weight"),vec_variables)
     todelete=c(todelete,a)
     vec_variables=c(vec_variables,a)
@@ -181,35 +183,45 @@ analyse_feedback_folder_1 = function(
     vec_variables = vec_variables[-grep("estimated_nbr_grain_spike",vec_variables)]
   }else{to_add=NULL}
   
+  # If yield is in vec_variables
+  if("yield" %in% vec_variables | "rendement" %in% vec_variables){
+    a = setdiff(c("rdt_micro_parcelle","rdt_parcelle","poids_battage","micro_field_area"),vec_variables)
+    todelete_yield=a
+    vec_variables=c(vec_variables,a)
+    to_add_yield = "yield"
+    vec_variables = vec_variables[-grep("yield|rendement",vec_variables)]
+  }
+  
   data = get.data(db_user = db_user, db_host = db_host, db_name = db_name, db_password = db_password, 
                   query.type = "data-classic", filter.on = "father-son", data.type ="relation" ,variable.in=vec_variables
   )
   
   #1.1.1. Transform some data
-  if("spike_length"%in% vec_variables){
+  if ("spike_length"%in% vec_variables){
     # If there are measures on the field (F) but not on technical room (M) or the contrary, merge the 2 so that we don't loose information
     D=data$data$data
-    D$'spike_length---spike_length' = D$"spike_length---spike_length_M"
+    D$"spike_length---spike_length" = D$"spike_length---spike_length_M"
     for (i in 1:nrow(D)){
-      if(is.na(D[i,'spike_length---spike_length']) & !is.na(D[i,"spike_length---spike_length_F"])){
-        D[i,'spike_length---spike_length'] = D[i,"spike_length---spike_length_F"]}
+      if (is.na(D[i,"spike_length---spike_length"]) & !is.na(D[i,"spike_length---spike_length_F"])){
+        D[i,"spike_length---spike_length"] = D[i,"spike_length---spike_length_F"]
+      }
     }
     
     # If there are data on plant height and height at spike base, calculate spike_length
     for (i in 1:nrow(D)){
-      if(is.na(D[i,'spike_length---spike_length']) & !is.na(D[i,"plant_height---plant_height"]) &  !is.na(D[i,"plant_height_2---plant_height_2"])){
+      if (is.na(D[i,'spike_length---spike_length']) & !is.na(D[i,"plant_height---plant_height"]) &  !is.na(D[i,"plant_height_2---plant_height_2"])){
         D[i,'spike_length---spike_length'] = as.numeric(as.character(D[i,"plant_height---plant_height"])) - as.numeric(as.character(D[i,"plant_height_2---plant_height_2"]))}
     }
     
     data$data$data=D
   }
   
-  if(length(to_add)>0){
+  if (length(to_add)>0){
     # If the number of kernels was not measured but we want to estimated it since the thousand kernel weight, total grain weight and number of spikes were measured
     D=data$data$data
     
     # Get the number of spikes 
-    nBS=NULL
+    nBS = NULL
     for (i in 1:nrow(D)){
       nBS= c(nBS,ifelse(!is.na(D[i,"nbr_spike---nbr_spikes"]),D[i,"nbr_spike---nbr_spikes"],D[i,"nbr_spikes---nbr_spikes"]))
     }
@@ -229,7 +241,34 @@ analyse_feedback_folder_1 = function(
     vec_variables = c(vec_variables,"estimated_nbr_grain_spike")
   }
   
-  
+  if(length(grep("rdt",vec_variables))>0){
+    D=data$data$data
+    
+    t=NULL
+    a=NULL
+    for (i in 1:nrow(D)){
+      # one column for yield
+      a = c(a,ifelse(!is.na(D[i,"rdt_micro_parcelle---rdt_micro_parcelle"]),D[i,"rdt_micro_parcelle---rdt_micro_parcelle"],
+                     ifelse(!is.na(D[i,"rdt_parcelle---rdt_parcelle"]),D[i,"rdt_parcelle---rdt_parcelle"],D[i,"rdt_micro_parcelle---rdt_micro_parcelle_jsg"])))
+      # If no yield but info on poids_battage and micro_field area, calculate the yield
+      if(is.na(a[i]) & !is.na(D[i,"poids_battage---poids_battage"]) & !is.na(D[i,"micro_field_area---sowing_notice_micro_field_area"])){
+        if(!is.na(as.numeric(D[i,"poids_battage---poids_battage"]))){
+          D[i,"poids_battage---poids_battage"] = gsub(",",".",D[i,"poids_battage---poids_battage"])
+          surf = D[i,"micro_field_area---sowing_notice_micro_field_area"]
+          if(!is.na(as.numeric(surf))){
+            if(as.numeric(D[i,"poids_battage---poids_battage"]) >50){surf = as.numeric(D[i,"poids_battage---poids_battage"]) / 1000} # passer de g à kg
+            a[i] = (as.numeric(D[i,"poids_battage---poids_battage"]) / as.numeric(surf))*100
+          }
+        }
+      }
+    } 
+    a = gsub(",",".",a)
+    D$"yield---yield" = a
+    data$data$data=D
+    vec_variables = vec_variables[-grep(paste(todelete_yield,collapse="|"),vec_variables)]
+    vec_variables = c(vec_variables,to_add_yield)
+  }
+}
   
   #1.1.3. Correct some errors in data base
   if("tkw" %in% vec_variables){data$data$data[data$data$data$son %in% "Louesme-Blanc#VA_JUBA_2016_0001","tkw---tkw"][1] = 34.203}
