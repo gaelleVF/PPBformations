@@ -538,7 +538,7 @@ if(table.type == "selection.modalities"){
   RS = lapply(vec_variables,function(variable){
     print(variable)
     if(!file.exists(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""))){
-      Tab = analyse.selection(Mixtures_all, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
+      Tab = analyse.selection(Mixtures, res_model, vec_variables = variable, plot.save=NULL, table.save=path_to_tables, language=language, list_trad=list_trad, 
                               year=year_RS, data_mixtures=data_mixtures, selection.type = "response.sel.mixture", data_SR_all=data_SR_all)
     }else{
       Tab = read.table(paste(path_to_tables,"/Rep_Sel/sel_response_",variable,"_",paste(year,collapse="-"),".csv",sep=""),sep=";",header=T)
