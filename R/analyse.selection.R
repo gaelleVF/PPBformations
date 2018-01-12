@@ -438,7 +438,7 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
         if(class(result) == "list"){Res=NULL; comp = NULL; for (i in 1:length(result)){if(!is.null(result[[i]])){Res=cbind(Res,result[[i]])}else{comp = c(comp,i)}}; result=Res; data_SR=data_SR[-comp,]}
         result = t(result)
         colnames(result) = c("MoyenneVrac","MoyenneBouquet","pvalue")
-        Data = cbind(paste(a$vrac,a$bouquet,sep="-"),result)
+        Data = cbind(paste(data_SR$vrac,data_SR$bouquet,sep="-"),result)
         Data=as.data.frame(Data)
         Data$overyielding = as.numeric(as.character(Data$MoyenneBouquet))/as.numeric(as.character(Data$MoyenneVrac))-1
         if(!is.null(table.save) & !is.null(Data)){write.table(Data, file=paste(table.save,"/Rep_Sel/Mod1_",variable,"-2017.csv",sep=""),sep=";")}
@@ -469,66 +469,68 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
         x = x[names(x)%in%Melanges]
         lapply(x,function(y){
           M = unique(data_mixtures$Mix_tot$data$data[data_mixtures$Mix_tot$data$data$son_germplasm %in% unique(y$son_germplasm),c("son","son_year","son_germplasm","father","father_germplasm","selection_id","block","X","Y")])
-          M = M[is.na(M$selection_id) & M$son_year %in% year,]
-          M$modalite = unlist(lapply(1:nrow(M),function(i){
-            d=M[i,]
-            comp=0
-            if(length(grep("[.]3",d$son))>0){return("Mod1") ; comp=1}
-            if(length(grep("[.]2",d$son))>0){return("Mod2") ; comp=1}
-            if(length(grep("#B",d$son))>0){return("Mod3") ; comp=1}
-            if(comp==0){return("Mod4")}
-          }))
-          M$germplasm = unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]}))
-          M = M[!duplicated(M[c("germplasm","son_year")]),]
-          M =  plyr:::splitter_d(M, .(son_year))
-          
-          y = lapply(year,function(yr){
-            m = M[yr][[1]]
-            if(!is.null(m)){
-              A = unlist(lapply(1:nrow(m),function(i){
-                d=m[i,]
-                Mod = d$modalite
-                if(d$modalite != "Mod4"){
-                  a = strsplit(as.character(d$son),"_")[[1]]
-                  if(length(grep("Mod4",m$modalite))>0){
-                    b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
-                    sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  sel=sel[!is.na(sel)]
-                    no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  no_sel=no_sel[!is.na(no_sel)]
-                    overY = (mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
-                  }else{overY = NA}
-                  
-                  names(overY) = Mod
-                  if(Mod == "Mod2"){
-                    if(length(grep("Mod3",m$modalite))>0){
-                      b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
-                      m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  m2=m2[!is.na(m2)]
-                      m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  m3=m3[!is.na(m3)]
-                      overY = c(overY,(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
-                      names(overY)[2]="Mod3vsMod2"
+          if(nrow(M)>0){
+            M = M[is.na(M$selection_id) & M$son_year %in% year,]
+            M$modalite = unlist(lapply(1:nrow(M),function(i){
+              d=M[i,]
+              comp=0
+              if(length(grep("[.]3",d$son))>0){return("Mod1") ; comp=1}
+              if(length(grep("[.]2",d$son))>0){return("Mod2") ; comp=1}
+              if(length(grep("#B",d$son))>0){return("Mod3") ; comp=1}
+              if(comp==0){return("Mod4")}
+            }))
+            M$germplasm = unlist(lapply(as.character(M$son),function(x){strsplit(x,"_")[[1]][1]}))
+            M = M[!duplicated(M[c("germplasm","son_year")]),]
+            M =  plyr:::splitter_d(M, .(son_year))
+            
+            y = lapply(year,function(yr){
+              m = M[yr][[1]]
+              if(!is.null(m)){
+                A = unlist(lapply(1:nrow(m),function(i){
+                  d=m[i,]
+                  Mod = d$modalite
+                  if(d$modalite != "Mod4"){
+                    a = strsplit(as.character(d$son),"_")[[1]]
+                    if(length(grep("Mod4",m$modalite))>0){
+                      b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
+                      sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  sel=sel[!is.na(sel)]
+                      no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  no_sel=no_sel[!is.na(no_sel)]
+                      overY = (mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
+                    }else{overY = NA}
+                    
+                    names(overY) = Mod
+                    if(Mod == "Mod2"){
+                      if(length(grep("Mod3",m$modalite))>0){
+                        b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
+                        m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  m2=m2[!is.na(m2)]
+                        m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  m3=m3[!is.na(m3)]
+                        overY = c(overY,(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
+                        names(overY)[2]="Mod3vsMod2"
+                      }
                     }
-                  }
-                  return(overY)
-                }else{return(NA)}
-              }))
-              A=A[!is.na(A)]
-              if(length(A)>0){
-                if(length(grep("Mod4",m$modalite))>0){A=c(m[grep("Mod4",m$modalite),"germplasm"],A)
-                }else{A=c(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],A)}
-                names(A)[1]="melange"
-                if(!("Mod1"%in%names(A))){A=c(A,"Mod1"=NA)}
-                if(!("Mod2"%in%names(A))){A=c(A,"Mod2"=NA)}
-                if(!("Mod3"%in%names(A))){A=c(A,"Mod3"=NA)}
-                if(!("Mod3vsMod2"%in%names(A))){A=c(A,"Mod3vsMod2"=NA)}
-              }else{A=NULL}
-              return(A)
-            }else{return(NULL)}
-          })
-          names(y) = year
-          a = unlist(lapply(y,function(x){length(x)>0}))
-          y=y[a]
-          if(length(y)>0){
-            A=NULL
-            for(i in 1:length(y)){A = rbind(A,y[[i]])}
+                    return(overY)
+                  }else{return(NA)}
+                }))
+                A=A[!is.na(A)]
+                if(length(A)>0){
+                  if(length(grep("Mod4",m$modalite))>0){A=c(m[grep("Mod4",m$modalite),"germplasm"],A)
+                  }else{A=c(strsplit(as.character(m[grep("Mod3",m$modalite),"germplasm"]),"#")[[1]][1],A)}
+                  names(A)[1]="melange"
+                  if(!("Mod1"%in%names(A))){A=c(A,"Mod1"=NA)}
+                  if(!("Mod2"%in%names(A))){A=c(A,"Mod2"=NA)}
+                  if(!("Mod3"%in%names(A))){A=c(A,"Mod3"=NA)}
+                  if(!("Mod3vsMod2"%in%names(A))){A=c(A,"Mod3vsMod2"=NA)}
+                }else{A=NULL}
+                return(A)
+              }else{return(NULL)}
+            })
+            names(y) = year
+            a = unlist(lapply(y,function(x){length(x)>0}))
+            y=y[a]
+            if(length(y)>0){
+              A=NULL
+              for(i in 1:length(y)){A = rbind(A,y[[i]])}
+            }else{A=NULL}
           }else{A=NULL}
           return(A)
         })
