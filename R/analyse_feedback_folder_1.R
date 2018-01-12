@@ -268,7 +268,7 @@ analyse_feedback_folder_1 = function(
     vec_variables = vec_variables[-grep(paste(todelete_yield,collapse="|"),vec_variables)]
     vec_variables = c(vec_variables,to_add_yield)
   }
-}
+
   
   #1.1.3. Correct some errors in data base
   if("tkw" %in% vec_variables){data$data$data[data$data$data$son %in% "Louesme-Blanc#VA_JUBA_2016_0001","tkw---tkw"][1] = 34.203}
