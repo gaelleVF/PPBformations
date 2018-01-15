@@ -25,6 +25,7 @@ mixture_folder = function(
   pathway = ".",
   path_to_tables=".",
   vec_variables,
+  out_analyse_feedback_folder_1,
   mix_to_delete)
 {
 # Set the right folder and create folders tex_files and feedback_folder ----------
@@ -44,8 +45,7 @@ mixture_folder = function(
   message("Several files used in the tex document have been copied to tex_files folder")
   
   language="french"
-  
-  if(FALSE){
+
     # get info from out_analyse_feedback_folder_1
     year = out_analyse_feedback_folder_1$year
     res_model1 = out_analyse_feedback_folder_1$res_model1
@@ -53,6 +53,8 @@ mixture_folder = function(
     res_model_varintra = out_analyse_feedback_folder_1$res_model_varintra
     data_network_year = out_analyse_feedback_folder_1$data_network_year
     data_all =  out_analyse_feedback_folder_1$out_farmers_data[[person]]$data_all
+    data_S_all = out_analyse_feedback_folder_1$data_all$data_S_all
+    data_SR_all = out_analyse_feedback_folder_1$data_all$data_SR_all
     data_year =  out_analyse_feedback_folder_1$out_farmers_data[[person]]$data_year
     data_S_year =  out_analyse_feedback_folder_1$out_farmers_data[[person]]$data_S_year
     data_SR_year =  out_analyse_feedback_folder_1$out_farmers_data[[person]]$data_SR_year
@@ -60,8 +62,11 @@ mixture_folder = function(
     Mixtures_all = out_analyse_feedback_folder_1$data_mixtures$Mixtures_all
     Mixtures_S = out_analyse_feedback_folder_1$data_mixtures$Mixtures_selection
     Mix_tot = out_analyse_feedback_folder_1$data_mixtures$Mix_tot
-  }
+    data_mixtures = out_analyse_feedback_folder_1$data_mixtures
   
+    
+
+if(FALSE){
   year = get(load(paste(pathway,"out_year.RData",sep="/")))
   out_farmers_data = get(load(paste(pathway,"out_out_farmers_data.RData",sep="/")))
   data_all =  out_farmers_data[[person]]$data_all
@@ -77,6 +82,8 @@ mixture_folder = function(
   Mix_tot = data_mixtures$Mix_tot
   data_S_all =  get(load(paste(pathway,"data_S_all.RData",sep="/")))
   data_SR_all =   get(load(paste(pathway,"data_SR_all.RData",sep="/")))
+}
+    
   if(file.exists(paste(pathway,"mix_to_delete.RData",sep="/"))){mix_to_delete = get(load(paste(pathway,"mix_to_delete.RData",sep="/")))}else{mix_to_delete=FALSE}
   vec_variables_mod1 = names(res_model1)
 
@@ -628,25 +635,28 @@ Hypothèse : lorsqu'on a une grande variabilité de hauteur les composantes les 
 # 2.2.1.3. Corrélations entre overyieldings
   Table = Table$overyielding
   Tab=matrix(NA,ncol=ncol(Table)-1,nrow=ncol(Table)-1)
-  for(i in 2:(ncol(Table)-1)){
-    for(j in (i+1):ncol(Table)){
-      t=Table[,c(i,j)]
-      R = rcorr(as.numeric(as.character(t[,1])),as.numeric(as.character(t[,2])))
-      Tab[(i-1),(j-1)] = paste(round(R$r[1,2],3),get_stars(R$P[2]),sep=" ")
+  if(nrow(Tab)>1){
+    for(i in 2:(ncol(Table)-1)){
+      for(j in (i+1):ncol(Table)){
+        t=Table[,c(i,j)]
+        R = rcorr(as.numeric(as.character(t[,1])),as.numeric(as.character(t[,2])))
+        Tab[(i-1),(j-1)] = paste(round(R$r[1,2],3),get_stars(R$P[2]),sep=" ")
+      }
     }
-  }
-  Tab[,1] = gsub("[.]"," ",colnames(Table)[-1]) ; colnames(Tab)[2:ncol(Tab)]=colnames(Table)[-c(1,2)]
-  Tab = Tab[-nrow(Tab),]
-  
-  attributes(Tab)$invert =FALSE
-  out = list("table" = list("caption" = "Corrélations entre gains des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
+    Tab[,1] = gsub("[.]"," ",colnames(Table)[-1]) ; colnames(Tab)[2:ncol(Tab)]=colnames(Table)[-c(1,2)]
+    Tab = Tab[-nrow(Tab),]
+    
+    attributes(Tab)$invert =FALSE
+    out = list("table" = list("caption" = "Corrélations entre gains des différents caractères mesurés : une valeur proche de 0 indique qu'il n'existe pas de corrélation, 
 tandis qu'une valeur proche de 1 indique une forte corrélation. Voir tableau \\ref{Signif} pour l'explication des symboles utilisés.
 \\\\
 \\emph{Interprétation :} un gain de pmg ou de nombre de grains par épi du mélange n'est pas nécessairement associé à une perte en taux de protéine.
 L'augmentation du poids des épis des mélanges se fait grâce à une augmentation de longueur des épis et de nombre de grains par épi.
                             ", "content" = list(Tab),"landscape"=TRUE,"tab.lab"="CorrelOverY")) ; OUT=c(OUT,out)
-  
-  
+    
+    
+  }
+
   
   
   
