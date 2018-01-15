@@ -92,6 +92,7 @@ get_mixture_tables <- function(res_model,
                                )
 {
 
+  library(Hmisc)
   Mixtures = data_mixtures$Mixtures_all$data
   melanges_tot=data_mixtures$Mix_tot$data$data
   if(!is.null(data_S_all)){  
