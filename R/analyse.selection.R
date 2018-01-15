@@ -32,7 +32,8 @@ analyse.selection <- function(Mixtures,
                               data_S_all=NULL,
                               data_SR_all=NULL)
 {
-  
+  Mix_tot=data_mixtures$Mix_tot
+  print(paste("Mix_tot exists ? ",exists("Mix_tot"),sep=" "))
 #0.1. functions
   get.data.version=function(data_S_all,language){
     data_version = format.data(data_S_all, data.on = "son", fuse_g_and_s = TRUE, format = "PPBstats")
@@ -493,8 +494,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
                     a = strsplit(as.character(d$son),"_")[[1]]
                     if(length(grep("Mod4",m$modalite))>0){
                       b = strsplit(as.character(m[grep("Mod4",m$modalite),"son"]),"_")[[1]]
-                      sel = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  sel=sel[!is.na(sel)]
-                      no_sel = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  no_sel=no_sel[!is.na(no_sel)]
+                      sel = data_mixtures$Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), data_mixtures$Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  sel=sel[!is.na(sel)]
+                      no_sel = data_mixtures$Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), data_mixtures$Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  no_sel=no_sel[!is.na(no_sel)]
                       overY = (mean(as.numeric(as.character(sel))) - mean(as.numeric(as.character(no_sel)))) / mean(as.numeric(as.character(no_sel)))
                     }else{overY = NA}
                     
@@ -502,8 +503,8 @@ if(selection.type == "response.sel.mixture" | selection.type == "diff.and.rep"){
                     if(Mod == "Mod2"){
                       if(length(grep("Mod3",m$modalite))>0){
                         b = strsplit(as.character(m[grep("Mod3",m$modalite),"son"]),"_")[[1]]
-                        m2 = Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  m2=m2[!is.na(m2)]
-                        m3 = Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  m3=m3[!is.na(m3)]
+                        m2 = data_mixtures$Mix_tot$data$data[grep(paste(a[1],"_",a[2],"_",yr,sep=""), data_mixtures$Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]]  ;  m2=m2[!is.na(m2)]
+                        m3 = data_mixtures$Mix_tot$data$data[grep(paste(b[1],"_",b[2],"_",yr,sep=""), data_mixtures$Mix_tot$data$data$son),list_trad[[grep(variable,list_trad)]][1]] ;  m3=m3[!is.na(m3)]
                         overY = c(overY,(mean(as.numeric(as.character(m3))) - mean(as.numeric(as.character(m2)))) / mean(as.numeric(as.character(m2))))
                         names(overY)[2]="Mod3vsMod2"
                       }
