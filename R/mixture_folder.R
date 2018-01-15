@@ -830,7 +830,7 @@ une valeur positive indique que la modalité 3 a une valeur supérieur à la mod
   
   # /!\ Get pdf ----------
   get.pdf(dir = paste(we_are_here, "/mixture_folder", sep = ""), 
-          form.name = paste("test", year, sep = ":"), 
+          form.name = paste(person, year, sep = ":"), 
           LaTeX_head = "../tex_files/structure.tex", 
           LaTeX_body = OUT, 
           compile.tex = TRUE,
