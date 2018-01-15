@@ -33,7 +33,7 @@ analyse.selection <- function(Mixtures,
                               data_SR_all=NULL)
 {
   Mix_tot=data_mixtures$Mix_tot
-  print(paste("Mix_tot exists ? ",exists("Mix_tot"),sep=" "))
+
 #0.1. functions
   get.data.version=function(data_S_all,language){
     data_version = format.data(data_S_all, data.on = "son", fuse_g_and_s = TRUE, format = "PPBstats")
