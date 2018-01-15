@@ -200,7 +200,7 @@ get_mixture_tables <- function(res_model,
       tab = plyr:::splitter_d(tab, .(split))
       
       a = lapply(tab,function(d){
-        if(length(na.omit(d[,col]))>0){
+        if(length(na.omit(d[,col]))>2){
           if(shapiro.test(d[,col])$p.value<=0.05){
             a = t.test(d[,col],mu=0)
             type = "t.test"
