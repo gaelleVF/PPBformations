@@ -816,17 +816,29 @@ plus importante que mélanger les sélections faites dans les composantes (notam
                       "Modality 3 vs Modality 2","Intra mixture variability M3 vs M2")
   }
   write.table(Table,file=paste(path_to_tables,"/../resultats/tableaux/selection_modalities_",paste(year,collapse="-"),".csv",sep=""),sep=";")
-  attributes(Table)$invert =FALSE
+  
+  Table1 = Table[1:5,]
+  Table2 = Table[6:nrow(Table),]
+  attributes(Table1)$invert = attributes(Table2)$invert = FALSE
   out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
-et \\textbf{réponse à la sélection} (RS, données 2017). 
+et \\textbf{réponse à la pratique de sélection} (RP, données 2017). 
 La valeur indiquée est le gain (ou la perte) en pourcentage du bouquet de sélection par rapport au vrac pour DS, et de la modalité de sélection du mélange
-par rapport au mélange non sélectionné pour RS. Les symboles indiquent si la différence observée est significative ou non : voir tableau \\ref{Signif}
+par rapport au mélange non sélectionné pour RP. Les symboles indiquent si la différence observée est significative ou non : voir tableau \\ref{Signif}
 pour l'explication des symboles utilisés. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 (différence normalisée) :
 sélection dans le mélange vs. sélections dans les composantes pour former le mélange},
 tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : pour ces deux dernières colonnes 
 une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
-", "content" = list(Table),"landscape"=TRUE, "sep"=c(3,4,7,9,11,12))) ; OUT=c(OUT,out)
+", "content" = list(Table1),"landscape"=TRUE, "sep"=c(3,4,7,9,11,12))) ; OUT=c(OUT,out)
 
+  out = list("table" = list("caption" = "\\textbf{Différentiel de sélection} (DS, données 2016)
+et \\textbf{réponse à la pratique de sélection} (RP, données 2017). 
+La valeur indiquée est le gain (ou la perte) en pourcentage du bouquet de sélection par rapport au vrac pour DS, et de la modalité de sélection du mélange
+par rapport au mélange non sélectionné pour RP. Les symboles indiquent si la différence observée est significative ou non : voir tableau \\ref{Signif}
+pour l'explication des symboles utilisés. L'avant dernière colonne présente la \\textbf{comparaison des modalités de sélection 2 et 3 (différence normalisée) :
+sélection dans le mélange vs. sélections dans les composantes pour former le mélange},
+tandis que la dernière colonne compare la \\textbf{variabilité observée} dans ces 2 modalités de mélange : pour ces deux dernières colonnes 
+une valeur positive indique que la modalité 3 a une valeur supérieur à la modalité 2, à l'inverse une valeur négative indique que la modalité 2 est supérieure à la modalité 3. 
+", "content" = list(Table2),"landscape"=TRUE, "sep"=c(3,4,7,9,11,12))) ; OUT=c(OUT,out)
   
   # /!\ Get pdf ----------
   get.pdf(dir = paste(we_are_here, "/mixture_folder", sep = ""), 
